@@ -1,0 +1,525 @@
+                  Drofa 2.0.0 -> Drofa 3.0.0 log
+////////////////////////////////////////////////////////////////////
+1. Fixed occasional writing illegal moves in the TT
+------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 1707 - 1466 - 1755  [0.524] 4928
+Elo difference: 17.0 +/- 7.8
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+-------------------------------------------------------------
+2. Fully refactored eval, no NODES difference, NPS is ~10-15% faster now.
+-------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 1885 - 1650 - 2217  [0.520] 5752
+Elo difference: 14.2 +/- 7.0
+SPRT: llr 2.96, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+-------------------------------------------------------------
+3. OutPosts implemented
+-------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 6324 - 6035 - 7641  [0.507] 20000
+Elo difference: 5.0 +/- 3.8
+SPRT: llr 2.83  (96,2%), lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------
+4. Protected outposts implemented
+------------------------------------------------------------
+Score of Drofa_dev2 vs Drofa_dev: 1524 - 1485 - 1991  [0.504] 5000
+Elo difference: 2.71 +/- 7.46
+SPRT: llr 0.25, lbound -2.94, ubound 2.94
+Finished match
+
+As we will tune the tables later anyway, smth lilke 3 +/- 7.5 is fine.
+Thus merged into 2.0.4
+-----------------------------------------------------------
+5. Mobility using array[moves] instead of (moves*const) bonus.
+   Weights in the array tweaked to be non-linear.
+-----------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.0.4: 861 - 643 - 959  [0.544] 2463
+Elo difference: 30.83 +/- 10.73
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+-----------------------------------------------------------
+6. Mobility scanning through (ie R attacks scan through R and Q)
+-----------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.0.5: 3581 - 3321 - 4202  [0.512] 11104
+Elo difference: 8.1 +/- 5.1
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+-----------------------------------------------------------
+7. Exclude squares attacked by enemy pawns from mobility
+-----------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.0.6: 5051 - 4770 - 5925  [0.509] 15746
+Elo difference: 6.2 +/- 4.3
+SPRT: llr 2.95 (100.2%), lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+-----------------------------------------------------------
+8. Rank-dependant passed-pawn evaluation.
+-----------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.0.7: 2067 - 1828 - 2381  [0.519] 6276
+Elo difference: 13.2 +/- 6.8
+SPRT: llr 2.95 (100.2%), lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+-----------------------------------------------------------
+9. Supported pawns
+-----------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.0.8: 1571 - 1475 - 1954  [0.510] 5000
+Elo difference: 6.67 +/- 7.51
+SPRT: llr 1.06, lbound -2.94, ubound 2.94
+Finished match
+------------------------------------------------------------
+10. Bishop rammed pawns downscale
+------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 6171 - 6084 - 7745  [0.502] 20000
+Elo difference: 1.5 +/- 3.8, LOS: 78,4%
+Finished match
+------------------------------------------------------------
+9 and 10 both integrated into the 2.0.9
+Bishop_Rammed_Pawns should be adjasted/re-tested.
+------------------------------------------------------------
+11. Passed pawns by file bonus
+Score of Drofa_dev vs Drofa_2.0.9: 3086 - 2922 - 3992  [0.508] 10000
+Elo difference: 5.70 +/- 5.28
+Finished match
+------------------------------------------------------------
+12. Decrease open/semiopen bonus is there is enemy protected
+outpost on the line
+------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.0.9: 9586 - 9362 - 11052  [0.504] 30000
+Elo difference: 2.59 +/- 3.12
+Finished match
+------------------------------------------------------------
+11 and 12 merged into 2.0.10
+------------------------------------------------------------
+13. Divide score by 2 for opposite-color-bishop endgame
+------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 4919 - 4813 - 6268  [0.504] 16000
+Elo difference: 2.3 +/- 4.2
+Finished match
+------------------------------------------------------------
+14. Mobility tweak, proper scanning through.
+------------------------------------------------------------
+~3-4 elo after 5000 games, electricity out
+no proper data
+------------------------------------------------------------
+15. KingAttack calculations implemented
+------------------------------------------------------------
+Score of Drofa_dev2 vs Drofa_dev: 686 - 529 - 498  [0.546] 1713
+Elo difference: 31.93 +/- 13.88
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+
+14 and 15 Merged into 2.1.0
+------------------------------------------------------------
+16. Better promotion sorting (Q as is, N after both killers, R as neutral quiet
+B as high negative quiet)
+------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.1.0: 3113 - 2923 - 3964  [0.509] 10000
+Elo difference: 6.60 +/- 5.28
+SPRT: llr 2.82, lbound -2.94, ubound 2.94
+Finished match
+------------------------------------------------------------
+17. Tempo evaluation introduced
+------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.1.1: 4633 - 4415 - 5952  [0.507] 15000
+Elo difference: 5.05 +/- 4.32
+Finished match
+------------------------------------------------------------
+18. Smaller TT-entry
+------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.1.2: 2364 - 2228 - 2959  [0.509] 7551
+Elo difference: 6.26 +/- 6.10
+SPRT: llr 2.96, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------
+19. Reduce more for nodes with bad history (in LMR)
+------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.1.2: 1448 - 1221 - 1707  [0.526] 4376
+Elo difference: 18.0 +/- 8.0
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+// very strange. Although it seems like at least +10 elo, further re-tests showed
+that it is much less (2-3 maybe....)
+can be a fluke with different compiles....
+-------------------------------------------------------------
+20. Update killers/history/counters with TTcutoffs
+-------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 1471 - 1314 - 1822  [0.517] 4607
+Elo difference: 11.8 +/- 7.8
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+-------------------------------------------------------------
+21. Reduce less for Q promotions
+-------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 2292 - 2116 - 2917  [0.512] 7325
+Elo difference: 8.3 +/- 6.2
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+/////////////////////////////////////////////////////////////
+20 + 21 joined into the 2.1.4 version
+Regression teset 2.1.4 vs 2.1.2 (LTC, 1` + 1``):
+
+Score of Drofa_2.1.4 vs Drofa_2.1.2: 172 - 128 - 300  [0.537] 600
+Elo difference: 25.52 +/- 19.65
+Finished match
+/////////////////////////////////////////////////////////////
+----------------------------------------------------------------
+22. Code cleanup, small nps loss, but much cleaner
+----------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.1.4: 4328 - 4434 - 6238  [0.496] 15000
+Elo difference: -2.46 +/- 4.24
+SPRT: llr 1.11, lbound -2.94, ubound 2.94
+Finished match
+----------------------------------------------------------------
+23. King proximity to the passed pawn eval
+----------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.1.5: 1389 - 1235 - 1800  [0.517] 4424
+Elo difference: 12.10 +/- 7.88
+SPRT: llr 2.97, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+-----------------------------------------------------------------
+24. RookOpen / RookSemiOpen values tweak
+-----------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.1.6: 6551 - 6274 - 8771  [0.506] 21596
+Elo difference: 4.5 +/- 3.6
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+-----------------------------------------------------------------
+24. PV is now aquired from array instead of TT
+-----------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.1.7: 4360 - 4498 - 6142  [0.495] 15000
+Elo difference: -3.20 +/- 4.27
+SPRT: llr -0.733, lbound -2.94, ubound 2.94
+Finished match
+-----------------------------------------------------------------
+25. Fixed Queen mobility bug, fixed mobility-related warnings
+-----------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.1.8: 1506 - 1522 - 1972  [0.498] 5000
+Elo difference: -1.11 +/- 7.48
+Finished match
+-----------------------------------------------------------------
+26. Null move pruning taking into account how much is statEval>beta
+-----------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.1.9: 953 - 812 - 1275  [0.523] 3040
+Elo difference: 16.13 +/- 9.40
+SPRT: llr 2.96, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+27. Added UCI 'Hash' option (min = 25, max = 1024 MB)
+------------------------------------------------------------------
+no functional changes, so no engine test
+------------------------------------------------------------------
+28. Small speedUP of the positionHistory
+------------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 1877 - 1785 - 2626  [0.507] 6288
+Elo difference: 5.1 +/- 6.5
+SPRT: llr 2.94, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////
+/////////////      Drofa_2.2.0 vs Drofa_2.1.0   	//////////
+//////////////////////////////////////////////////////////////////
+
+STC	(10``+0.1``):
+Score of Drofa_2.2.0 vs Drofa_2.1.0: 582 - 406 - 559  [0.557] 1547
+Elo difference: 39.70 +/- 13.86
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+
+LTC	(60`+1`):
+Score of Drofa_2.2.0 vs Drofa_2.1.0: 321 - 197 - 465  [0.563] 983
+Elo difference: 44.06 +/- 15.77
+SPRT: llr 2.98, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+
+//////////////////////////////////////////////////////////////////
+
+
+29.  3. Change the way hashMove is passed to movePicker (PASSED)
+------------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 1816 - 1670 - 2433  [0.512] 5919
+...      Drofa_dev playing White: 957 - 803 - 1200  [0.526] 2960
+...      Drofa_dev playing Black: 859 - 867 - 1233  [0.499] 2959
+...      White vs Black: 1824 - 1662 - 2433  [0.514] 5919
+Elo difference: 8.6 +/- 6.8, LOS: 99.3 %, DrawRatio: 41.1 %
+SPRT: llr 2.94 (100.0%), lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+
+30. Huge simplification of the EVAL (1 score instead of two)
+------------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 5552 - 5563 - 7503  [0.500] 18618
+...      Drofa_dev playing White: 2878 - 2691 - 3741  [0.510] 9310
+...      Drofa_dev playing Black: 2674 - 2872 - 3762  [0.489] 9308
+...      White vs Black: 5750 - 5365 - 7503  [0.510] 18618
+Elo difference: -0.2 +/- 3.9, LOS: 45.8 %, DrawRatio: 40.3 %
+SPRT: llr 2.96 (100.7%), lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+31. Simplification 2_1
+--------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 1921 - 1846 - 2639  [0.506] 6406
+...      Drofa_dev playing White: 1010 - 874 - 1319  [0.521] 3203
+...      Drofa_dev playing Black: 911 - 972 - 1320  [0.490] 3203
+...      White vs Black: 1982 - 1785 - 2639  [0.515] 6406
+Elo difference: 4.1 +/- 6.5, LOS: 88.9 %, DrawRatio: 41.2 %
+SPRT: llr 2.96 (100.7%), lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+
+------------------------------------------------------------------
+32. AdaGrad Tuner implemented. Fixed bug in the PassedPawn calculations
+for black. Tuned values (500 iterations): Material, Bishop terms,
+Pawn terms.
+------------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.2.2: 372 - 235 - 317  [0.574] 924
+Elo difference: 51.90 +/- 18.24
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+33. King Passer Distance and RookOpen/Semiopen tuned
+------------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.2.3: 452 - 322 - 489  [0.551] 1263
+Elo difference: 35.89 +/- 15.02
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+34. Mobility + PSQT tuned
+------------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.2.4: 367 - 219 - 233  [0.590] 819
+Elo difference: 63.48 +/- 20.32
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+35. Outpost PSQT tuned
+------------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 941 - 808 - 1241  [0.522] 2990
+...      Drofa_dev playing White: 504 - 388 - 603  [0.539] 1495
+...      Drofa_dev playing Black: 437 - 420 - 638  [0.506] 1495
+...      White vs Black: 924 - 825 - 1241  [0.517] 2990
+Elo difference: 15.5 +/- 9.5, LOS: 99.9 %, DrawRatio: 41.5 %
+SPRT: llr 2.96 (100.5%), lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+-------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////
+/////////////    Testing strength gain of tuning  	//////////
+//////////////////////////////////////////////////////////////////
+
+STC	(10``+0.1``):
+Score of Drofa_2.2.6 vs Drofa_2.2.2: 573 - 167 - 260  [0.703] 1000
+Elo difference: 149.68 +/- 19.56
+Finished match
+
+//////////////////////////////////////////////////////////////////
+------------------------------------------------------------------
+36. Added HanginPiece evaluation term
+------------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 787 - 660 - 1106  [0.525] 2553
+...      Drofa_dev playing White: 410 - 310 - 557  [0.539] 1277
+...      Drofa_dev playing Black: 377 - 350 - 549  [0.511] 1276
+...      White vs Black: 760 - 687 - 1106  [0.514] 2553
+Elo difference: 17.3 +/- 10.1, LOS: 100.0 %, DrawRatio: 43.3 %
+SPRT: llr 2.95 (100.3%), lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+37. Change mvpCost for delta pruning
+------------------------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 1736 - 1596 - 2675  [0.512] 6007
+Elo difference: 8.1 +/- 6.5, LOS: 99.2 %, DrawRatio: 44.5 %
+SPRT: llr 2.96 (100.6%), lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+38. Added BlockedPawn evaluation
+------------------------------------------------------------------
+Elo difference: 7.7 +/- 6.3, LOS: 99.1 %, DrawRatio: 43.9 %
+SPRT: llr 2.96 (100.4%), lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+39. Bell-shaped timeman
+------------------------------------------------------------------
+STC:
+Score of Drofa_dev vs Drofa_2.2.9: 610 - 489 - 899  [0.530] 1998
+Elo difference: 21.07 +/- 11.29
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+Other Later:
+40/15
+Score of Drofa_2.2.10 vs Drofa_2.2.9: 324 - 242 - 434  [0.541] 1000
+Elo difference: 28.55 +/- 16.20
+SPRT: llr 1.91, lbound -2.94, ubound 2.94
+------------------------------------------------------------------
+40. Rook behiund passed pawn
+--------------------------------------------------
+Score of Drofa_dev vs Drofa_master: 2913 - 2756 - 4648  [0.508] 10317
+...      Drofa_dev playing White: 1554 - 1286 - 2318  [0.526] 5158
+...      Drofa_dev playing Black: 1359 - 1470 - 2330  [0.489] 5159
+...      White vs Black: 3024 - 2645 - 4648  [0.518] 10317
+Elo difference: 5.3 +/- 5.0, LOS: 98.1 %, DrawRatio: 45.1 %
+SPRT: llr 2.95 (100.1%), lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+41. SEE added. SEE pruning in qSearch
+------------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.2.10: 505 - 382 - 665  [0.540] 1552
+Elo difference: 27.59 +/- 13.07
+SPRT: llr 2.95, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+42. Search SEE-negative captures last
+------------------------------------------------------------------
+Score of Drofa_dev vs Drofa_2.2.11: 258 - 146 - 340  [0.575] 744
+Elo difference: 52.70 +/- 18.42
+SPRT: llr 2.96, lbound -2.94, ubound 2.94 - H1 was accepted
+Finished match
+------------------------------------------------------------------
+43. Implemented aspiration window
+------------------------------------------------------------------
+ELO   | 14.68 +- 8.16 (95%)
+SPRT  | 10.0+0.10s Threads=1 Hash=16MB
+LLR   | 2.96 (-2.94, 2.94) [0.00, 5.00]
+Games | N: 3932 W: 1192 L: 1026 D: 1714
+------------------------------------------------------------------
+43a. Rook behind passed pawn simplified
+------------------------------------------------------------------
+ELO   | 0.74 +- 4.08 (95%)
+SPRT  | 10.0+0.10s Threads=1 Hash=16MB
+LLR   | -0.41 (-2.94, 2.94) [-1.00, 4.00]
+Games | N: 15098 W: 4115 L: 4083 D: 6900
+------------------------------------------------------------------
+44. SEE pruning of quiet moves implemented
+------------------------------------------------------------------
+ELO   | 17.08 +- 9.01 (95%)
+SPRT  | 10.0+0.10s Threads=1 Hash=16MB
+LLR   | 2.95 (-2.94, 2.94) [0.00, 5.00]
+Games | N: 3360 W: 1070 L: 905 D: 1385
+------------------------------------------------------------------
+45. Threading introduced
+------------------------------------------------------------------
+ELO   | 10.46 +- 8.12 (95%)
+SPRT  | 10.0+0.10s Threads=1 Hash=16MB
+LLR   | 2.97 (-2.94, 2.94) [-5.00, 0.00]
+Games | N: 4020 W: 1209 L: 1088 D: 1723
+------------------------------------------------------------------
+45. Scale down for no pawn positions
+------------------------------------------------------------------
+ELO   | 4.44 +- 3.52 (95%)
+SPRT  | 10.0+0.10s Threads=1 Hash=16MB
+LLR   | 3.03 (-2.94, 2.94) [0.00, 5.00]
+Games | N: 21366 W: 6241 L: 5968 D: 9157
+------------------------------------------------------------------
+45. If king is on a distance = 1 from own passer, eval if its
+in front, equal or in the back
+------------------------------------------------------------------
+ELO   | 4.68 +- 3.71 (95%)
+SPRT  | 10.0+0.10s Threads=1 Hash=16MB
+LLR   | 3.01 (-2.94, 2.94) [0.00, 5.00]
+Games | N: 19296 W: 5655 L: 5395 D: 8246
+------------------------------------------------------------------
+46. Time management tweak, move time spend maximum to ~15-17 move
+Didnt pass cyclic, but its ez to revert for it
+------------------------------------------------------------------
+STC:
+ELO   | 9.37 +- 6.16 (95%)
+SPRT  | 10.0+0.10s Threads=1 Hash=16MB
+LLR   | 2.99 (-2.94, 2.94) [0.00, 5.00]
+Games | N: 6824 W: 2003 L: 1819 D: 3002
+LTC:
+ELO   | 14.25 +- 7.91 (95%)
+SPRT  | 60.0+0.6s Threads=1 Hash=64MB
+LLR   | 2.99 (-2.94, 2.94) [-1.00, 4.00]
+Games | N: 3634 W: 967 L: 818 D: 1849
+Cyclic:
+ELO   | -11.63 +- 8.54 (95%)
+SPRT  | 40/10s Threads=1 Hash=16MB
+LLR   | -2.94 (-2.94, 2.94) [0.00, 5.00]
+Games | N: 3646 W: 986 L: 1108 D: 1552
+-----------------------------------------> version up to 2.2.17
+------------------------------------------------------------------
+47. Bishop Center Control evaluation
+------------------------------------------------------------------
+ELO   | 7.42 +- 5.35 (95%)
+SPRT  | 10.0+0.10s Threads=1 Hash=16MB
+LLR   | 2.95 (-2.94, 2.94) [0.00, 5.00]
+Games | N: 9268 W: 2755 L: 2557 D: 3956
+-----------------------------------------> version up to 2.2.18
+48. Revert to the old TM values for cyclic TC
+------------------------------------------------------------------
+Cyclic:
+ELO   | 5.80 +- 4.44 (95%)
+SPRT  | 40/10s Threads=1 Hash=16MB
+LLR   | 2.98 (-2.94, 2.94) [0.00, 5.00]
+Games | N: 13424 W: 3950 L: 3726 D: 5748
+STC:
+ELO   | -0.40 +- 3.61 (95%)
+SPRT  | 10.0+0.10s Threads=1 Hash=16MB
+LLR   | 1.92 (-2.94, 2.94) [-5.00, 0.00]
+Games | N: 19918 W: 5565 L: 5588 D: 8765
+------------------------------------------------------------------
+49. Implement PAWN_DISTORTION evaluation feature
+------------------------------------------------------------------
+ELO   | 4.19 +- 3.37 (95%)
+SPRT  | 10.0+0.10s Threads=1 Hash=16MB
+LLR   | 2.96 (-2.94, 2.94) [0.00, 5.00]
+Games | N: 23120 W: 6706 L: 6427 D: 9987
+------------------------------------------------------------------
+50. Various bug fixes (thanks to theo77186 for pointing them out)
+------------------------------------------------------------------
+-----------------------------------------> version up to 2.2.19
+------------------------------------------------------------------
+51. MinorBehindPawn evaluation introduced
+------------------------------------------------------------------
+ELO   | 7.59 +- 5.43 (95%)
+SPRT  | 10.0+0.10s Threads=1 Hash=16MB
+LLR   | 2.95 (-2.94, 2.94) [0.00, 5.00]
+Games | N: 8972 W: 2663 L: 2467 D: 3842
+-----------------------------------------> version up to 2.2.20
+------------------------------------------------------------------
+52. Bugfix in the threading code
+------------------------------------------------------------------
+No functional change for 1 thread.
+-----------------------------------------> version up to 3.0.0
+
+
+//////////////////////////////////////////////////////////////////
+/////////////      Drofa_3.0.0 vs Drofa_2.2.0   	//////////
+//////////////////////////////////////////////////////////////////
+
+Bench (Drofa_3.0.0) - 10559976
+
+STC	(10``+ 0.1``):
+
+Score of Drofa_3.0.0 vs Drofa_2.2.0: 386 - 35 - 79  [0.851] 500
+Elo difference: 302.70 +/- 35.74
+Finished match
+
+LTC	(60`+ 0.6`):
+
+Score of Drofa_3.0.0 vs Drofa_2.2.0: 205 - 19 - 76  [0.810] 300
+Elo difference: 251.89 +/- 38.73
+Finished match
+
+4CPU test (10``+ 0.1``):
+Score of Drofa_3.0.0 vs Drofa_3.0.0: 111 - 21 - 118  [0.680] 250
+Elo difference: 130.94 +/- 31.30
+Finished match
+
+//////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
