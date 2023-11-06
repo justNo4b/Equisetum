@@ -48,9 +48,12 @@ public:
     int evaluate(const Color);
 
     // incremental update functions
-    void addPiece(Color, PieceType, unsigned int);
-    void removePiece(Color, PieceType, unsigned int);
     void movePiece(Color, PieceType, unsigned int, unsigned int);
+    void promotePiece(Color, PieceType, unsigned int, unsigned int);
+    void cappromPiece(Color, PieceType, PieceType, unsigned int, unsigned int);
+    void capturePiece(Color, PieceType, PieceType, unsigned int, unsigned int);
+    void castleMove(Color, unsigned int, unsigned int, unsigned int, unsigned int);
+    void enpassMove(Color, unsigned int, unsigned int);
 
 private:
 

@@ -127,26 +127,105 @@ int NNueEvaluation::evaluate(const Color color){
     return s;
 }
 
-
-void NNueEvaluation::addPiece(Color color, PieceType pieceType, unsigned int square){
-    int indexWV = _getPieceIndex(square, pieceType, color, WHITE);
-    int indexBV = _getPieceIndex(square, pieceType, color, BLACK);
-    for (int i = 0; i < NNUE_HIDDEN; i++){
-        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[indexWV][i];
-        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[indexBV][i];
-    }
-}
-
-void NNueEvaluation::removePiece(Color color, PieceType pieceType, unsigned int square){
-    int indexWV = _getPieceIndex(square, pieceType, color, WHITE);
-    int indexBV = _getPieceIndex(square, pieceType, color, BLACK);
-    for (int i = 0; i < NNUE_HIDDEN; i++){
-        _hiddenScore[WHITE][i] -= NNUE_HIDDEN_WEIGHT[indexWV][i];
-        _hiddenScore[BLACK][i] -= NNUE_HIDDEN_WEIGHT[indexBV][i];
-    }
-}
-
 void NNueEvaluation::movePiece(Color color, PieceType pieceType, unsigned int fromSquare, unsigned int toSquare){
-    removePiece(color, pieceType, fromSquare);
-    addPiece(color, pieceType, toSquare);
+    int remove_indexWV  = _getPieceIndex(fromSquare, pieceType, color, WHITE);
+    int remove_indexBV  = _getPieceIndex(fromSquare, pieceType, color, BLACK);
+    int add_indexWV     = _getPieceIndex(toSquare, pieceType, color, WHITE);
+    int add_indexBV     = _getPieceIndex(toSquare, pieceType, color, BLACK);
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i];
+        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i];
+    }
+
+}
+
+void NNueEvaluation::promotePiece(Color color, PieceType promotedTo, unsigned int fromSquare, unsigned int toSquare){
+    // remove pawn
+    int remove_indexWV  = _getPieceIndex(fromSquare, PAWN, color, WHITE);
+    int remove_indexBV  = _getPieceIndex(fromSquare, PAWN, color, BLACK);
+    // add promoted piece
+    int add_indexWV     = _getPieceIndex(toSquare, promotedTo, color, WHITE);
+    int add_indexBV     = _getPieceIndex(toSquare, promotedTo, color, BLACK);
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i];
+        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i];
+    }
+
+}
+
+
+void NNueEvaluation::cappromPiece(Color color, PieceType capturedPiece, PieceType promotedTo, unsigned int fromSquare, unsigned int toSquare){
+    // Remove pawn
+    int remove_indexWV      = _getPieceIndex(fromSquare, PAWN, color, WHITE);
+    int remove_indexBV      = _getPieceIndex(fromSquare, PAWN, color, BLACK);
+    // Add promoted piece
+    int add_indexWV         = _getPieceIndex(toSquare, promotedTo, color, WHITE);
+    int add_indexBV         = _getPieceIndex(toSquare, promotedTo, color, BLACK);
+    // Remove captured
+    int captured_indexWV    = _getPieceIndex(toSquare, capturedPiece, getOppositeColor(color), WHITE);
+    int captured_indexBV    = _getPieceIndex(toSquare, capturedPiece, getOppositeColor(color), BLACK);
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i] - NNUE_HIDDEN_WEIGHT[captured_indexWV][i];
+        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i] - NNUE_HIDDEN_WEIGHT[captured_indexBV][i];
+    }
+
+}
+
+void NNueEvaluation::capturePiece(Color color, PieceType pieceType, PieceType capturedPiece, unsigned int fromSquare, unsigned int toSquare){
+    // MovePiece
+    int remove_indexWV  = _getPieceIndex(fromSquare, pieceType, color, WHITE);
+    int remove_indexBV  = _getPieceIndex(fromSquare, pieceType, color, BLACK);
+    int add_indexWV     = _getPieceIndex(toSquare, pieceType, color, WHITE);
+    int add_indexBV     = _getPieceIndex(toSquare, pieceType, color, BLACK);
+    // RemoveCaptured
+    int captured_indexWV    = _getPieceIndex(toSquare, capturedPiece, getOppositeColor(color), WHITE);
+    int captured_indexBV    = _getPieceIndex(toSquare, capturedPiece, getOppositeColor(color), BLACK);
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i] - NNUE_HIDDEN_WEIGHT[captured_indexWV][i];
+        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i] - NNUE_HIDDEN_WEIGHT[captured_indexBV][i];
+    }
+
+}
+
+void NNueEvaluation::castleMove(Color color, unsigned int fromSquareKing, unsigned int toSquareKing,unsigned int fromSquareRook, unsigned int toSquareRook){
+    // King
+    int removeK_indexWV  = _getPieceIndex(fromSquareKing, KING, color, WHITE);
+    int removeK_indexBV  = _getPieceIndex(fromSquareKing, KING, color, BLACK);
+    int addK_indexWV     = _getPieceIndex(toSquareKing, KING, color, WHITE);
+    int addK_indexBV     = _getPieceIndex(toSquareKing, KING, color, BLACK);
+    //Rook
+    int removeR_indexWV  = _getPieceIndex(fromSquareRook, ROOK, color, WHITE);
+    int removeR_indexBV  = _getPieceIndex(fromSquareRook, ROOK, color, BLACK);
+    int addR_indexWV     = _getPieceIndex(toSquareRook, ROOK, color, WHITE);
+    int addR_indexBV     = _getPieceIndex(toSquareRook, ROOK, color, BLACK);
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[addK_indexWV][i] - NNUE_HIDDEN_WEIGHT[removeK_indexWV][i]
+                                + NNUE_HIDDEN_WEIGHT[addR_indexWV][i] - NNUE_HIDDEN_WEIGHT[removeR_indexWV][i];
+        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[addK_indexBV][i] - NNUE_HIDDEN_WEIGHT[removeK_indexBV][i]
+                                + NNUE_HIDDEN_WEIGHT[addR_indexBV][i] - NNUE_HIDDEN_WEIGHT[removeR_indexBV][i];
+    }
+
+}
+
+void NNueEvaluation::enpassMove(Color color, unsigned int fromSquare, unsigned int toSquare){
+    unsigned int epPawn = color == WHITE ? toSquare - 8 : toSquare + 8;
+    // MovePiece
+    int remove_indexWV  = _getPieceIndex(fromSquare, PAWN, color, WHITE);
+    int remove_indexBV  = _getPieceIndex(fromSquare, PAWN, color, BLACK);
+    int add_indexWV     = _getPieceIndex(toSquare, PAWN, color, WHITE);
+    int add_indexBV     = _getPieceIndex(toSquare, PAWN, color, BLACK);
+    // RemoveCaptured
+    int captured_indexWV    = _getPieceIndex(epPawn, PAWN, getOppositeColor(color), WHITE);
+    int captured_indexBV    = _getPieceIndex(epPawn, PAWN, getOppositeColor(color), BLACK);
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i] - NNUE_HIDDEN_WEIGHT[captured_indexWV][i];
+        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i] - NNUE_HIDDEN_WEIGHT[captured_indexBV][i];
+    }
+
 }
