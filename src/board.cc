@@ -447,7 +447,6 @@ void Board::_movePiece(Color color, PieceType pieceType, int from, int to) {
 
   _zKey.movePiece(color, pieceType, from, to);
   _pst.movePiece(color, pieceType, from, to);
-  _nnue.movePiece(color, pieceType, from, to);
 }
 
 void Board::_removePiece(Color color, PieceType pieceType, int squareIndex) {
@@ -466,7 +465,6 @@ void Board::_removePiece(Color color, PieceType pieceType, int squareIndex) {
   _pCountKey.flipPieceCount(color, pieceType, _popCount(getPieces(color, pieceType)) + 1);
   _zKey.flipPiece(color, pieceType, squareIndex);
   _pst.removePiece(color, pieceType, squareIndex);
-  _nnue.removePiece(color, pieceType, squareIndex);
 }
 
 void Board::_addPiece(Color color, PieceType pieceType, int squareIndex) {
@@ -481,7 +479,6 @@ void Board::_addPiece(Color color, PieceType pieceType, int squareIndex) {
   _pCountKey.flipPieceCount(color, pieceType, _popCount(getPieces(color, pieceType)));
   _zKey.flipPiece(color, pieceType, squareIndex);
   _pst.addPiece(color, pieceType, squareIndex);
-  _nnue.addPiece(color, pieceType, squareIndex);
 }
 
 bool Board:: isThereMajorPiece() const {
@@ -695,6 +692,7 @@ void Board::doMove(Move move) {
   if (!flags) {
     // No flags set, not a special move
     _movePiece(_activePlayer, move.getPieceType(), from, to);
+    _nnue.movePiece(_activePlayer, move.getPieceType(), from, to);
   } else if ((flags & Move::CAPTURE) && (flags & Move::PROMOTION)) { // Capture promotion special case
     // Remove captured Piece
     PieceType capturedPieceType = move.getCapturedPieceType();
@@ -706,6 +704,7 @@ void Board::doMove(Move move) {
     // Add promoted piece
     PieceType promotionPieceType = move.getPromotionPieceType();
     _addPiece(_activePlayer, promotionPieceType, to);
+    _nnue.cappromPiece(getActivePlayer(), capturedPieceType, promotionPieceType, from, to);
   } else if (flags & Move::CAPTURE) {
     // Remove captured Piece
     PieceType capturedPieceType = move.getCapturedPieceType();
@@ -713,23 +712,28 @@ void Board::doMove(Move move) {
 
     // Move capturing piece
     _movePiece(_activePlayer, move.getPieceType(), from, to);
+    _nnue.capturePiece(_activePlayer, move.getPieceType(), move.getCapturedPieceType(), from, to);
   } else if (flags & Move::KSIDE_CASTLE) {
     // Move the correct rook
     if (_activePlayer == WHITE) {
       _movePiece(_activePlayer, KING, from, g1);
       _movePiece(WHITE, ROOK, to, f1);
+      _nnue.castleMove(_activePlayer, from, g1, to, f1);
     } else {
       _movePiece(_activePlayer, KING, from, g8);
       _movePiece(BLACK, ROOK, to, f8);
+      _nnue.castleMove(_activePlayer, from, g8, to, f8);
     }
   } else if (flags & Move::QSIDE_CASTLE) {
     // Move the correct rook
     if (_activePlayer == WHITE) {
       _movePiece(_activePlayer, KING, from, c1);
       _movePiece(WHITE, ROOK, to, d1);
+      _nnue.castleMove(_activePlayer, from, c1, to, d1);
     } else {
       _movePiece(_activePlayer, KING, from, c8);
       _movePiece(BLACK, ROOK, to, d8);
+      _nnue.castleMove(_activePlayer, from, c8, to, d8);
     }
   } else if (flags & Move::EN_PASSANT) {
     // Remove the correct pawn
@@ -741,14 +745,17 @@ void Board::doMove(Move move) {
 
     // Move the capturing pawn
     _movePiece(_activePlayer, move.getPieceType(), from, to);
+    _nnue.enpassMove(_activePlayer, from, to);
   } else if (flags & Move::PROMOTION) {
     // Remove promoted pawn
     _removePiece(_activePlayer, PAWN, from);
 
     // Add promoted piece
     _addPiece(_activePlayer, move.getPromotionPieceType(), to);
+    _nnue.promotePiece(getActivePlayer(), move.getPromotionPieceType(), from, to);
   } else if (flags & Move::DOUBLE_PAWN_PUSH) {
     _movePiece(_activePlayer, move.getPieceType(), from, to);
+    _nnue.movePiece(_activePlayer, move.getPieceType(), from, to);
 
     // Set square behind pawn as _enPassant
     unsigned int enPasIndex = _activePlayer == WHITE ? to - 8 : to + 8;
