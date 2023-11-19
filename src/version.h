@@ -19,7 +19,7 @@
 #define VERSION_H
 
 #define VER_MAJ ("s_4.0.6c")
-#define VER_MIN ("NN_bogotense")
-#define VER_PATCH ("b")
+#define VER_MIN ("NN_variegatum")
+#define VER_PATCH ("a")
 
 #endif
