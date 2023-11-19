@@ -22,12 +22,12 @@
 #include "bitutils.h"
 
 #define NNUE_INPUT   (2 * 6 * 64)
-#define NNUE_HIDDEN  (512)
+#define NNUE_HIDDEN  (768)
 #define NNUE_OUTPUT  (1)
 
 const int NNUE_SCALE = 16 * 512;
 
-const std::string EVAL_FILE = "equi_512x2r_1.4B_220.nnue";
+const std::string EVAL_FILE = "equi_768x2f_2.4B_220.nnue";
 
 class Board;
 
