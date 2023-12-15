@@ -1,5 +1,5 @@
 /*
-    Equisetum - UCI compatable chess engine
+    Drofa - UCI compatable chess engine
         Copyright (C) 2017 - 2019  Rhys Rustad-Elliott
                       2020 - 2023  Litov Alexander
     This program is free software: you can redistribute it and/or modify
@@ -48,9 +48,11 @@ class HASH{
 
   HASH_Entry *hashTable;
   U64 TableSize;
+  U64 TableMask;
 
   pawn_HASH_Entry *pHASH;
   U64 pTableSize;
+  U64 pTableMask;
 
 };
 
