@@ -18,8 +18,8 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define VER_MAJ ("s_4.0.8")
+#define VER_MAJ ("s_4.1.1")
 #define VER_MIN ("NN_variegatum")
-#define VER_PATCH ("b")
+#define VER_PATCH ("c")
 
 #endif
