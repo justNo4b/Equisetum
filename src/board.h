@@ -81,7 +81,7 @@ class Board {
    *
    * @param move Move to perform on the board.
    */
-  void doMove(Move);
+  bool doMove(Move);
 
 
    /**

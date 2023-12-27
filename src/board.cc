@@ -678,7 +678,7 @@ int  Board:: Calculate_SEE(const Move move) const{
   return gain[0];
 }
 
-void Board::doMove(Move move) {
+bool Board::doMove(Move move) {
   // Clear En passant info after each move if it exists
   if (_enPassant) {
     _zKey.clearEnPassant();
@@ -692,6 +692,8 @@ void Board::doMove(Move move) {
   if (!flags) {
     // No flags set, not a special move
     _movePiece(_activePlayer, move.getPieceType(), from, to);
+    // Check if we are in check after moving
+    if (colorIsInCheck(_activePlayer)) return false;
     _nnue.movePiece(_activePlayer, move.getPieceType(), from, to);
   } else if ((flags & Move::CAPTURE) && (flags & Move::PROMOTION)) { // Capture promotion special case
     // Remove captured Piece
@@ -704,6 +706,7 @@ void Board::doMove(Move move) {
     // Add promoted piece
     PieceType promotionPieceType = move.getPromotionPieceType();
     _addPiece(_activePlayer, promotionPieceType, to);
+    if (colorIsInCheck(_activePlayer)) return false;
     _nnue.cappromPiece(getActivePlayer(), capturedPieceType, promotionPieceType, from, to);
   } else if (flags & Move::CAPTURE) {
     // Remove captured Piece
@@ -712,16 +715,19 @@ void Board::doMove(Move move) {
 
     // Move capturing piece
     _movePiece(_activePlayer, move.getPieceType(), from, to);
+    if (colorIsInCheck(_activePlayer)) return false;
     _nnue.capturePiece(_activePlayer, move.getPieceType(), move.getCapturedPieceType(), from, to);
   } else if (flags & Move::KSIDE_CASTLE) {
     // Move the correct rook
     if (_activePlayer == WHITE) {
       _movePiece(_activePlayer, KING, from, g1);
       _movePiece(WHITE, ROOK, to, f1);
+      if (colorIsInCheck(_activePlayer)) return false;
       _nnue.castleMove(_activePlayer, from, g1, to, f1);
     } else {
       _movePiece(_activePlayer, KING, from, g8);
       _movePiece(BLACK, ROOK, to, f8);
+      if (colorIsInCheck(_activePlayer)) return false;
       _nnue.castleMove(_activePlayer, from, g8, to, f8);
     }
   } else if (flags & Move::QSIDE_CASTLE) {
@@ -729,10 +735,12 @@ void Board::doMove(Move move) {
     if (_activePlayer == WHITE) {
       _movePiece(_activePlayer, KING, from, c1);
       _movePiece(WHITE, ROOK, to, d1);
+      if (colorIsInCheck(_activePlayer)) return false;
       _nnue.castleMove(_activePlayer, from, c1, to, d1);
     } else {
       _movePiece(_activePlayer, KING, from, c8);
       _movePiece(BLACK, ROOK, to, d8);
+      if (colorIsInCheck(_activePlayer)) return false;
       _nnue.castleMove(_activePlayer, from, c8, to, d8);
     }
   } else if (flags & Move::EN_PASSANT) {
@@ -745,6 +753,7 @@ void Board::doMove(Move move) {
 
     // Move the capturing pawn
     _movePiece(_activePlayer, move.getPieceType(), from, to);
+    if (colorIsInCheck(_activePlayer)) return false;
     _nnue.enpassMove(_activePlayer, from, to);
   } else if (flags & Move::PROMOTION) {
     // Remove promoted pawn
@@ -752,9 +761,11 @@ void Board::doMove(Move move) {
 
     // Add promoted piece
     _addPiece(_activePlayer, move.getPromotionPieceType(), to);
+    if (colorIsInCheck(_activePlayer)) return false;
     _nnue.promotePiece(getActivePlayer(), move.getPromotionPieceType(), from, to);
   } else if (flags & Move::DOUBLE_PAWN_PUSH) {
     _movePiece(_activePlayer, move.getPieceType(), from, to);
+    if (colorIsInCheck(_activePlayer)) return false;
     _nnue.movePiece(_activePlayer, move.getPieceType(), from, to);
 
     // Set square behind pawn as _enPassant
@@ -776,6 +787,9 @@ void Board::doMove(Move move) {
 
   _zKey.flipActivePlayer();
   _activePlayer = getInactivePlayer();
+
+  // everything is fine, return
+  return true;
 }
 
 void Board:: doNool(){
