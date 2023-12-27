@@ -284,10 +284,11 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
     Move move = movePicker.getNext();
 
     Board movedBoard = board;
-    movedBoard.doMove(move);
-    _sStack.AddMove(move);
+    bool isLegal = movedBoard.doMove(move);
 
-    if (!movedBoard.colorIsInCheck(movedBoard.getInactivePlayer())){
+    if (isLegal){
+        myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
+        _sStack.AddMove(move);
         U64 nodesStart = _nodes;
 
         if (fullWindow) {
@@ -314,9 +315,9 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
           // Break if we've found a checkmate
         }
         _rootNodesSpent[move.getPieceType()][move.getTo()] += _nodes - nodesStart;
-
+        _sStack.Remove();
     }
-    _sStack.Remove();
+
   }
 
   if (!_stop && !(bestMove.getFlags() & Move::NULL_MOVE)) {
@@ -503,8 +504,8 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 
             // make a move
             Board movedBoard = board;
-            movedBoard.doMove(move);
-            if (!movedBoard.colorIsInCheck(movedBoard.getInactivePlayer())){
+            bool isLegal = movedBoard.doMove(move);
+            if (isLegal){
                 // see if qSearch holds
                 int qScore = - _qSearch(movedBoard, -pcBeta, -pcBeta + 1);
 
@@ -563,11 +564,10 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
     }
 
     Board movedBoard = board;
-    movedBoard.doMove(move);
-    myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
-    bool doLMR = false;
-
-      if (!movedBoard.colorIsInCheck(movedBoard.getInactivePlayer())){
+    bool isLegal = movedBoard.doMove(move);
+    if (isLegal){
+        myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
+        bool doLMR = false;
         legalCount++;
         int score;
 
@@ -851,12 +851,12 @@ int Search::_qSearch(const Board &board, int alpha, int beta) {
       continue;;
 
     Board movedBoard = board;
-    movedBoard.doMove(move);
-    myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
-      if (!movedBoard.colorIsInCheck(movedBoard.getInactivePlayer())){
+    bool isLegal = movedBoard.doMove(move);
+
+    if (isLegal){
+          myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
 
           int score = -_qSearch(movedBoard, -beta, -alpha);
-
           if (score >= beta) {
             // Add a new tt entry for this node
             if (!_stop){
@@ -867,7 +867,7 @@ int Search::_qSearch(const Board &board, int alpha, int beta) {
           if (score > alpha) {
             alpha = score;
           }
-        }
+    }
 
 
   }
