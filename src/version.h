@@ -20,6 +20,6 @@
 
 #define VER_MAJ ("s_4.1.1")
 #define VER_MIN ("NN_variegatum")
-#define VER_PATCH ("c")
+#define VER_PATCH ("d")
 
 #endif
