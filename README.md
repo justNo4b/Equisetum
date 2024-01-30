@@ -1,56 +1,51 @@
-<h1 align="center">Drofa</h1>
+<h1 align="center">Equisetum</h1>
+
+<p align="center">
+ <img src="Logo/Equisetum.png" width="350"/>
+</p>
 
 A UCI chess engine written in C++11.
-Drofa uses AB-search and combines hand-crafted evaluation (HCE) with supplementary NN,
-that uses King and Pawn (KPNN) positions as inputs (264 -> 16 -> 2).
+Equisetum uses Fail-Hard AB-search and NNUE evaluation.
+This approach resulted in an engine of moderate strength. One of the few strong engines using a fail-hard approach
 
-This approach resulted in an engine of moderate strength.
+## NNUE
+
+Equisetum uses an NNUE (efficiently updatable neural network) as an evaluation function.
+
+Current implementation is a very simple (768-768)x2 -> 1 network.
+It is trained on Equisetum self-play games using a mix of a play from a randomized startposition and a randomized positions  
+derived from human high-bias positions.
+
+Network is training using <a href="https://github.com/AndyGrant/Ethereal">CudAD</a>
 
 
 ## Origins
-Drofa started as fork of the <a href="https://github.com/GunshipPenguin/shallow-blue">Shallow Blue</a> chess engine.
-My initial intention was to take weak, but stable and working chess engine and try to improve it,
-learning c++ along the way.
+Equisetum is basically a continuation of the <a href="https://github.com/GunshipPenguin/shallow-blue">Drofa</a> chess engine,
+which in turn is started as fork of the <a href="https://github.com/GunshipPenguin/shallow-blue">Shallow Blue</a> chess engine.
+My initial intention was to take weak, but stable and working chess engine and try to improve it, learning c++ along the way.
 
-During my Drofa experiments huge chunk of knowlenge were received from:
+During my Drofa/Equisetum experiments huge chunk of knowlenge were received from:
 
  - <a href="https://github.com/peterwankman/vice">VICE</a> chess engine and tutorials.
- - <a href="https://www.chessprogramming.org">Chessprogramming WIKI</a> great place for all chessprogramming-related knowledge.
- - <a href="https://github.com/TerjeKir/weiss">Weiss</a> chess engine, with clean and understandable implementations of complex features. Drofa use Weiss 1.0
-LMP base reduction formulas. Althouth Adagrad tuning implementation is not copy-pasted from Weiss, Drofa implementation closesy follows Weiss logic and can be considered a c++ rewrite of it.
+ - <a href="https://github.com/TerjeKir/weiss">Weiss</a> chess engine, with clean and understandable implementations of complex features. Drofa/Equisetum use Weiss 1.0
+LMP base reduction formulas. As well as HCE-tuning for Drofa versions
  - Several open source engines, mostly <a href="https://github.com/AndyGrant/Ethereal">Ethereal</a> and <a href="https://github.com/official-stockfish/Stockfish">Stockfish</a>
 
-Special thanks to:
+## Special thanks to:
  - Terje Kirstihagen (Weiss author)
+ - GediminasMasaitis (ChessDotCPP author) for explaining bulk of the NNUE concepts to me
+ - Finn Eggers for creating <a href="https://github.com/AndyGrant/Ethereal">CudAD</a> which i use for NNUE training
  - Andrew Grant. AdaGrad paper and Ethereal chess engine are great sources of knowledge; Ethereal tuning dataset was a great help in tuning. As well as allowing me on main OpenBench instance
  - Kim Kahre, Finn Eggers and Eugenio Bruno (Koivisto team) for allowing Drofa on Koi OpenBench instance and motivating me to work on the engine
  - Jay Honnold (Berserk author) for helping me with NN stuff
  - OpenBench community for helping me with motivation, in finding bugs, teaching me (even if unknowingly) good programming practices and interesting discussions
 
-## Strength (ccrl blitz elo) - as of May 2023:
-```
-Drofa 1.0.0    2088
-Drofa 1.3.1    2424
-Drofa 2.0.0    2488
-Drofa 2.0.0    2488
-Drofa 3.0.0    2922
-Drofa 3.1.0    3009
-Drofa 3.2.0    3101
-Drofa 3.3.0    3188
-Drofa 4.0.0    ~3250 - etimated based on 3.3.22 results
-```
-
-Since version 3.3.23 Drofa supports FRC and DFRC, with a CCRL elo of 3244
-
-## Changelogs
-
-With Drofa 4.0.0 many features was added on top of the Shallow Blue, adding up to more than 1000 elo.
-Almost-full changelog with SPRT results and ELO estimations for most of the features can be found in `Changelogs` folder.
-
+## Strength
+Current Equisetum is estimated to be somewhere before Stockfish 11 and Stockfish 12 strength.
 
 ## UCI commands
 
-Drofa 3.0.0 supports following UCI commands:
+Equisetum supports following UCI commands:
 
 - BookPath
 - OwnBook
@@ -67,9 +62,9 @@ setoption name BookPath value /path/to/book.bin
 ## License
 
 During developement, many concepts found in GPL-3 engines were used.
-Thus, as of 4.0.0, Drofa also will be licensed as GPL-3.
+Thus, as of 4.0.0, Equisetum also will be licensed as GPL-3.
 
 2017 - 2019 © Rhys Rustad-Elliott (original Shallow Blue creator)
 
-2020 - 2023 © Litov Alexander
+2020 - 2024 © Litov Alexander
 
