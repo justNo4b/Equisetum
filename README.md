@@ -16,11 +16,11 @@ Current implementation is a very simple (768-768)x2 -> 1 network.
 It is trained on Equisetum self-play games using a mix of a play from a randomized startposition and a randomized positions  
 derived from human high-bias positions.
 
-Network is training using <a href="https://github.com/AndyGrant/Ethereal">CudAD</a>
+Network is training using <a href="https://github.com/Luecx/CudAD">CudAD</a>
 
 
 ## Origins
-Equisetum is basically a continuation of the <a href="https://github.com/GunshipPenguin/shallow-blue">Drofa</a> chess engine,
+Equisetum is basically a continuation of the <a href="https://github.com/justNo4b/Drofa">Drofa</a> chess engine,
 which in turn is started as fork of the <a href="https://github.com/GunshipPenguin/shallow-blue">Shallow Blue</a> chess engine.
 My initial intention was to take weak, but stable and working chess engine and try to improve it, learning c++ along the way.
 
@@ -34,7 +34,7 @@ LMP base reduction formulas. As well as HCE-tuning for Drofa versions
 ## Special thanks to:
  - Terje Kirstihagen (Weiss author)
  - GediminasMasaitis (ChessDotCPP author) for explaining bulk of the NNUE concepts to me
- - Finn Eggers for creating <a href="https://github.com/AndyGrant/Ethereal">CudAD</a> which i use for NNUE training
+ - Finn Eggers for creating <a href="https://github.com/Luecx/CudAD">CudAD</a> which i use for NNUE training
  - Andrew Grant. AdaGrad paper and Ethereal chess engine are great sources of knowledge; Ethereal tuning dataset was a great help in tuning. As well as allowing me on main OpenBench instance
  - Kim Kahre, Finn Eggers and Eugenio Bruno (Koivisto team) for allowing Drofa on Koi OpenBench instance and motivating me to work on the engine
  - Jay Honnold (Berserk author) for helping me with NN stuff
