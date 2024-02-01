@@ -7,7 +7,12 @@ CPP_FILES = $(wildcard src/*.cc)
 OBJ_FILES = $(addprefix obj/,$(notdir $(CPP_FILES:.cc=.o)))
 
 LD_FLAGS ?= -pthread -flto
-CC_FLAGS ?= -Wall -std=c++11 -O3 -march=native -flto -pthread -fno-exceptions
+CC_FLAGS ?= -Wall -std=c++11 -O3 -march=native -flto -pthread -fno-exceptions -D_INCBIN_
+
+# Use INCBIN by default, and no incbin for release
+EVALFILE = equi_768x2rl_2.4Bv3_320.nnue
+CC_FLAGS += -DEVALFILE=\"$(EVALFILE)\"
+
 
 # can we use pext here?
 # use it if is supported and no Ryzen1/2
@@ -22,18 +27,18 @@ ifneq ($(findstring __BMI2__, $(ARCH_INFO)), )
 endif
 
 # Special tuning compilation
-tune: CC_FLAGS  = -Wall -std=c++11 -O3 -march=native -flto -pthread -fopenmp -fno-exceptions -D_TUNE_
-tune: LD_FLAGS  = -pthread -flto -fopenmp
+normal: CC_FLAGS  = -Wall -std=c++11 -O3 -march=native -flto -pthread -fopenmp -fno-exceptions
+normal: LD_FLAGS  = -pthread -flto -fopenmp
 
 EXE = Equisetum_dev
-TUNE_EXE = Drofa_tune
+normal_EXE = Equisetum_normal
 
 all: $(OBJ_DIR) $(EXE)
 
-tune: $(OBJ_DIR) $(TUNE_EXE)
+normal: $(OBJ_DIR) $(normal_EXE)
 
 
-$(TUNE_EXE): $(OBJ_FILES)
+$(normal_EXE): $(OBJ_FILES)
 	$(CXX) $(LD_FLAGS) -o $@ $^
 
 $(EXE): $(OBJ_FILES)
@@ -48,5 +53,5 @@ $(OBJ_DIR):
 clean:
 	rm -rf $(OBJ_DIR)
 	rm -f $(TEST_BIN_NAME)
-	rm -f $(TUNE_BIN_NAME)
+	rm -f $(normal_BIN_NAME)
 	rm -f $(BIN_NAME)
