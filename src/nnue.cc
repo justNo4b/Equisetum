@@ -21,8 +21,13 @@
 #include "board.h"
 #include "bitutils.h"
 #include <fstream>
-#include <fstream>
+#include <sstream>
 
+// Enable incbin
+#ifdef _INCBIN_
+#include "incbin/incbin.h"
+INCBIN(network, EVALFILE);
+#endif
 
     int16_t NNueEvaluation::NNUE_HIDDEN_BIAS[NNUE_HIDDEN];
     int16_t NNueEvaluation::NNUE_HIDDEN_WEIGHT[NNUE_INPUT][NNUE_HIDDEN];
@@ -33,14 +38,23 @@
 
 void NNueEvaluation::init(){
 
-    std::ifstream file(EVAL_FILE, std::ios::binary | std::ios::in);
+#ifdef _INCBIN_
+    // read embedded NNUE file
+    auto file = std::stringstream(std::ios::in | std::ios::out | std::ios::binary);
+    file.write(reinterpret_cast<const char*>(gnetworkData), gnetworkSize);
 
+#else
+    // normal compilation, read NNUE from harddrive
+
+    std::ifstream file(EVAL_FILE, std::ios::binary | std::ios::in);
     // Exit the program if file is not found or cannot be opened
     if (!file){
         std::cout << "Failed to open NNUE file. Exit"<< std::endl;
         exit(0);
     }
     // File exist, proceed
+#endif
+
 
     for (int i = 0; i < NNUE_INPUT; i++){
         for (int h = 0; h < NNUE_HIDDEN; h++){
