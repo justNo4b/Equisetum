@@ -420,6 +420,16 @@ void loop() {
 
 void Uci::init() {
   initOptions();
+
+/* Shit for SPSA
+        for(auto it = optionsMap.cbegin(); it != optionsMap.cend(); ++it)
+        {
+            auto step = (int)((it->second.getMin() + it->second.getMax()) / 20);
+            step = std::max(1, step);
+            std::cout << it->first << " int " << it->second.getDefaultValue() << " " << it->second.getMin() << " " << it->second.getMax() << " " <<  step << " 0.002" << std::endl;
+        }
+*/
+
 }
 
 void Uci::start() {
