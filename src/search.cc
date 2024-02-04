@@ -33,7 +33,47 @@ extern std::thread      cThread[MAX_THREADS];
 extern HASH           * myHASH;
 
 
-void Search::init_LMR_array(){
+void Search::init_LMR_array(SearchParms sp){
+  // Init Tuning Shit
+
+
+    ASP_WINDOW = sp.asp_window;
+    ASP_DELTA  = sp.asp_delta;
+
+    NMP_BASE = sp.nmp_base;
+    NMP_MAXREDUCT = sp.nmp_maxreduct;
+    NMP_DEPTHDIV  = sp.nmp_depthdiv;
+    NMP_DELTA_DIV = sp.nmp_delta_div;
+    NMP_COND_BASE = sp.nmp_cond_base;
+    NMP_COND_DEPTH = sp.nmp_cond_depth;
+
+    PRCUT_BETA_BASE = sp.prcut_beta_base;
+    PRCUT_DEPTH = sp.prcut_depth;
+
+    SEE_Q_BASE = sp.see_q_base;
+    SEE_Q_DEPTH = sp.see_q_depth;
+
+    SING_SEARCH_START = sp.sing_search_start;
+
+    DELTA_MOVE_CONST = sp.delta_move_const;
+    FUTIL_MOVE_CONST = sp.futil_move_const;
+
+    REVF_MOVE_CONST = sp.revf_move_const;
+    REVF_IMPR_CONST = sp.revf_impr_const;
+    REVF_DEPTH = sp.revf_depth;
+
+    RAZORING_MARGIN = sp.razoring_margin;
+
+    LMR_INIT_A = sp.lmr_init_a;
+    LMR_INIT_DIV = sp.lmr_init_div;
+    LMR_DEPTH_POW = sp.lmr_depth_pow;
+    LMR_NUMBER_POW = sp.lmr_number_pow;
+
+    LMP_START_BASE = sp.lmp_start_base;
+    LMP_START_IMPR = sp.lmp_start_impr;
+    LMP_MULTIPL_BASE = sp.lmp_multipl_base;
+    LMP_MULTIPL_IMPR = sp.lmp_multipl_impr;
+
 
   // 1. Initialization of the LMR_array.
   // Original formula, came up after plotting  Weiss formula and trying to came up with
@@ -53,7 +93,7 @@ void Search::init_LMR_array(){
 
 }
 
-Search::Search(const Board &board, Limits limits, Hist positionHistory, OrderingInfo *info, bool logUci) :
+Search::Search(const Board &board, Limits limits, Hist positionHistory, OrderingInfo *info, SearchParms sp, bool logUci) :
     _orderingInfo(*info),
     _timer(limits, board.getActivePlayer(), board._getGameClock() / 2),
     _initialBoard(board),
@@ -65,7 +105,7 @@ Search::Search(const Board &board, Limits limits, Hist positionHistory, Ordering
 
   _sStack = SEARCH_Data();
   _posHist = positionHistory;
-  init_LMR_array();
+  init_LMR_array(sp);
 }
 
 void Search::iterDeep() {
@@ -440,7 +480,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
   // The idea is so if we are very far ahead of beta at low
   // depth, we can just return estimated eval (eval - margin),
   // because beta probably will be beaten
-  if (isPrune && depth < 6 && ((nodeEval - REVF_MOVE_CONST * depth + REVF_IMPR_CONST * improving) >= beta)){
+  if (isPrune && depth <= REVF_DEPTH && ((nodeEval - REVF_MOVE_CONST * depth + REVF_IMPR_CONST * improving) >= beta)){
       return beta;
   }
 
@@ -485,7 +525,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 
   // Probcut
   if (!pvNode &&
-       depth >= 5 &&
+       depth >= PRCUT_DEPTH &&
        alpha < WON_IN_X){
         int pcBeta = beta + PRCUT_BETA_BASE;
         while (movePicker.hasNext()){

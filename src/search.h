@@ -27,6 +27,47 @@
 #include <chrono>
 #include <atomic>
 
+
+struct SearchParms {
+   int asp_window = 25;
+   int asp_delta  = 50;
+
+   int nmp_base = 3;
+   int nmp_maxreduct = 4;
+   int nmp_depthdiv  = 4;
+   int nmp_delta_div = 128;
+   int nmp_cond_base = 120;
+   int nmp_cond_depth = 20;
+
+   int prcut_beta_base = 200;
+   int prcut_depth = 5;
+
+   int see_q_base = 51;
+   int see_q_depth = -51;
+
+   int sing_search_start = 8;
+
+   int delta_move_const = 300;
+   int futil_move_const = 250;
+
+   int revf_move_const = 150;
+   int revf_impr_const = 100;
+   int revf_depth = 5;
+
+   int razoring_margin = 650;
+
+   double lmr_init_a = 0.1;
+   double lmr_init_div = 1.75;
+   double lmr_depth_pow = 0.15;
+   double lmr_number_pow = 0.15;
+
+   double lmp_start_base = 1.5;
+   double lmp_start_impr = 3.0;
+   double lmp_multipl_base = 1.0;
+   double lmp_multipl_impr = 2.0;
+};
+
+
 /**
  * @brief Represents a search through a minmax tree.
  *
@@ -46,7 +87,7 @@ class Search {
    * @param logUci If logUci is set, UCI info commands about the search will be printed
    * to standard output in real time.k
    */
-  Search(const Board &, Limits, Hist, OrderingInfo *, bool= true);
+  Search(const Board &, Limits, Hist, OrderingInfo *, SearchParms, bool= true);
 
   /**
    * @brief Performs an iterative deepening search within the constraints of the given limits.
@@ -80,6 +121,12 @@ class Search {
    */
   int getSeldepth();
 
+
+  /**
+   * @brief Array of Piece costs used for SEE
+   */
+ const int _SEE_cost[6] = {100, 500, 300, 300, 1000, 10000};
+
  private:
 
   /**
@@ -104,45 +151,42 @@ class Search {
   //search_constants
   //
 
-  const int ASP_WINDOW = 25;
-  const int ASP_DELTA  = 50;
+   int ASP_WINDOW = 25;
+   int ASP_DELTA  = 50;
 
-  const int NMP_BASE = 3;
-  const int NMP_MAXREDUCT = 4;
-  const int NMP_DEPTHDIV  = 4;
-  const int NMP_DELTA_DIV = 128;
-  const int NMP_COND_BASE = 120;
-  const int NMP_COND_DEPTH = 20;
+   int NMP_BASE = 3;
+   int NMP_MAXREDUCT = 4;
+   int NMP_DEPTHDIV  = 4;
+   int NMP_DELTA_DIV = 128;
+   int NMP_COND_BASE = 120;
+   int NMP_COND_DEPTH = 20;
 
-  const int PRCUT_BETA_BASE = 200;
+   int PRCUT_BETA_BASE = 200;
+   int PRCUT_DEPTH = 5;
 
-  const int SEE_Q_BASE = 51;
-  const int SEE_Q_DEPTH = -51;
-  const int SEE_PAWN = 0;
-  const int SEE_KNIGHT = 0;
-  const int SEE_BISHOP = 0;
-  const int SEE_ROOK = 0;
-  const int SEE_QUEEN = 0;
+   int SEE_Q_BASE = 51;
+   int SEE_Q_DEPTH = -51;
 
-  const int SING_SEARCH_START = 8;
+   int SING_SEARCH_START = 8;
 
-  const int DELTA_MOVE_CONST = 300;
-  const int FUTIL_MOVE_CONST = 250;
+   int DELTA_MOVE_CONST = 300;
+   int FUTIL_MOVE_CONST = 250;
 
-  const int REVF_MOVE_CONST = 150;
-  const int REVF_IMPR_CONST = 100;
+   int REVF_MOVE_CONST = 150;
+   int REVF_IMPR_CONST = 100;
+   int REVF_DEPTH = 5;
 
-  const int RAZORING_MARGIN = 650;
+   int RAZORING_MARGIN = 650;
 
-  const double LMR_INIT_A = 0.1;
-  const double LMR_INIT_DIV = 1.75;
-  const double LMR_DEPTH_POW = 0.15;
-  const double LMR_NUMBER_POW = 0.15;
+   double LMR_INIT_A = 0.1;
+   double LMR_INIT_DIV = 1.75;
+   double LMR_DEPTH_POW = 0.15;
+   double LMR_NUMBER_POW = 0.15;
 
-  const double LMP_START_BASE = 1.5;
-  const double LMP_START_IMPR = 3.0;
-  const double LMP_MULTIPL_BASE = 1.0;
-  const double LMP_MULTIPL_IMPR = 2.0;
+   double LMP_START_BASE = 1.5;
+   double LMP_START_IMPR = 3.0;
+   double LMP_MULTIPL_BASE = 1.0;
+   double LMP_MULTIPL_IMPR = 2.0;
 
 
 
@@ -295,7 +339,7 @@ class Search {
    * @brief this function calculates reductions values and stores
    * it in the _lmr_R_array
    */
-  void init_LMR_array();
+  void init_LMR_array(SearchParms);
 
 };
 

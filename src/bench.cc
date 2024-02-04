@@ -41,7 +41,8 @@ void myBench(){
     for (int i = 0; i < BENCH_POS_NUMBER; i++){
         int curNodes = 0;
         board = Board(BENCH_POSITION[i], false);
-        search = std::make_shared<Search>(board, limits, history, myOrdering, false);
+        SearchParms sp = SearchParms();
+        search = std::make_shared<Search>(board, limits, history, myOrdering, sp, false);
         search->iterDeep();
         curNodes = search->getNodes();
         nodes_total += curNodes;

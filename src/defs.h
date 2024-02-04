@@ -218,12 +218,6 @@ const int NNUE_PIECE_TO_INDEX[2][6] = {
         }
     };
 
-
-  /**
-   * @brief Array of Piece costs used for SEE
-   */
-  int _SEE_cost[6] = {100, 500, 300, 300, 1000, 10000};
-
 /**
  * @brief Returns the opposite of the given color
  *
