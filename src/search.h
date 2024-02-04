@@ -103,11 +103,49 @@ class Search {
 
   //search_constants
   //
-  const int NULL_MOVE_REDUCTION = 3;
+
+  const int ASP_WINDOW = 25;
+  const int ASP_DELTA  = 50;
+
+  const int NMP_BASE = 3;
+  const int NMP_MAXREDUCT = 4;
+  const int NMP_DEPTHDIV  = 4;
+  const int NMP_DELTA_DIV = 128;
+  const int NMP_COND_BASE = 120;
+  const int NMP_COND_DEPTH = 20;
+
+  const int PRCUT_BETA_BASE = 200;
+
+  const int SEE_Q_BASE = 51;
+  const int SEE_Q_DEPTH = -51;
+  const int SEE_PAWN = 0;
+  const int SEE_KNIGHT = 0;
+  const int SEE_BISHOP = 0;
+  const int SEE_ROOK = 0;
+  const int SEE_QUEEN = 0;
+
+  const int SING_SEARCH_START = 8;
+
   const int DELTA_MOVE_CONST = 300;
   const int FUTIL_MOVE_CONST = 250;
+
   const int REVF_MOVE_CONST = 150;
+  const int REVF_IMPR_CONST = 100;
+
   const int RAZORING_MARGIN = 650;
+
+  const double LMR_INIT_A = 0.1;
+  const double LMR_INIT_DIV = 1.75;
+  const double LMR_DEPTH_POW = 0.15;
+  const double LMR_NUMBER_POW = 0.15;
+
+  const double LMP_START_BASE = 1.5;
+  const double LMP_START_IMPR = 3.0;
+  const double LMP_MULTIPL_BASE = 1.0;
+  const double LMP_MULTIPL_IMPR = 2.0;
+
+
+
   //
 
   /**

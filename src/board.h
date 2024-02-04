@@ -294,10 +294,6 @@ class Board {
   U64 _getRookMobilityForSquare(int, U64, U64) const;
   U64 _getQueenMobilityForSquare(int, U64, U64) const;
 
-  /**
-   * @brief Array of Piece costs used for SEE
-   */
-  int _SEE_cost[6] = {100, 500, 300, 300, 1000, 10000};
 
   int _phase;
 
