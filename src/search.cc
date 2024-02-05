@@ -41,14 +41,14 @@ void Search::init_LMR_array(){
 
   for (int depth = 0; depth < 34; depth++){
     for (int movenum = 0; movenum < 34; movenum++){
-      _lmr_R_array[depth][movenum] = (int) (0.1 + (pow(depth, 0.15) * pow(movenum, 0.15))/1.75);
+      _lmr_R_array[depth][movenum] = (int) (0.57 + (pow(depth, 0.10) * pow(movenum, 0.16))/2.49);
     }
   }
   // 2. Initialization of the LMP array.
   // Current formula is completely based on the Weiss chess engine.
   for (int depth = 0; depth < MAX_PLY; depth++){
-    _lmp_Array[depth][0] = (int) ((3 + pow(depth, 2) * 2) / 2);
-    _lmp_Array[depth][1] = (int)  (3 + pow(depth, 2) * 2);
+    _lmp_Array[depth][0] = (int)  (1.57 + pow((depth - 1), 2) * 1.71);
+    _lmp_Array[depth][1] = (int)  (3.51 + pow((depth - 1), 2) * 1.73);
   }
 
 }
@@ -77,8 +77,8 @@ void Search::iterDeep() {
   int maxDepthSearched = 0;
 
   int targetDepth = _timer.getSearchDepth();
-  int aspWindow = 25;
-  int aspDelta  = 50;
+  int aspWindow = 30;
+  int aspDelta  = 48;
 
     for (int currDepth = 1; currDepth <= targetDepth; currDepth++) {
         maxDepthSearched = std::max(maxDepthSearched, currDepth);
@@ -440,7 +440,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
   // The idea is so if we are very far ahead of beta at low
   // depth, we can just return estimated eval (eval - margin),
   // because beta probably will be beaten
-  if (isPrune && depth < 6 && ((nodeEval - REVF_MOVE_CONST * depth + 100 * improving) >= beta)){
+  if (isPrune && depth <= 8 && ((nodeEval - 161 * depth + 142 * improving) >= beta)){
       return beta;
   }
 
@@ -449,13 +449,13 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
   // No nmp in pvNode, InCheck, when doing singular, or just after Null move was made
   // Use SF-like conditional of requsting Eval being higher than beta at low depth
   // Equisetum track NMP_failure to use for extending decisions
-  if (isPrune && pMove != 0 && nodeEval >= beta + std::max(0, 120 - 20 * depth) && board.isThereMajorPiece()){
+  if (isPrune && pMove != 0 && nodeEval >= beta + std::max(0, 118 - 21 * depth) && board.isThereMajorPiece()){
           Board movedBoard = board;
           _posHist.Add(board.getZKey().getValue());
           _sStack.AddNullMove(getOppositeColor(board.getActivePlayer()));
           movedBoard.doNool();
 
-          int fDepth = depth - NULL_MOVE_REDUCTION - depth / 4 - std::min((nodeEval - beta) / 128, 4);
+          int fDepth = depth - NULL_MOVE_REDUCTION - depth / 4 - std::min((nodeEval - beta) / 128, 5);
           int score = -_negaMax(movedBoard, &thisPV, fDepth , -beta, -beta + 1, false, false);
 
           _posHist.Remove();
@@ -485,9 +485,9 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 
   // Probcut
   if (!pvNode &&
-       depth >= 5 &&
+       depth >= 4 &&
        alpha < WON_IN_X){
-        int pcBeta = beta + 200;
+        int pcBeta = beta + 218;
         while (movePicker.hasNext()){
             Move move = movePicker.getNext();
 
@@ -555,7 +555,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
       // At shallow depth prune highlyish -negative SEE-moves
       if (depth <= 10
           && isQuiet
-          && !board.SEE_GreaterOrEqual(move, (-51 * depth + 51))) continue;
+          && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
           //&& board.Calculate_SEE(move) < ) continue;
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
@@ -593,9 +593,9 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
               int sDepth = depth / 2;
               int sBeta = ttEntry.score - depth * 2;
               Board sBoard = board;
-              int score = depth > 8 ? _negaMax(sBoard, &thisPV, sDepth, sBeta - 1, sBeta, true, cutNode) : nodeEval;
+              int score = depth > 5 ? _negaMax(sBoard, &thisPV, sDepth, sBeta - 1, sBeta, true, cutNode) : nodeEval;
               if (sBeta > score){
-                tDepth += 1 + (fnNode && depth > 8);
+                tDepth += 1 + (fnNode && depth > 5);
                 singNode = true;
               }
             }
