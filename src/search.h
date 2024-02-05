@@ -43,12 +43,11 @@ struct SearchParms {
    int prcut_beta_base = 218;
    int prcut_depth = 4;
 
-   int see_q_base = 48;
-   int see_q_depth = -68;
+
 
    int sing_search_start = 5;
 
-   int delta_move_const = 186;
+
    int futil_move_const = 232;
 
    int revf_move_const = 161;
@@ -58,13 +57,17 @@ struct SearchParms {
    int razoring_margin = 945;
     */
 
+   int delta_move_const = 186;
+   int see_q_base = 48;
+   int see_q_depth = -68;
 
+
+
+/*
    double lmr_init_a = 0.57;
    double lmr_init_div = 2.49;
    double lmr_depth_pow = 0.10;
    double lmr_number_pow = 0.16;
-
-/*
    double lmp_start_base = 1.57;
    double lmp_start_impr = 3.51;
    double lmp_multipl_base = 1.71;

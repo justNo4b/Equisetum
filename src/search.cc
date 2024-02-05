@@ -50,12 +50,11 @@ void Search::init_LMR_array(SearchParms sp){
     PRCUT_BETA_BASE = sp.prcut_beta_base;
     PRCUT_DEPTH = sp.prcut_depth;
 
-    SEE_Q_BASE = sp.see_q_base;
-    SEE_Q_DEPTH = sp.see_q_depth;
+
 
     SING_SEARCH_START = sp.sing_search_start;
 
-    DELTA_MOVE_CONST = sp.delta_move_const;
+
     FUTIL_MOVE_CONST = sp.futil_move_const;
 
     REVF_MOVE_CONST = sp.revf_move_const;
@@ -64,14 +63,18 @@ void Search::init_LMR_array(SearchParms sp){
 
     RAZORING_MARGIN = sp.razoring_margin;
 */
+    DELTA_MOVE_CONST = sp.delta_move_const;
+    SEE_Q_BASE = sp.see_q_base;
+    SEE_Q_DEPTH = sp.see_q_depth;
 
 
+
+/*
     LMR_INIT_A = sp.lmr_init_a;
     LMR_INIT_DIV = sp.lmr_init_div;
     LMR_DEPTH_POW = sp.lmr_depth_pow;
     LMR_NUMBER_POW = sp.lmr_number_pow;
 
-/*
     LMP_START_BASE = sp.lmp_start_base;
     LMP_START_IMPR = sp.lmp_start_impr;
     LMP_MULTIPL_BASE = sp.lmp_multipl_base;

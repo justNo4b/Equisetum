@@ -534,6 +534,14 @@ U64 Board::_getLeastValuableAttacker(Color color, U64 attackers, PieceType &piec
   return 0;
 }
 
+void Board::setSeeValues(BoardParams bp){
+    _SEE_cost[PAWN] = bp.pSee;
+    _SEE_cost[KNIGHT] = bp.kSee;
+    _SEE_cost[BISHOP] = bp.bSee;
+    _SEE_cost[ROOK] = bp.rSee;
+    _SEE_cost[QUEEN] = bp.qSee;
+}
+
 bool Board::SEE_GreaterOrEqual(const Move move, int threshold) const{
 
   // 0. Early exits

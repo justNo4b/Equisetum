@@ -21,6 +21,7 @@
 #include "eval.h"
 #include "searchdata.h"
 #include "timer.h"
+#include "board.h"
 #include <iostream>
 #include <thread>
 
@@ -34,6 +35,7 @@ Search        * cSearch[MAX_THREADS];
 std::thread     cThread[MAX_THREADS];
 
 SearchParms ourSearchParams;
+BoardParams ourBoardParams;
 
 namespace {
 Book book;
@@ -95,12 +97,11 @@ void loadCosts(){
     ourSearchParams.prcut_beta_base = atoi(optionsMap["prcut_beta_base"].getValue().c_str());
     ourSearchParams.prcut_depth = atoi(optionsMap["prcut_depth"].getValue().c_str());
 
-    ourSearchParams.see_q_base = atoi(optionsMap["see_q_base"].getValue().c_str());
-    ourSearchParams.see_q_depth = -1 * atoi(optionsMap["see_q_depth"].getValue().c_str());
+
 
     ourSearchParams.sing_search_start = atoi(optionsMap["sing_search_start"].getValue().c_str());
 
-    ourSearchParams.delta_move_const = atoi(optionsMap["delta_move_const"].getValue().c_str());
+
     ourSearchParams.futil_move_const = atoi(optionsMap["futil_move_const"].getValue().c_str());
 
     ourSearchParams.revf_move_const = atoi(optionsMap["revf_move_const"].getValue().c_str());
@@ -108,13 +109,23 @@ void loadCosts(){
     ourSearchParams.revf_depth = atoi(optionsMap["revf_depth"].getValue().c_str());
 
     ourSearchParams.razoring_margin = atoi(optionsMap["razoring_margin"].getValue().c_str());
-*/
 
 
     ourSearchParams.lmr_init_a = atoi(optionsMap["lmr_init_a"].getValue().c_str()) / 100;
     ourSearchParams.lmr_init_div = atoi(optionsMap["lmr_init_div"].getValue().c_str()) / 100;
     ourSearchParams.lmr_depth_pow = atoi(optionsMap["lmr_depth_pow"].getValue().c_str()) / 100;
     ourSearchParams.lmr_number_pow = atoi(optionsMap["lmr_number_pow"].getValue().c_str()) / 100;
+*/
+    ourSearchParams.delta_move_const = atoi(optionsMap["delta_move_const"].getValue().c_str());
+    ourSearchParams.see_q_base = atoi(optionsMap["see_q_base"].getValue().c_str());
+    ourSearchParams.see_q_depth = -1 * atoi(optionsMap["see_q_depth"].getValue().c_str());
+
+    ourBoardParams.pSee = atoi(optionsMap["pawnSee"].getValue().c_str());
+    ourBoardParams.kSee = atoi(optionsMap["knightSee"].getValue().c_str());
+    ourBoardParams.bSee = atoi(optionsMap["bishopSee"].getValue().c_str());
+    ourBoardParams.rSee = atoi(optionsMap["rookSee"].getValue().c_str());
+    ourBoardParams.qSee = atoi(optionsMap["queenSee"].getValue().c_str());
+
 
 /*
     ourSearchParams.lmp_start_base = atoi(optionsMap["lmp_start_base"].getValue().c_str()) / 100;
@@ -153,24 +164,32 @@ void initOptions() {
   optionsMap["nmp_cond_depth"] =    Option(21, 10, 30, &loadCosts);
   optionsMap["prcut_beta_base"] =   Option(218, 50, 300, &loadCosts);
   optionsMap["prcut_depth"] =   Option(4, 2, 8, &loadCosts);
-  optionsMap["see_q_base"] =     Option(48, 0, 120, &loadCosts);
-  optionsMap["see_q_depth"] =    Option(68, 0, 150, &loadCosts); // member to go negative
+
   optionsMap["sing_search_start"] =   Option(5, 2, 8, &loadCosts);
-  optionsMap["delta_move_const"] =   Option(186, 50, 500, &loadCosts);
+
   optionsMap["futil_move_const"] =     Option(232, 50, 500, &loadCosts);
   optionsMap["revf_move_const"] =    Option(161, 25, 300, &loadCosts);
   optionsMap["revf_impr_const"] =   Option(142, 25, 175, &loadCosts);
   optionsMap["revf_depth"] =   Option(8, 3, 10, &loadCosts);
   optionsMap["razoring_margin"] =     Option(650, 100, 1000, &loadCosts);
 */
+  optionsMap["see_q_base"] =     Option(48, 0, 120, &loadCosts);
+  optionsMap["see_q_depth"] =    Option(68, 0, 150, &loadCosts); // member to go negative
+  optionsMap["delta_move_const"] =   Option(186, 50, 500, &loadCosts);
 
-
-
+  optionsMap["pawnSee"] =    Option(100, 25, 200, &loadCosts);
+  optionsMap["knightSee"] =   Option(300, 150, 450, &loadCosts);
+  optionsMap["bishopSee"] =   Option(300, 150, 450, &loadCosts);
+  optionsMap["rookSee"] =     Option(500, 400, 600, &loadCosts);
+  optionsMap["queenSee"] =     Option(1000, 800, 1200, &loadCosts);
+/*
   // member divide by 100
   optionsMap["lmr_init_a"] =    Option(57, 0, 400, &loadCosts);
   optionsMap["lmr_init_div"] =   Option(249, 0, 500, &loadCosts);
   optionsMap["lmr_depth_pow"] =   Option(10, 5, 25, &loadCosts);
   optionsMap["lmr_number_pow"] =     Option(16, 5, 25, &loadCosts);
+*/
+
 
 /*
   optionsMap["lmp_start_base"] =    Option(157, 0, 300, &loadCosts);
@@ -250,6 +269,7 @@ void go(std::istringstream &is) {
     else if (token == "movestogo") is >> limits.movesToGo;
   }
 
+    board.setSeeValues(ourBoardParams);
 // if we have > 1 threads, run some additional threads
   if (myTHREADSCOUNT > 1){
     for (int i = 1; i < myTHREADSCOUNT; i++){

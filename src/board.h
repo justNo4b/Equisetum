@@ -27,6 +27,14 @@
 
 class Move;
 
+struct BoardParams{
+    int pSee = 100;
+    int kSee = 300;
+    int bSee = 300;
+    int rSee = 500;
+    int qSee = 1000;
+};
+
 /**
  * @brief Represents a chess board.
  *
@@ -265,6 +273,8 @@ class Board {
   int getPhase() const;
 
   bool getFrcMode() const;
+
+  void setSeeValues(BoardParams);
 
   bool squareUnderAttack(Color, int) const;
   U64  getCastlingRightsColored(Color) const;
