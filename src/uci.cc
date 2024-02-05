@@ -116,6 +116,11 @@ void loadCosts(){
     ourSearchParams.lmr_depth_pow = atoi(optionsMap["lmr_depth_pow"].getValue().c_str()) / 100;
     ourSearchParams.lmr_number_pow = atoi(optionsMap["lmr_number_pow"].getValue().c_str()) / 100;
 
+    ourSearchParams.lmr_init_a_cap = atoi(optionsMap["lmr_init_a_cap"].getValue().c_str()) / 100;
+    ourSearchParams.lmr_init_div_cap = atoi(optionsMap["lmr_init_div_cap"].getValue().c_str()) / 100;
+    ourSearchParams.lmr_depth_pow_cap = atoi(optionsMap["lmr_depth_pow_cap"].getValue().c_str()) / 100;
+    ourSearchParams.lmr_number_pow_cap = atoi(optionsMap["lmr_number_pow_cap"].getValue().c_str()) / 100;
+
 /*
     ourSearchParams.lmp_start_base = atoi(optionsMap["lmp_start_base"].getValue().c_str()) / 100;
     ourSearchParams.lmp_start_impr = atoi(optionsMap["lmp_start_impr"].getValue().c_str()) / 100;
@@ -171,6 +176,11 @@ void initOptions() {
   optionsMap["lmr_init_div"] =   Option(249, 0, 500, &loadCosts);
   optionsMap["lmr_depth_pow"] =   Option(10, 5, 25, &loadCosts);
   optionsMap["lmr_number_pow"] =     Option(16, 5, 25, &loadCosts);
+
+  optionsMap["lmr_init_a_cap"] =    Option(57, 0, 400, &loadCosts);
+  optionsMap["lmr_init_div_cap"] =   Option(249, 0, 500, &loadCosts);
+  optionsMap["lmr_depth_pow_cap"] =   Option(10, 5, 25, &loadCosts);
+  optionsMap["lmr_number_pow_cap"] =     Option(16, 5, 25, &loadCosts);
 
 /*
   optionsMap["lmp_start_base"] =    Option(157, 0, 300, &loadCosts);
