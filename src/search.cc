@@ -71,11 +71,6 @@ void Search::init_LMR_array(SearchParms sp){
     LMR_DEPTH_POW = sp.lmr_depth_pow;
     LMR_NUMBER_POW = sp.lmr_number_pow;
 
-    LMR_INIT_A_CAP = sp.lmr_init_a_cap;
-    LMR_INIT_DIV_CAP = sp.lmr_init_div_cap;
-    LMR_DEPTH_POW_CAP = sp.lmr_depth_pow_cap;
-    LMR_NUMBER_POW_CAP = sp.lmr_number_pow_cap;
-
 /*
     LMP_START_BASE = sp.lmp_start_base;
     LMP_START_IMPR = sp.lmp_start_impr;
@@ -91,10 +86,8 @@ void Search::init_LMR_array(SearchParms sp){
 
   for (int depth = 0; depth < 34; depth++){
     for (int movenum = 0; movenum < 34; movenum++){
-      //Capture
-      _lmr_R_array[0][depth][movenum] = (int) (LMR_INIT_A_CAP + (pow(depth, LMR_DEPTH_POW_CAP) * pow(movenum, LMR_NUMBER_POW_CAP)) / LMR_INIT_DIV_CAP);
       //Quiet
-      _lmr_R_array[1][depth][movenum] = (int) (LMR_INIT_A + (pow(depth, LMR_DEPTH_POW) * pow(movenum, LMR_NUMBER_POW)) / LMR_INIT_DIV);
+      _lmr_R_array[depth][movenum] = (int) (LMR_INIT_A + (pow(depth, LMR_DEPTH_POW) * pow(movenum, LMR_NUMBER_POW)) / LMR_INIT_DIV);
     }
   }
   // 2. Initialization of the LMP array.
@@ -685,7 +678,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
         if (doLMR){
 
           //Basic reduction is done according to the array
-          int reduction = _lmr_R_array[isQuiet][std::min(33, tDepth)][std::min(33, legalCount)];
+          int reduction = _lmr_R_array[std::min(33, tDepth)][std::min(33, legalCount)];
 
           // Reduction tweaks
           // We generally want to guess if the move will not improve alpha and guess right to do no re-searches
