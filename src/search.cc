@@ -36,7 +36,7 @@ extern HASH           * myHASH;
 void Search::init_LMR_array(SearchParms sp){
   // Init Tuning Shit
 
-
+/*
     ASP_WINDOW = sp.asp_window;
     ASP_DELTA  = sp.asp_delta;
 
@@ -63,16 +63,21 @@ void Search::init_LMR_array(SearchParms sp){
     REVF_DEPTH = sp.revf_depth;
 
     RAZORING_MARGIN = sp.razoring_margin;
+*/
+
 
     LMR_INIT_A = sp.lmr_init_a;
     LMR_INIT_DIV = sp.lmr_init_div;
     LMR_DEPTH_POW = sp.lmr_depth_pow;
     LMR_NUMBER_POW = sp.lmr_number_pow;
 
+/*
     LMP_START_BASE = sp.lmp_start_base;
     LMP_START_IMPR = sp.lmp_start_impr;
     LMP_MULTIPL_BASE = sp.lmp_multipl_base;
     LMP_MULTIPL_IMPR = sp.lmp_multipl_impr;
+*/
+
 
 
   // 1. Initialization of the LMR_array.

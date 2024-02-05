@@ -81,7 +81,7 @@ void changeThreadsNumber(){
 
 
 void loadCosts(){
-
+/*
     ourSearchParams.asp_window = atoi(optionsMap["asp_window"].getValue().c_str());
     ourSearchParams.asp_delta  = atoi(optionsMap["asp_delta"].getValue().c_str());
 
@@ -108,23 +108,19 @@ void loadCosts(){
     ourSearchParams.revf_depth = atoi(optionsMap["revf_depth"].getValue().c_str());
 
     ourSearchParams.razoring_margin = atoi(optionsMap["razoring_margin"].getValue().c_str());
+*/
+
 
     ourSearchParams.lmr_init_a = atoi(optionsMap["lmr_init_a"].getValue().c_str()) / 100;
     ourSearchParams.lmr_init_div = atoi(optionsMap["lmr_init_div"].getValue().c_str()) / 100;
     ourSearchParams.lmr_depth_pow = atoi(optionsMap["lmr_depth_pow"].getValue().c_str()) / 100;
     ourSearchParams.lmr_number_pow = atoi(optionsMap["lmr_number_pow"].getValue().c_str()) / 100;
 
+/*
     ourSearchParams.lmp_start_base = atoi(optionsMap["lmp_start_base"].getValue().c_str()) / 100;
     ourSearchParams.lmp_start_impr = atoi(optionsMap["lmp_start_impr"].getValue().c_str()) / 100;
     ourSearchParams.lmp_multipl_base = atoi(optionsMap["lmp_multipl_base"].getValue().c_str()) / 100;
     ourSearchParams.lmp_multipl_impr = atoi(optionsMap["lmp_multipl_impr"].getValue().c_str()) / 100;
-
-/*
-Eval::SetupTuning(KNIGHT, );
-Eval::SetupTuning(BISHOP, atoi(optionsMap["cBishop"].getValue().c_str()));
-
-Eval::SetupTuning(ROOK, atoi(optionsMap["cRook"].getValue().c_str()));
-Eval::SetupTuning(QUEEN, atoi(optionsMap["cQueen"].getValue().c_str()));
 */
 
 
@@ -146,36 +142,44 @@ void initOptions() {
   // to change different parameters via communocation
   // with the engine.
 
-
-  optionsMap["asp_window"] =   Option(25, 10, 75, &loadCosts);
-  optionsMap["asp_delta"] =   Option(50, 10, 100, &loadCosts);
-  optionsMap["nmp_base"] =     Option(3, 2, 7, &loadCosts);
-  optionsMap["nmp_maxreduct"] = Option(4, 2, 7, &loadCosts);
+/*
+  optionsMap["asp_window"] =   Option(30, 10, 75, &loadCosts);
+  optionsMap["asp_delta"] =   Option(48, 10, 100, &loadCosts);
+  optionsMap["nmp_base"] =     Option(4, 2, 7, &loadCosts);
+  optionsMap["nmp_maxreduct"] = Option(5, 2, 7, &loadCosts);
   optionsMap["nmp_depthdiv"] =   Option(4, 2, 8, &loadCosts);
   optionsMap["nmp_delta_div"] =   Option(128, 64, 256, &loadCosts);
-  optionsMap["nmp_cond_base"] =     Option(120, 60, 200, &loadCosts);
-  optionsMap["nmp_cond_depth"] =    Option(20, 10, 30, &loadCosts);
-  optionsMap["prcut_beta_base"] =   Option(200, 50, 300, &loadCosts);
-  optionsMap["prcut_depth"] =   Option(5, 2, 8, &loadCosts);
-  optionsMap["see_q_base"] =     Option(51, 0, 120, &loadCosts);
-  optionsMap["see_q_depth"] =    Option(51, 0, 150, &loadCosts); // member to go negative
-  optionsMap["sing_search_start"] =   Option(8, 4, 10, &loadCosts);
-  optionsMap["delta_move_const"] =   Option(300, 50, 500, &loadCosts);
-  optionsMap["futil_move_const"] =     Option(250, 50, 500, &loadCosts);
-  optionsMap["revf_move_const"] =    Option(150, 25, 300, &loadCosts);
-  optionsMap["revf_impr_const"] =   Option(100, 25, 175, &loadCosts);
-  optionsMap["revf_depth"] =   Option(5, 3, 10, &loadCosts);
+  optionsMap["nmp_cond_base"] =     Option(118, 60, 200, &loadCosts);
+  optionsMap["nmp_cond_depth"] =    Option(21, 10, 30, &loadCosts);
+  optionsMap["prcut_beta_base"] =   Option(218, 50, 300, &loadCosts);
+  optionsMap["prcut_depth"] =   Option(4, 2, 8, &loadCosts);
+  optionsMap["see_q_base"] =     Option(48, 0, 120, &loadCosts);
+  optionsMap["see_q_depth"] =    Option(68, 0, 150, &loadCosts); // member to go negative
+  optionsMap["sing_search_start"] =   Option(5, 2, 8, &loadCosts);
+  optionsMap["delta_move_const"] =   Option(186, 50, 500, &loadCosts);
+  optionsMap["futil_move_const"] =     Option(232, 50, 500, &loadCosts);
+  optionsMap["revf_move_const"] =    Option(161, 25, 300, &loadCosts);
+  optionsMap["revf_impr_const"] =   Option(142, 25, 175, &loadCosts);
+  optionsMap["revf_depth"] =   Option(8, 3, 10, &loadCosts);
   optionsMap["razoring_margin"] =     Option(650, 100, 1000, &loadCosts);
+*/
+
+
 
   // member divide by 100
-  optionsMap["lmr_init_a"] =    Option(10, 0, 400, &loadCosts);
-  optionsMap["lmr_init_div"] =   Option(175, 0, 500, &loadCosts);
-  optionsMap["lmr_depth_pow"] =   Option(15, 5, 25, &loadCosts);
-  optionsMap["lmr_number_pow"] =     Option(15, 5, 25, &loadCosts);
-  optionsMap["lmp_start_base"] =    Option(150, 0, 300, &loadCosts);
-  optionsMap["lmp_start_impr"] =   Option(300, 0, 600, &loadCosts);
-  optionsMap["lmp_multipl_base"] =   Option(100, 0, 300, &loadCosts);
-  optionsMap["lmp_multipl_impr"] =     Option(200, 0, 600, &loadCosts);
+  optionsMap["lmr_init_a"] =    Option(57, 0, 400, &loadCosts);
+  optionsMap["lmr_init_div"] =   Option(249, 0, 500, &loadCosts);
+  optionsMap["lmr_depth_pow"] =   Option(10, 5, 25, &loadCosts);
+  optionsMap["lmr_number_pow"] =     Option(16, 5, 25, &loadCosts);
+
+/*
+  optionsMap["lmp_start_base"] =    Option(157, 0, 300, &loadCosts);
+  optionsMap["lmp_start_impr"] =   Option(351, 0, 600, &loadCosts);
+  optionsMap["lmp_multipl_base"] =   Option(171, 0, 300, &loadCosts);
+  optionsMap["lmp_multipl_impr"] =     Option(173, 0, 600, &loadCosts);
+*/
+
+
 
 
 

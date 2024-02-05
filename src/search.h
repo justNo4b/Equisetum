@@ -29,42 +29,49 @@
 
 
 struct SearchParms {
-   int asp_window = 25;
-   int asp_delta  = 50;
+    /*
+   int asp_window = 30;
+   int asp_delta  = 48;
 
-   int nmp_base = 3;
-   int nmp_maxreduct = 4;
+   int nmp_base = 4;
+   int nmp_maxreduct = 5;
    int nmp_depthdiv  = 4;
    int nmp_delta_div = 128;
-   int nmp_cond_base = 120;
-   int nmp_cond_depth = 20;
+   int nmp_cond_base = 118;
+   int nmp_cond_depth = 21;
 
-   int prcut_beta_base = 200;
-   int prcut_depth = 5;
+   int prcut_beta_base = 218;
+   int prcut_depth = 4;
 
-   int see_q_base = 51;
-   int see_q_depth = -51;
+   int see_q_base = 48;
+   int see_q_depth = -68;
 
-   int sing_search_start = 8;
+   int sing_search_start = 5;
 
-   int delta_move_const = 300;
-   int futil_move_const = 250;
+   int delta_move_const = 186;
+   int futil_move_const = 232;
 
-   int revf_move_const = 150;
-   int revf_impr_const = 100;
-   int revf_depth = 5;
+   int revf_move_const = 161;
+   int revf_impr_const = 142;
+   int revf_depth = 8;
 
-   int razoring_margin = 650;
+   int razoring_margin = 945;
+    */
 
-   double lmr_init_a = 0.1;
-   double lmr_init_div = 1.75;
-   double lmr_depth_pow = 0.15;
-   double lmr_number_pow = 0.15;
 
-   double lmp_start_base = 1.5;
-   double lmp_start_impr = 3.0;
-   double lmp_multipl_base = 1.0;
-   double lmp_multipl_impr = 2.0;
+   double lmr_init_a = 0.57;
+   double lmr_init_div = 2.49;
+   double lmr_depth_pow = 0.10;
+   double lmr_number_pow = 0.16;
+
+/*
+   double lmp_start_base = 1.57;
+   double lmp_start_impr = 3.51;
+   double lmp_multipl_base = 1.71;
+   double lmp_multipl_impr = 1.73;
+*/
+
+
 };
 
 
@@ -151,42 +158,42 @@ class Search {
   //search_constants
   //
 
-   int ASP_WINDOW = 25;
-   int ASP_DELTA  = 50;
+   int ASP_WINDOW = 30;
+   int ASP_DELTA  = 48;
 
-   int NMP_BASE = 3;
-   int NMP_MAXREDUCT = 4;
+   int NMP_BASE = 4;
+   int NMP_MAXREDUCT = 5;
    int NMP_DEPTHDIV  = 4;
    int NMP_DELTA_DIV = 128;
-   int NMP_COND_BASE = 120;
-   int NMP_COND_DEPTH = 20;
+   int NMP_COND_BASE = 118;
+   int NMP_COND_DEPTH = 21;
 
-   int PRCUT_BETA_BASE = 200;
-   int PRCUT_DEPTH = 5;
+   int PRCUT_BETA_BASE = 218;
+   int PRCUT_DEPTH = 4;
 
-   int SEE_Q_BASE = 51;
-   int SEE_Q_DEPTH = -51;
+   int SEE_Q_BASE = 48;
+   int SEE_Q_DEPTH = -68;
 
-   int SING_SEARCH_START = 8;
+   int SING_SEARCH_START = 5;
 
-   int DELTA_MOVE_CONST = 300;
-   int FUTIL_MOVE_CONST = 250;
+   int DELTA_MOVE_CONST = 186;
+   int FUTIL_MOVE_CONST = 232;
 
-   int REVF_MOVE_CONST = 150;
-   int REVF_IMPR_CONST = 100;
-   int REVF_DEPTH = 5;
+   int REVF_MOVE_CONST = 161;
+   int REVF_IMPR_CONST = 142;
+   int REVF_DEPTH = 8;
 
-   int RAZORING_MARGIN = 650;
+   int RAZORING_MARGIN = 945;
 
-   double LMR_INIT_A = 0.1;
-   double LMR_INIT_DIV = 1.75;
-   double LMR_DEPTH_POW = 0.15;
-   double LMR_NUMBER_POW = 0.15;
+   double LMR_INIT_A = 0.57;
+   double LMR_INIT_DIV = 2.49;
+   double LMR_DEPTH_POW = 0.10;
+   double LMR_NUMBER_POW = 0.16;
 
-   double LMP_START_BASE = 1.5;
-   double LMP_START_IMPR = 3.0;
-   double LMP_MULTIPL_BASE = 1.0;
-   double LMP_MULTIPL_IMPR = 2.0;
+   double LMP_START_BASE = 1.57;
+   double LMP_START_IMPR = 3.51;
+   double LMP_MULTIPL_BASE = 1.71;
+   double LMP_MULTIPL_IMPR = 1.73;
 
 
 
