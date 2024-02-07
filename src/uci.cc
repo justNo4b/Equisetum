@@ -36,6 +36,7 @@ std::thread     cThread[MAX_THREADS];
 
 SearchParms ourSearchParams;
 BoardParams ourBoardParams;
+Limits uci_timer;
 
 namespace {
 Book book;
@@ -83,6 +84,17 @@ void changeThreadsNumber(){
 
 
 void loadCosts(){
+
+uci_timer.width_a  = atoi(optionsMap["width_a"].getValue().c_str());
+uci_timer.width    = atoi(optionsMap["width"].getValue().c_str());
+uci_timer.t_move   = atoi(optionsMap["t_move"].getValue().c_str());
+uci_timer.c_move   = atoi(optionsMap["crit_move"].getValue().c_str());
+
+uci_timer.mtg_incr = atoi(optionsMap["mtg_cycl_incr"].getValue().c_str());
+uci_timer.nodes_max = atoi(optionsMap["nodes_max"].getValue().c_str());
+uci_timer.nodes_min = atoi(optionsMap["nodes_min"].getValue().c_str());
+uci_timer.nodes_div = atoi(optionsMap["nodes_div"].getValue().c_str());
+uci_timer.nodes_fact = atoi(optionsMap["nodes_fact"].getValue().c_str());
 
     ourSearchParams.asp_window = atoi(optionsMap["asp_window"].getValue().c_str());
     ourSearchParams.asp_delta  = atoi(optionsMap["asp_delta"].getValue().c_str());
@@ -210,6 +222,16 @@ void initOptions() {
   optionsMap["lmp_start_impr"] =   Option(351, 0, 600, &loadCosts);
   optionsMap["lmp_multipl_base"] =   Option(171, 0, 300, &loadCosts);
   optionsMap["lmp_multipl_impr"] =     Option(173, 0, 600, &loadCosts);
+
+  optionsMap["width_a"] =       Option(322, 100, 500, &loadCosts);
+  optionsMap["width"] =         Option(188, 50, 300, &loadCosts);
+  optionsMap["t_move"] =        Option(22, 8, 40, &loadCosts);
+  optionsMap["crit_move"] =     Option(26, 8, 40, &loadCosts);
+  optionsMap["mtg_cycl_incr"] = Option(5, 2, 30, &loadCosts);
+  optionsMap["nodes_max"] =     Option(85, 50, 100, &loadCosts);
+  optionsMap["nodes_min"] =     Option(25, 1, 50, &loadCosts);
+  optionsMap["nodes_fact"] =    Option(50, 25, 75, &loadCosts);
+  optionsMap["nodes_div"] =     Option(50, 25, 75, &loadCosts);
 
 }
 
