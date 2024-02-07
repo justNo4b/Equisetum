@@ -36,9 +36,10 @@ extern HASH           * myHASH;
 void Search::init_LMR_array(SearchParms sp){
   // Init Tuning Shit
 
-/*
+
     ASP_WINDOW = sp.asp_window;
     ASP_DELTA  = sp.asp_delta;
+    ASP_DEPTH  = sp.asp_depth;
 
     NMP_BASE = sp.nmp_base;
     NMP_MAXREDUCT = sp.nmp_maxreduct;
@@ -62,14 +63,20 @@ void Search::init_LMR_array(SearchParms sp){
     REVF_DEPTH = sp.revf_depth;
 
     RAZORING_MARGIN = sp.razoring_margin;
-*/
+
     DELTA_MOVE_CONST = sp.delta_move_const;
     SEE_Q_BASE = sp.see_q_base;
     SEE_Q_DEPTH = sp.see_q_depth;
 
 
+    CMH_BASE = sp.cmh_base;
+    CMH_DEPTH = sp.cmh_depth;
+    LMP_HIST_LIMIT = sp.lmp_hist_limit;
+    PM_HIST_REDUCTION_LIMIT = sp.pm_hist_reduction_limit;
+    M_HIST_LMR_DIV = sp.m_hist_lmr_div;
+    CM_HIST_LMR_DIV = sp.cm_hist_lmr_div;
+    PM_HIST_MALUS_FACTOR = sp.pm_hist_malus_factor;
 
-/*
     LMR_INIT_A = sp.lmr_init_a;
     LMR_INIT_DIV = sp.lmr_init_div;
     LMR_DEPTH_POW = sp.lmr_depth_pow;
@@ -79,7 +86,7 @@ void Search::init_LMR_array(SearchParms sp){
     LMP_START_IMPR = sp.lmp_start_impr;
     LMP_MULTIPL_BASE = sp.lmp_multipl_base;
     LMP_MULTIPL_IMPR = sp.lmp_multipl_impr;
-*/
+
 
 
 
@@ -135,7 +142,7 @@ void Search::iterDeep() {
 
         int aspAlpha = LOST_SCORE;
         int aspBeta  =-LOST_SCORE;
-        if (currDepth > 6){
+        if (currDepth >= ASP_DEPTH){
             aspAlpha = _bestScore - aspWindow;
             aspBeta  = _bestScore + aspWindow;
         }
@@ -598,7 +605,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
       // 5.1 LATE MOVE PRUNING
       // If we made many quiet moves in the position already
       // we suppose other moves wont improve our situation
-      if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= 0)) break;
+      if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= LMP_HIST_LIMIT)) break;
 
       // 5.2. SEE pruning of quiet moves
       // At shallow depth prune highlyish -negative SEE-moves
@@ -609,7 +616,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
       // Prune quiet moves with poor CMH on the tips of the tree
-      if (depth <= 3 && isQuiet && cmHistory <= (-4096 * depth + 4096)) continue;
+      if (depth <= 3 && isQuiet && cmHistory <= ( CMH_DEPTH * depth + CMH_BASE)) continue;
     }
 
     Board movedBoard = board;
@@ -704,7 +711,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 
           // Reduce less if move on the previous ply was bad
           // Ie hystorycally bad quiet, see- capture or underpromotion
-          reduction -= pMoveScore < -HALFMAX_HISTORY_SCORE;
+          reduction -= pMoveScore < PM_HIST_REDUCTION_LIMIT;
 
           // if we are improving, reduce a bit less (from Weiss)
           reduction -= improving;
@@ -716,8 +723,8 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
           reduction -= singNode;
 
           // reduce more/less based on the hitory
-          reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
-          reduction -= cmHistory  / HALFMAX_HISTORY_SCORE;
+          reduction -= moveHistory / M_HIST_LMR_DIV;
+          reduction -= cmHistory  / CM_HIST_LMR_DIV;
 
           // reduce less when move is a Queen promotion
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
@@ -801,7 +808,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 
         }else{
           // Beta was not beaten and we dont improve alpha in this case we lower our search history values
-          int dBonus = std::max(0, depth - (nodeEval < alpha) - (!ttNode && depth >= 4) + (pMoveScore < -HALFMAX_HISTORY_SCORE) + cutNode);
+          int dBonus = std::max(0, depth - (nodeEval < alpha) - (!ttNode && depth >= 4) + (pMoveScore < PM_HIST_MALUS_FACTOR) + cutNode);
           if (isQuiet){
             _orderingInfo.decrementHistory(board.getActivePlayer(), move.getFrom(), move.getTo(), dBonus);
             _orderingInfo.decrementCounterHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo(), dBonus);

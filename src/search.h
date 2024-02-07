@@ -29,9 +29,10 @@
 
 
 struct SearchParms {
-    /*
+
    int asp_window = 30;
    int asp_delta  = 48;
+   int asp_depth  = 7;
 
    int nmp_base = 4;
    int nmp_maxreduct = 5;
@@ -55,15 +56,22 @@ struct SearchParms {
    int revf_depth = 8;
 
    int razoring_margin = 945;
-    */
+
 
    int delta_move_const = 186;
    int see_q_base = 48;
    int see_q_depth = -68;
 
 
+   int cmh_depth = -4096;
+   int cmh_base  = 4096;
+   int lmp_hist_limit = 0;
+   int pm_hist_reduction_limit = -8192;
+   int m_hist_lmr_div = 8192;
+   int cm_hist_lmr_div = 8192;
+   int pm_hist_malus_factor = -8192;
 
-/*
+
    double lmr_init_a = 0.57;
    double lmr_init_div = 2.49;
    double lmr_depth_pow = 0.10;
@@ -72,7 +80,7 @@ struct SearchParms {
    double lmp_start_impr = 3.51;
    double lmp_multipl_base = 1.71;
    double lmp_multipl_impr = 1.73;
-*/
+
 
 
 };
@@ -157,6 +165,7 @@ class Search {
 
    int ASP_WINDOW = 30;
    int ASP_DELTA  = 48;
+   int ASP_DEPTH  = 7;
 
    int NMP_BASE = 4;
    int NMP_MAXREDUCT = 5;
@@ -181,6 +190,14 @@ class Search {
    int REVF_DEPTH = 8;
 
    int RAZORING_MARGIN = 945;
+
+   int CMH_DEPTH = -4096;
+   int CMH_BASE  = 4096;
+   int LMP_HIST_LIMIT = 0;
+   int PM_HIST_REDUCTION_LIMIT = -8192;
+   int M_HIST_LMR_DIV = 8192;
+   int CM_HIST_LMR_DIV = 8192;
+   int PM_HIST_MALUS_FACTOR = -8192;
 
    double LMR_INIT_A = 0.57;
    double LMR_INIT_DIV = 2.49;
