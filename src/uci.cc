@@ -286,18 +286,17 @@ void pickBestMove() {
 
 void go(std::istringstream &is) {
   std::string token;
-  Limits limits;
 
   while (is >> token) {
-    if (token == "depth") is >> limits.depth;
-    else if (token == "infinite") limits.infinite = true;
-    else if (token == "movetime") is >> limits.moveTime;
-    else if (token == "nodes") is >> limits.nodes;
-    else if (token == "wtime") is >> limits.time[WHITE];
-    else if (token == "btime") is >> limits.time[BLACK];
-    else if (token == "winc") is >> limits.increment[WHITE];
-    else if (token == "binc") is >> limits.increment[BLACK];
-    else if (token == "movestogo") is >> limits.movesToGo;
+    if (token == "depth") is >> uci_timer.depth;
+    else if (token == "infinite") uci_timer.infinite = true;
+    else if (token == "movetime") is >> uci_timer.moveTime;
+    else if (token == "nodes") is >> uci_timer.nodes;
+    else if (token == "wtime") is >> uci_timer.time[WHITE];
+    else if (token == "btime") is >> uci_timer.time[BLACK];
+    else if (token == "winc") is >> uci_timer.increment[WHITE];
+    else if (token == "binc") is >> uci_timer.increment[BLACK];
+    else if (token == "movestogo") is >> uci_timer.movesToGo;
   }
 
     board.setSeeValues(ourBoardParams);
@@ -306,7 +305,7 @@ void go(std::istringstream &is) {
     for (int i = 1; i < myTHREADSCOUNT; i++){
       // copy board stuff
       Board b = board;
-      Limits l = limits;
+      Limits l = uci_timer;
       Hist h = positionHistory;
 
       // clear killers for every ordering
@@ -318,7 +317,7 @@ void go(std::istringstream &is) {
   }
 
   myOrdering->clearKillers();
-  search = std::make_shared<Search>(board, limits, positionHistory, myOrdering, ourSearchParams);
+  search = std::make_shared<Search>(board, uci_timer, positionHistory, myOrdering, ourSearchParams);
 
   std::thread searchThread(&pickBestMove);
   searchThread.detach();
