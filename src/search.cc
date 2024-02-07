@@ -76,6 +76,7 @@ void Search::init_LMR_array(SearchParms sp){
     M_HIST_LMR_DIV = sp.m_hist_lmr_div;
     CM_HIST_LMR_DIV = sp.cm_hist_lmr_div;
     PM_HIST_MALUS_FACTOR = sp.pm_hist_malus_factor;
+    CMH_PRUNING_DEPTH = sp.cmh_pruning_depth;
 
     LMR_INIT_A = sp.lmr_init_a;
     LMR_INIT_DIV = sp.lmr_init_div;
@@ -616,7 +617,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
       // Prune quiet moves with poor CMH on the tips of the tree
-      if (depth <= 3 && isQuiet && cmHistory <= ( CMH_DEPTH * depth + CMH_BASE)) continue;
+      if (depth <= CMH_PRUNING_DEPTH && isQuiet && cmHistory <= ( CMH_DEPTH * depth + CMH_BASE)) continue;
     }
 
     Board movedBoard = board;

@@ -70,7 +70,7 @@ struct SearchParms {
    int m_hist_lmr_div = 8192;
    int cm_hist_lmr_div = 8192;
    int pm_hist_malus_factor = -8192;
-
+   int cmh_pruning_depth = 3;
 
    double lmr_init_a = 0.57;
    double lmr_init_div = 2.49;
@@ -193,6 +193,7 @@ class Search {
 
    int CMH_DEPTH = -4096;
    int CMH_BASE  = 4096;
+   int CMH_PRUNING_DEPTH = 3;
    int LMP_HIST_LIMIT = 0;
    int PM_HIST_REDUCTION_LIMIT = -8192;
    int M_HIST_LMR_DIV = 8192;

@@ -83,9 +83,10 @@ void changeThreadsNumber(){
 
 
 void loadCosts(){
-/*
+
     ourSearchParams.asp_window = atoi(optionsMap["asp_window"].getValue().c_str());
     ourSearchParams.asp_delta  = atoi(optionsMap["asp_delta"].getValue().c_str());
+    ourSearchParams.asp_depth  = atoi(optionsMap["asp_depth"].getValue().c_str());
 
     ourSearchParams.nmp_base = atoi(optionsMap["nmp_base"].getValue().c_str());
     ourSearchParams.nmp_maxreduct = atoi(optionsMap["nmp_maxreduct"].getValue().c_str());
@@ -115,7 +116,7 @@ void loadCosts(){
     ourSearchParams.lmr_init_div = atoi(optionsMap["lmr_init_div"].getValue().c_str()) / 100;
     ourSearchParams.lmr_depth_pow = atoi(optionsMap["lmr_depth_pow"].getValue().c_str()) / 100;
     ourSearchParams.lmr_number_pow = atoi(optionsMap["lmr_number_pow"].getValue().c_str()) / 100;
-*/
+
     ourSearchParams.delta_move_const = atoi(optionsMap["delta_move_const"].getValue().c_str());
     ourSearchParams.see_q_base = atoi(optionsMap["see_q_base"].getValue().c_str());
     ourSearchParams.see_q_depth = -1 * atoi(optionsMap["see_q_depth"].getValue().c_str());
@@ -127,14 +128,20 @@ void loadCosts(){
     ourBoardParams.qSee = atoi(optionsMap["queenSee"].getValue().c_str());
 
 
-/*
+
     ourSearchParams.lmp_start_base = atoi(optionsMap["lmp_start_base"].getValue().c_str()) / 100;
     ourSearchParams.lmp_start_impr = atoi(optionsMap["lmp_start_impr"].getValue().c_str()) / 100;
     ourSearchParams.lmp_multipl_base = atoi(optionsMap["lmp_multipl_base"].getValue().c_str()) / 100;
     ourSearchParams.lmp_multipl_impr = atoi(optionsMap["lmp_multipl_impr"].getValue().c_str()) / 100;
-*/
 
-
+   ourSearchParams.cmh_depth = -1 * atoi(optionsMap["cmh_depth"].getValue().c_str());
+   ourSearchParams.cmh_base  = atoi(optionsMap["cmh_base"].getValue().c_str());
+   ourSearchParams.lmp_hist_limit = atoi(optionsMap["lmp_hist_limit"].getValue().c_str()) - 4096;
+   ourSearchParams.pm_hist_reduction_limit = -1 * atoi(optionsMap["pm_hist_reduction_limit"].getValue().c_str());
+   ourSearchParams.m_hist_lmr_div = atoi(optionsMap["m_hist_lmr_div"].getValue().c_str());
+   ourSearchParams.cm_hist_lmr_div = atoi(optionsMap["cm_hist_lmr_div"].getValue().c_str());
+   ourSearchParams.pm_hist_malus_factor = -1 * atoi(optionsMap["pm_hist_malus_factor"].getValue().c_str());
+   ourSearchParams.cmh_pruning_depth = atoi(optionsMap["cmh_pruning_depth"].getValue().c_str());
 }
 
 
@@ -153,9 +160,11 @@ void initOptions() {
   // to change different parameters via communocation
   // with the engine.
 
-/*
+
   optionsMap["asp_window"] =   Option(30, 10, 75, &loadCosts);
   optionsMap["asp_delta"] =   Option(48, 10, 100, &loadCosts);
+  optionsMap["asp_depth"] =   Option(7, 3, 12, &loadCosts);
+
   optionsMap["nmp_base"] =     Option(4, 2, 7, &loadCosts);
   optionsMap["nmp_maxreduct"] = Option(5, 2, 7, &loadCosts);
   optionsMap["nmp_depthdiv"] =   Option(4, 2, 8, &loadCosts);
@@ -172,7 +181,7 @@ void initOptions() {
   optionsMap["revf_impr_const"] =   Option(142, 25, 175, &loadCosts);
   optionsMap["revf_depth"] =   Option(8, 3, 10, &loadCosts);
   optionsMap["razoring_margin"] =     Option(650, 100, 1000, &loadCosts);
-*/
+
   optionsMap["see_q_base"] =     Option(48, 0, 120, &loadCosts);
   optionsMap["see_q_depth"] =    Option(68, 0, 150, &loadCosts); // member to go negative
   optionsMap["delta_move_const"] =   Option(186, 50, 500, &loadCosts);
@@ -182,25 +191,25 @@ void initOptions() {
   optionsMap["bishopSee"] =   Option(300, 150, 450, &loadCosts);
   optionsMap["rookSee"] =     Option(500, 400, 600, &loadCosts);
   optionsMap["queenSee"] =     Option(1000, 800, 1200, &loadCosts);
-/*
+
+  optionsMap["cmh_depth"] =     Option(4096, 0, 10000, &loadCosts); // member to go negative
+  optionsMap["cmh_base"] =     Option(4096, 0, 10000, &loadCosts);
+  optionsMap["lmp_hist_limit"] =     Option(4096, 0, 10000, &loadCosts); // ????
+  optionsMap["pm_hist_reduction_limit"] =     Option(8192, 4000, 16000, &loadCosts);// member to go negative
+  optionsMap["m_hist_lmr_div"] =     Option(8192, 4000, 16000, &loadCosts);
+  optionsMap["cm_hist_lmr_div"] =     Option(8192, 4000, 16000, &loadCosts);
+  optionsMap["pm_hist_malus_factor"] =     Option(8192, 4000, 16000, &loadCosts); // member to go negative
+  optionsMap["cmh_pruning_depth"] =     Option(3, 1, 8, &loadCosts);
+
   // member divide by 100
   optionsMap["lmr_init_a"] =    Option(57, 0, 400, &loadCosts);
   optionsMap["lmr_init_div"] =   Option(249, 0, 500, &loadCosts);
   optionsMap["lmr_depth_pow"] =   Option(10, 5, 25, &loadCosts);
   optionsMap["lmr_number_pow"] =     Option(16, 5, 25, &loadCosts);
-*/
-
-
-/*
   optionsMap["lmp_start_base"] =    Option(157, 0, 300, &loadCosts);
   optionsMap["lmp_start_impr"] =   Option(351, 0, 600, &loadCosts);
   optionsMap["lmp_multipl_base"] =   Option(171, 0, 300, &loadCosts);
   optionsMap["lmp_multipl_impr"] =     Option(173, 0, 600, &loadCosts);
-*/
-
-
-
-
 
 }
 
