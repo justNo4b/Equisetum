@@ -177,36 +177,36 @@ void initOptions() {
   optionsMap["asp_delta"] =   Option(48, 10, 100, &loadCosts);
   optionsMap["asp_depth"] =   Option(7, 3, 12, &loadCosts);
 
-  optionsMap["nmp_base"] =     Option(4, 2, 7, &loadCosts);
-  optionsMap["nmp_maxreduct"] = Option(5, 2, 7, &loadCosts);
+  optionsMap["nmp_base"] =     Option(4, 2, 8, &loadCosts);
+  optionsMap["nmp_maxreduct"] = Option(5, 2, 10, &loadCosts);
   optionsMap["nmp_depthdiv"] =   Option(4, 2, 8, &loadCosts);
-  optionsMap["nmp_delta_div"] =   Option(128, 64, 256, &loadCosts);
-  optionsMap["nmp_cond_base"] =     Option(118, 60, 200, &loadCosts);
-  optionsMap["nmp_cond_depth"] =    Option(21, 10, 30, &loadCosts);
-  optionsMap["prcut_beta_base"] =   Option(218, 50, 300, &loadCosts);
+  optionsMap["nmp_delta_div"] =   Option(128, 64, 512, &loadCosts);
+  optionsMap["nmp_cond_base"] =     Option(118, 60, 250, &loadCosts);
+  optionsMap["nmp_cond_depth"] =    Option(21, 10, 40, &loadCosts);
+  optionsMap["prcut_beta_base"] =   Option(218, 100, 350, &loadCosts);
   optionsMap["prcut_depth"] =   Option(4, 2, 8, &loadCosts);
 
   optionsMap["sing_search_start"] =   Option(5, 2, 8, &loadCosts);
 
   optionsMap["futil_move_const"] =     Option(232, 50, 500, &loadCosts);
   optionsMap["revf_move_const"] =    Option(161, 25, 300, &loadCosts);
-  optionsMap["revf_impr_const"] =   Option(142, 25, 175, &loadCosts);
-  optionsMap["revf_depth"] =   Option(8, 3, 10, &loadCosts);
-  optionsMap["razoring_margin"] =     Option(650, 100, 1000, &loadCosts);
+  optionsMap["revf_impr_const"] =   Option(142, 25, 300, &loadCosts);
+  optionsMap["revf_depth"] =   Option(8, 4, 12, &loadCosts);
+  optionsMap["razoring_margin"] =     Option(945, 600, 1500, &loadCosts);
 
   optionsMap["see_q_base"] =     Option(48, 0, 120, &loadCosts);
   optionsMap["see_q_depth"] =    Option(68, 0, 150, &loadCosts); // member to go negative
   optionsMap["delta_move_const"] =   Option(186, 50, 500, &loadCosts);
 
-  optionsMap["pawnSee"] =    Option(100, 25, 200, &loadCosts);
+  optionsMap["pawnSee"] =    Option(100, 50, 250, &loadCosts);
   optionsMap["knightSee"] =   Option(300, 150, 450, &loadCosts);
   optionsMap["bishopSee"] =   Option(300, 150, 450, &loadCosts);
-  optionsMap["rookSee"] =     Option(500, 400, 600, &loadCosts);
+  optionsMap["rookSee"] =     Option(500, 400, 700, &loadCosts);
   optionsMap["queenSee"] =     Option(1000, 800, 1200, &loadCosts);
 
   optionsMap["cmh_depth"] =     Option(4096, 0, 10000, &loadCosts); // member to go negative
   optionsMap["cmh_base"] =     Option(4096, 0, 10000, &loadCosts);
-  optionsMap["lmp_hist_limit"] =     Option(4096, 0, 10000, &loadCosts); // ????
+  optionsMap["lmp_hist_limit"] =     Option(4096, 0, 16000, &loadCosts); // ????
   optionsMap["pm_hist_reduction_limit"] =     Option(8192, 4000, 16000, &loadCosts);// member to go negative
   optionsMap["m_hist_lmr_div"] =     Option(8192, 4000, 16000, &loadCosts);
   optionsMap["cm_hist_lmr_div"] =     Option(8192, 4000, 16000, &loadCosts);
@@ -227,7 +227,7 @@ void initOptions() {
   optionsMap["width"] =         Option(188, 50, 300, &loadCosts);
   optionsMap["t_move"] =        Option(22, 8, 40, &loadCosts);
   optionsMap["crit_move"] =     Option(26, 8, 40, &loadCosts);
-  optionsMap["mtg_cycl_incr"] = Option(5, 2, 30, &loadCosts);
+  optionsMap["mtg_cycl_incr"] = Option(5, 2, 10, &loadCosts);
   optionsMap["nodes_max"] =     Option(85, 50, 100, &loadCosts);
   optionsMap["nodes_min"] =     Option(25, 1, 50, &loadCosts);
   optionsMap["nodes_fact"] =    Option(50, 25, 75, &loadCosts);
