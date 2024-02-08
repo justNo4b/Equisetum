@@ -297,7 +297,7 @@ class Board {
   /**
    * @brief Array of Piece costs used for SEE
    */
-  int _SEE_cost[6] = {112, 517, 341, 283, 1012, 10000};
+  int _SEE_cost[6] = {100, 500, 300, 300, 1000, 10000};
 
   int _phase;
 
