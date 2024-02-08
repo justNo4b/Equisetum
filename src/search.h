@@ -103,8 +103,8 @@ class Search {
 
   //search_constants
   //
-  const int NULL_MOVE_REDUCTION = 4;
-  const int DELTA_MOVE_CONST = 193;
+  const int NULL_MOVE_REDUCTION = 3;
+  const int DELTA_MOVE_CONST = 210;
 
   const int REVF_MOVE_CONST = 150;
   const int RAZORING_MARGIN = 958;
