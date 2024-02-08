@@ -22,6 +22,7 @@
 
 MoveGen::MoveGen(const Board *board, bool isCaptureGenerated, MoveList * ml) {
   _moves = ml;
+  setBoard(board, isCaptureGenerated);
 }
 
 MoveGen::MoveGen(MoveList * ml) {
