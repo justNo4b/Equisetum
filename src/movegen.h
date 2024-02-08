@@ -37,12 +37,12 @@ class MoveGen {
    * @param board Board to generate moves for.
    * @param isCaptureGenerated if true, we generate only Captures (we are in QSearch)
    */
-  MoveGen(const Board &board, bool isCaptureGenerated);
+  MoveGen(const Board *board, bool isCaptureGenerated, MoveList *);
 
   /**
    * @brief Constructs a new MoveGen for an empty board.
    */
-  MoveGen();
+  MoveGen(MoveList *);
 
   /**
    * @brief Sets the board for this MoveGen to the specified board and generates moves for it.
@@ -50,7 +50,7 @@ class MoveGen {
    * @param board Board to set and generate moves for
    * @param isCaptureGenerated if true, we generate only Captures (we are in QSearch)
    */
-  void setBoard(const Board &board, bool isCaptureGenerated);
+  void setBoard(const Board *board, bool isCaptureGenerated);
 
 
   void initCapArray();
@@ -66,16 +66,7 @@ class MoveGen {
   /**
    * @brief A vector containing generated pseudo-legal moves
    */
-  MoveList _moves;
-
-  /**
-   * @brief Size of _moves to pre-reserve before generating moves.
-   *
-   * At the current time 218 seems to be an upper bound on the maximum number
-   * of moves from any one position.
-   */
-  static const int MOVELIST_RESERVE_SIZE = 218;
-  static const int MOVELIST_RESERVE_SIZE_CAPS = 32;
+    MoveList * _moves;
 
   /**
    * @brief Generates pseudo-legal moves for the active player of the given board
@@ -84,7 +75,7 @@ class MoveGen {
    *
    * @param board Board to generate moves for
    */
-  void _genMoves(const Board &board);
+  void _genMoves(const Board *board);
 
  /**
    * @brief Generates pseudo-legal captures for the active player of the given board
@@ -93,14 +84,14 @@ class MoveGen {
    *
    * @param board Board to generate moves for
    */
-  void _genCaptures(const Board &board);
+  void _genCaptures(const Board *board);
 
   /**
    * @brief Populates the _legalMoves vector with moves from _moves that are legal.
    *
    * @param board Board to check legality of moves with.
    */
-  void _genLegalMoves(const Board &board);
+  void _genLegalMoves(const Board *board);
 
   /**
    * @brief Convenience function to generate pawn promotions.
@@ -122,9 +113,9 @@ class MoveGen {
    * These functions generate the four types of pawn moves for white for a given board.
    * @{
    */
-  inline void _genPawnMoves(const Board &, Color color);
-  inline void _genPawnAttacks(const Board &, Color color);
-  inline void _getPromQonly(const Board &, Color color);
+  inline void _genPawnMoves(const Board *, Color color);
+  inline void _genPawnAttacks(const Board *, Color color);
+  inline void _getPromQonly(const Board *, Color color);
   /**@}*/
 
   /**
@@ -134,11 +125,11 @@ class MoveGen {
    * generate moves for and a bitboard of attackable pieces.
    *
    */
-  void _genKingMoves(const Board &, Color, U64, U64);
-  void _genKnightMoves(const Board &, U64, U64);
-  void _genBishopMoves(const Board &, U64, U64);
-  void _genRookMoves(const Board &, U64, U64);
-  void _genQueenMoves(const Board &, U64, U64);
+  void _genKingMoves(const Board *, Color, U64, U64);
+  void _genKnightMoves(const Board *, U64, U64);
+  void _genBishopMoves(const Board *, U64, U64);
+  void _genRookMoves(const Board *, U64, U64);
+  void _genQueenMoves(const Board *, U64, U64);
   /**@}*/
 
     /**
@@ -148,11 +139,11 @@ class MoveGen {
    * generate moves for and a bitboard of attackable pieces.
    *
    */
-  inline void _genKingCaps(const Board &, U64, U64);
-  inline void _genKnightCaps(const Board &, U64, U64);
-  inline void _genBishopCaps(const Board &, U64, U64);
-  inline void _genRookCaps(const Board &, U64, U64);
-  inline void _genQueenCaps(const Board &, U64, U64);
+  inline void _genKingCaps(const Board *, U64, U64);
+  inline void _genKnightCaps(const Board *, U64, U64);
+  inline void _genBishopCaps(const Board *, U64, U64);
+  inline void _genRookCaps(const Board *, U64, U64);
+  inline void _genQueenCaps(const Board *, U64, U64);
   /**@}*/
 
   /**
@@ -168,7 +159,7 @@ class MoveGen {
    * @param moves      Bitboard containing possible destination squares
    * @param attackable Bitboard containing attackable pieces for this move
    */
-  void _addMoves(const Board &, int, PieceType, U64, U64);
+  void _addMoves(const Board *, int, PieceType, U64, U64);
 
     /**
    * @brief Convenience function to add Captures from a bitboard of generated moves.
@@ -183,7 +174,7 @@ class MoveGen {
    * @param moves      Bitboard containing possible destination squares
    * @param attackable Bitboard containing attackable pieces for this move
    */
-  inline void _addCaps(const Board &, int, PieceType, U64, U64);
+  inline void _addCaps(const Board *, int, PieceType, U64, U64);
 };
 
 #endif
