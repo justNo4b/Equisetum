@@ -34,8 +34,19 @@ enum UpdateType{
 
 struct UpdData{
     UpdateType type;
-    int additions[4];
-    int substractions[4];
+
+    Color color;
+    PieceType movingPiece;
+    PieceType capturedPiece;
+    PieceType promotedPiece;
+
+    unsigned int from;
+    unsigned int to;
+
+    unsigned int fromRook;
+    unsigned int toRook;
+
+
 
     // init
 };
@@ -46,12 +57,22 @@ class NNstack
 private:
 
     NNueEvaluation _nnstack [MAX_INT_PLY * 2];
-    int            curr_size = 0;
+    int            _curr_size = 0;
+
+    UpdData _updSchedule;
+
 
 
     /* data */
 public:
-    NNstack(/* args */);
+
+    NNstack();
+    NNstack(const Board &board);
+
+    void performUpdate();
+    void scheduleUpdate(UpdateType, Color, PieceType=KING, PieceType=KING, PieceType=KING, unsigned int,  unsigned int, unsigned int = a1, unsigned int = a1);
+
+    int evaluate(Color);
 
 
 

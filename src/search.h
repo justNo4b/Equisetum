@@ -24,6 +24,7 @@
 #include "transptable.h"
 #include "orderinginfo.h"
 #include "timer.h"
+#include "nnstack.h"
 #include <chrono>
 #include <atomic>
 
@@ -136,6 +137,8 @@ class Search {
    * @brief Initial board being used in this search.
    */
   Board _initialBoard;
+
+  NNstack _accumulator;
 
   /**
    * @brief True if UCI will be logged to standard output during the search.

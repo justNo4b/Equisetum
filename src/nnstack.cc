@@ -15,3 +15,68 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
+#include "defs.h"
+#include "nnstack.h"
+#include "nnue.h"
+#include "board.h"
+
+NNstack::NNstack(){
+    Board b = Board();
+    _curr_size  = 0;
+    _nnstack[_curr_size] = NNueEvaluation(b);
+}
+
+
+NNstack::NNstack(const Board &board){
+    _curr_size  = 0;
+    _nnstack[_curr_size] = NNueEvaluation(board);
+}
+
+
+void NNstack::performUpdate(){
+    _nnstack[_curr_size + 1] = _nnstack[_curr_size];
+
+    switch (_updSchedule.type)
+    {
+    case NN_MOVE:
+        _nnstack[_curr_size].movePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.from, _updSchedule.to);
+        break;
+    case NN_PROMO:
+        _nnstack[_curr_size].promotePiece(_updSchedule.color, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        break;
+    case NN_CAPTURE:
+        _nnstack[_curr_size].capturePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.capturedPiece, _updSchedule.from, _updSchedule.to);
+        break;
+    case NN_CAPPROMO:
+        _nnstack[_curr_size].cappromPiece(_updSchedule.color, _updSchedule.capturedPiece, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        break;
+    case NN_CASTLE:
+        _nnstack[_curr_size].castleMove(_updSchedule.color, _updSchedule.from, _updSchedule.to, _updSchedule.fromRook, _updSchedule.toRook);
+        break;
+    case NN_ENPASS:
+        _nnstack[_curr_size].enpassMove(_updSchedule.color, _updSchedule.from, _updSchedule.to);
+        break;
+    default:
+        break;
+    }
+
+}
+
+
+void NNstack::scheduleUpdate(UpdateType upd, Color c, PieceType moving, PieceType captured, PieceType promoted, unsigned int from,  unsigned int to, unsigned int fromR, unsigned int toR){
+    _updSchedule.type = upd;
+    _updSchedule.color = c;
+    _updSchedule.movingPiece = moving;
+    _updSchedule.capturedPiece = captured;
+    _updSchedule.promotedPiece = promoted;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
+    _updSchedule.fromRook = fromR;
+    _updSchedule.toRook = toR;
+}
+
+int NNstack::evaluate(Color color){
+    return _nnstack[_curr_size].evaluate(color);
+
+}

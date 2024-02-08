@@ -20,6 +20,7 @@
 #include "eval.h"
 #include "movepicker.h"
 #include "searchdata.h"
+#include "nnstack.h"
 #include <cstring>
 #include <thread>
 #include <algorithm>
@@ -66,6 +67,7 @@ Search::Search(const Board &board, Limits limits, Hist positionHistory, Ordering
   _sStack = SEARCH_Data();
   _posHist = positionHistory;
   init_LMR_array();
+  _accumulator = NNstack(_initialBoard);
 }
 
 void Search::iterDeep() {
