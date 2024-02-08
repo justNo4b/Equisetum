@@ -70,7 +70,12 @@ public:
     NNstack(const Board &board);
 
     void performUpdate();
-    void scheduleUpdate(UpdateType, Color, PieceType=KING, PieceType=KING, PieceType=KING, unsigned int,  unsigned int, unsigned int = a1, unsigned int = a1);
+    void scheduleUpdateMove(Color, PieceType, unsigned int, unsigned int);
+    void scheduleUpdatePromote(Color, PieceType, unsigned int, unsigned int);
+    void scheduleUpdateCapprom(Color, PieceType, PieceType, unsigned int, unsigned int);
+    void scheduleUpdateCapture(Color, PieceType, PieceType, unsigned int, unsigned int);
+    void scheduleUpdateCastle(Color, unsigned int, unsigned int, unsigned int, unsigned int);
+    void scheduleUpdateEnpass(Color, unsigned int, unsigned int);
 
     int evaluate(Color);
 

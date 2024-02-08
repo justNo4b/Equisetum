@@ -278,7 +278,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
     Move move = movePicker.getNext();
 
     Board movedBoard = board;
-    bool isLegal = movedBoard.doMove(move);
+    bool isLegal = movedBoard.doMove(move, &_accumulator);
 
     if (isLegal){
         myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
@@ -496,7 +496,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 
             // make a move
             Board movedBoard = board;
-            bool isLegal = movedBoard.doMove(move);
+            bool isLegal = movedBoard.doMove(move, &_accumulator);
             if (isLegal){
                 // see if qSearch holds
                 int qScore = - _qSearch(movedBoard, -pcBeta, -pcBeta + 1);
@@ -556,7 +556,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
     }
 
     Board movedBoard = board;
-    bool isLegal = movedBoard.doMove(move);
+    bool isLegal = movedBoard.doMove(move, &_accumulator);
     if (isLegal){
         myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
         bool doLMR = false;
@@ -835,7 +835,7 @@ int Search::_qSearch(const Board &board, int alpha, int beta) {
       continue;;
 
     Board movedBoard = board;
-    bool isLegal = movedBoard.doMove(move);
+    bool isLegal = movedBoard.doMove(move, &_accumulator);
 
     if (isLegal){
           myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());

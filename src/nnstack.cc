@@ -64,16 +64,54 @@ void NNstack::performUpdate(){
 }
 
 
-void NNstack::scheduleUpdate(UpdateType upd, Color c, PieceType moving, PieceType captured, PieceType promoted, unsigned int from,  unsigned int to, unsigned int fromR, unsigned int toR){
-    _updSchedule.type = upd;
+void NNstack::scheduleUpdateMove(Color c, PieceType moving, unsigned int from, unsigned int to){
+    _updSchedule.type = NN_MOVE;
     _updSchedule.color = c;
     _updSchedule.movingPiece = moving;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
+}
+
+void NNstack::scheduleUpdatePromote(Color c, PieceType promoted, unsigned int from, unsigned int to){
+    _updSchedule.type = NN_PROMO;
+    _updSchedule.color = c;
+    _updSchedule.promotedPiece = promoted;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
+}
+
+void NNstack::scheduleUpdateCapprom(Color c, PieceType captured, PieceType promoted, unsigned int from, unsigned int to){
+    _updSchedule.type = NN_CAPPROMO;
+    _updSchedule.color = c;
     _updSchedule.capturedPiece = captured;
     _updSchedule.promotedPiece = promoted;
     _updSchedule.from = from;
     _updSchedule.to = to;
+}
+
+void NNstack::scheduleUpdateCapture(Color c, PieceType moving, PieceType captured, unsigned int from, unsigned int to){
+    _updSchedule.type = NN_CAPTURE;
+    _updSchedule.color = c;
+    _updSchedule.movingPiece = moving;
+    _updSchedule.capturedPiece = captured;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
+}
+
+void NNstack::scheduleUpdateCastle(Color c, unsigned int from, unsigned int to, unsigned int fromR, unsigned int toR){
+    _updSchedule.type = NN_CASTLE;
+    _updSchedule.color = c;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
     _updSchedule.fromRook = fromR;
     _updSchedule.toRook = toR;
+}
+
+void NNstack::scheduleUpdateEnpass(Color c, unsigned int from, unsigned int to){
+    _updSchedule.type = NN_ENPASS;
+    _updSchedule.color = c;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
 }
 
 int NNstack::evaluate(Color color){

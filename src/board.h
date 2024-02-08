@@ -20,9 +20,9 @@
 
 #include "defs.h"
 #include "psquaretable.h"
-#include "nnue.h"
 #include "zkey.h"
 #include "move.h"
+#include "nnstack.h"
 #include <string>
 
 class Move;
@@ -81,7 +81,7 @@ class Board {
    *
    * @param move Move to perform on the board.
    */
-  bool doMove(Move);
+  bool doMove(Move, NNstack *);
 
 
    /**
@@ -196,8 +196,6 @@ class Board {
    * @return The Piece Square Table of this board for its current state.
    */
   PSquareTable getPSquareTable() const;
-
-  NNueEvaluation getNNue() const;
 
   /**
    * @brief Returns the color whose turn it is to move.
@@ -346,12 +344,6 @@ class Board {
    * @brief Piece Square table for this board in its current state.
    */
   PSquareTable _pst;
-
-  /**
-   * @brief Class doing incremental NN updates for evaluation
-   *
-   */
-  NNueEvaluation _nnue;
 
   /**
    * @brief Halfmove clock, used to determine draws by the 50 move rule
