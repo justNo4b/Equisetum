@@ -596,15 +596,6 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
               tDepth++;
             }
 
-        // 6.3 Last capture extention
-        // In the endgame positions we extend any non-pawn captures
-        // It seems benefitial as we calculate resulting endgame more accurately
-        if (!isQuiet &&
-            endgameNode &&
-            move.getCapturedPieceType() != PAWN &&
-            ttEntry.move != move.getMoveINT()){
-              tDepth++;
-            }
 
         _posHist.Add(board.getZKey().getValue());
         _sStack.AddMove(move);
