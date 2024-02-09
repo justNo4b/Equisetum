@@ -25,17 +25,22 @@ NNstack::NNstack(){
     Board b = Board();
     _curr_size  = 0;
     _nnstack[_curr_size] = NNueEvaluation(b);
+        _updDone = false;
 }
 
 
 NNstack::NNstack(const Board &board){
     _curr_size  = 0;
     _nnstack[_curr_size] = NNueEvaluation(board);
+    _updDone = false;
 }
 
 
 void NNstack::performUpdate(){
+    _updDone = true;
     _nnstack[_curr_size + 1] = _nnstack[_curr_size];
+
+    std::cout << _curr_size  <<std::endl;
 
     switch (_updSchedule.type)
     {
@@ -70,6 +75,8 @@ void NNstack::scheduleUpdateMove(Color c, PieceType moving, unsigned int from, u
     _updSchedule.movingPiece = moving;
     _updSchedule.from = from;
     _updSchedule.to = to;
+
+    _updDone = false;
 }
 
 void NNstack::scheduleUpdatePromote(Color c, PieceType promoted, unsigned int from, unsigned int to){
@@ -78,6 +85,8 @@ void NNstack::scheduleUpdatePromote(Color c, PieceType promoted, unsigned int fr
     _updSchedule.promotedPiece = promoted;
     _updSchedule.from = from;
     _updSchedule.to = to;
+
+    _updDone = false;
 }
 
 void NNstack::scheduleUpdateCapprom(Color c, PieceType captured, PieceType promoted, unsigned int from, unsigned int to){
@@ -87,6 +96,8 @@ void NNstack::scheduleUpdateCapprom(Color c, PieceType captured, PieceType promo
     _updSchedule.promotedPiece = promoted;
     _updSchedule.from = from;
     _updSchedule.to = to;
+
+    _updDone = false;
 }
 
 void NNstack::scheduleUpdateCapture(Color c, PieceType moving, PieceType captured, unsigned int from, unsigned int to){
@@ -96,6 +107,8 @@ void NNstack::scheduleUpdateCapture(Color c, PieceType moving, PieceType capture
     _updSchedule.capturedPiece = captured;
     _updSchedule.from = from;
     _updSchedule.to = to;
+
+    _updDone = false;
 }
 
 void NNstack::scheduleUpdateCastle(Color c, unsigned int from, unsigned int to, unsigned int fromR, unsigned int toR){
@@ -105,6 +118,8 @@ void NNstack::scheduleUpdateCastle(Color c, unsigned int from, unsigned int to, 
     _updSchedule.to = to;
     _updSchedule.fromRook = fromR;
     _updSchedule.toRook = toR;
+
+    _updDone = false;
 }
 
 void NNstack::scheduleUpdateEnpass(Color c, unsigned int from, unsigned int to){
@@ -112,9 +127,19 @@ void NNstack::scheduleUpdateEnpass(Color c, unsigned int from, unsigned int to){
     _updSchedule.color = c;
     _updSchedule.from = from;
     _updSchedule.to = to;
+
+    _updDone = false;
 }
 
 int NNstack::evaluate(Color color){
     return _nnstack[_curr_size].evaluate(color);
+
+}
+
+void NNstack::popOut(){
+    if (_updDone){
+        _curr_size--;
+        _updDone = false;
+    }
 
 }

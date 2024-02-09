@@ -21,6 +21,7 @@
 #include "eval.h"
 #include "searchdata.h"
 #include "timer.h"
+#include "nnstack.h"
 #include <iostream>
 #include <thread>
 
@@ -139,11 +140,12 @@ void setPosition(std::istringstream &is) {
       continue;
     }
 
+    NNstack fakeAcc = NNstack();
     MoveList moves = MoveList();
     MoveGen movegen(&board, false, &moves);
     for (auto &move : moves) {
       if (move.getNotation((optionsMap["UCI_Chess960"].getValue() == "true")) == token) {
-        board.doMove(move);
+        board.doMove(move, &fakeAcc);
         if ((move.getPieceType() == PAWN) || (move.getFlags() & Move::CAPTURE) ){
           positionHistory = Hist();
         }

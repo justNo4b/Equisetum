@@ -1102,7 +1102,7 @@ inline int Eval::evaluateMain(const Board &board, Color color) {
   return final_eval + TEMPO;
 }
 
-int Eval::evaluate(const Board &board, Color color){
+int Eval::evaluate(const Board &board, Color color, NNstack * accum){
 
     // Probe eval hash
     U64 index = board.getpCountKey().getValue() & (EG_HASH_SIZE - 1);
@@ -1115,7 +1115,7 @@ int Eval::evaluate(const Board &board, Color color){
         if (spevType == RETURN_SCORE) return egResult;
     }
 
-    int nnueEval =  board.getNNue().evaluate(color);
+    int nnueEval =  accum->evaluate(color);
 
     // phase 0 (max) -> 256 (min)
     // scale from 1.5 to 1

@@ -67,7 +67,6 @@ Search::Search(const Board &board, Limits limits, Hist positionHistory, Ordering
   _sStack = SEARCH_Data();
   _posHist = positionHistory;
   init_LMR_array();
-  _accumulator = NNstack(_initialBoard);
 }
 
 void Search::iterDeep() {
@@ -261,11 +260,12 @@ inline int Search::_makeDrawScore(){
 int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   _nodes++;
 
+  _accumulator = NNstack(_initialBoard);
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
   int hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
 
   MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0);
-  _sStack.AddEval(board.colorIsInCheck(board.getActivePlayer()) ? NOSCORE : Eval::evaluate(board, board.getActivePlayer()));
+  _sStack.AddEval(board.colorIsInCheck(board.getActivePlayer()) ? NOSCORE : Eval::evaluate(board, board.getActivePlayer(), &_accumulator));
   pV rootPV = pV();
 
 
@@ -310,6 +310,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
         }
         _rootNodesSpent[move.getPieceType()][move.getTo()] += _nodes - nodesStart;
         _sStack.Remove();
+        _accumulator.popOut();
     }
 
   }
@@ -402,12 +403,13 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
   }
 
   // Statically evaluate our position
-  // Do the Evaluation, unless we are in check or prev move was NULL
-  // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
+
+  _accumulator.performUpdate();
+
   if (incheckNode) {
     _sStack.AddEval(NOSCORE);
   }else {
-    nodeEval = Eval::evaluate(board, board.getActivePlayer());
+    nodeEval = Eval::evaluate(board, board.getActivePlayer(), &_accumulator);
     _sStack.AddEval(nodeEval);
   }
 
@@ -510,6 +512,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 
                     _posHist.Remove();
                     _sStack.Remove();
+                    _accumulator.popOut();
 
                     if (sScore >= pcBeta){
                         return beta;
@@ -709,6 +712,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 
         _posHist.Remove();
         _sStack.Remove();
+        _accumulator.popOut();
         // Beta cutoff
         if (score >= beta) {
           // Add this move as a new killer move and update history if move is quiet
@@ -785,7 +789,8 @@ int Search::_qSearch(const Board &board, int alpha, int beta) {
     return 0;
   }
 
-  int standPat = Eval::evaluate(board, board.getActivePlayer());
+  _accumulator.performUpdate();
+  int standPat = Eval::evaluate(board, board.getActivePlayer(), &_accumulator);
 
   if (standPat >= beta) {
     if (!pvNode) return beta;
@@ -841,6 +846,7 @@ int Search::_qSearch(const Board &board, int alpha, int beta) {
           myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
 
           int score = -_qSearch(movedBoard, -beta, -alpha);
+          _accumulator.popOut();
           if (score >= beta) {
             // Add a new tt entry for this node
             if (!_stop){
