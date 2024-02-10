@@ -460,7 +460,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
   //
   // Equisetum dont do this reduction after NullMove, because we already reduced a lot,
   // and reducing further may reduce quality of the NM_Search
-  if (depth >= 5 && !ttNode && pMove != 0 && !singSearch)
+  if (depth >= 5 && ttMove == 0 && pMove != 0 && !singSearch)
     depth--;
 
   // No pruning occured, generate moves and recurse
@@ -735,7 +735,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 
         }else{
           // Beta was not beaten and we dont improve alpha in this case we lower our search history values
-          int dBonus = std::max(0, depth - (nodeEval < alpha) - (!ttNode && depth >= 4) + (pMoveScore < -HALFMAX_HISTORY_SCORE) + cutNode);
+          int dBonus = std::max(0, depth - (nodeEval < alpha) - (ttMove == 0 && depth >= 4) + (pMoveScore < -HALFMAX_HISTORY_SCORE) + cutNode);
           if (isQuiet){
             _orderingInfo.decrementHistory(board.getActivePlayer(), move.getFrom(), move.getTo(), dBonus);
             _orderingInfo.decrementCounterHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo(), dBonus);
