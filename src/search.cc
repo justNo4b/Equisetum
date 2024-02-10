@@ -350,10 +350,6 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
   Color behindColor = _sStack.sideBehind;
   bool isPmQuietCounter = (pMoveScore >= 50000 && pMoveScore <= 200000);
 
-    if (ply != _accumulator.getSize()){
-          std::cout << ply << " " << _accumulator.getSize() << " "<<  depth  << " " << pvNode << std::endl;
-          quick_exit(0);
-    }
 
   _nodes++;
   // Check if we are out of time
