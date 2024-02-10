@@ -25,42 +25,45 @@ NNstack::NNstack(){
     Board b = Board();
     _curr_size  = 0;
     _nnstack[_curr_size] = NNueEvaluation(b);
-        _updDone = false;
+    _updDone[_curr_size] = true;
 }
 
 
 NNstack::NNstack(const Board &board){
     _curr_size  = 0;
     _nnstack[_curr_size] = NNueEvaluation(board);
-    _updDone = false;
+    _updDone[_curr_size] = true;
 }
 
 
 void NNstack::performUpdate(){
-    _updDone = true;
-    _nnstack[_curr_size + 1] = _nnstack[_curr_size];
 
-    std::cout << _curr_size  <<std::endl;
+    // already updated
+    if (_updDone[_curr_size]) return;
 
-    switch (_updSchedule.type)
+    // mark as updated, copy nnue and perform an update
+    _updDone[_curr_size] = true;
+    _nnstack[_curr_size] = _nnstack[_curr_size - 1];
+
+    switch (_updSchedule[_curr_size].type)
     {
     case NN_MOVE:
-        _nnstack[_curr_size].movePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.from, _updSchedule.to);
+        _nnstack[_curr_size].movePiece(_updSchedule[_curr_size].color, _updSchedule[_curr_size].movingPiece, _updSchedule[_curr_size].from, _updSchedule[_curr_size].to);
         break;
     case NN_PROMO:
-        _nnstack[_curr_size].promotePiece(_updSchedule.color, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        _nnstack[_curr_size].promotePiece(_updSchedule[_curr_size].color, _updSchedule[_curr_size].promotedPiece, _updSchedule[_curr_size].from, _updSchedule[_curr_size].to);
         break;
     case NN_CAPTURE:
-        _nnstack[_curr_size].capturePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.capturedPiece, _updSchedule.from, _updSchedule.to);
+        _nnstack[_curr_size].capturePiece(_updSchedule[_curr_size].color, _updSchedule[_curr_size].movingPiece, _updSchedule[_curr_size].capturedPiece, _updSchedule[_curr_size].from, _updSchedule[_curr_size].to);
         break;
     case NN_CAPPROMO:
-        _nnstack[_curr_size].cappromPiece(_updSchedule.color, _updSchedule.capturedPiece, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        _nnstack[_curr_size].cappromPiece(_updSchedule[_curr_size].color, _updSchedule[_curr_size].capturedPiece, _updSchedule[_curr_size].promotedPiece, _updSchedule[_curr_size].from, _updSchedule[_curr_size].to);
         break;
     case NN_CASTLE:
-        _nnstack[_curr_size].castleMove(_updSchedule.color, _updSchedule.from, _updSchedule.to, _updSchedule.fromRook, _updSchedule.toRook);
+        _nnstack[_curr_size].castleMove(_updSchedule[_curr_size].color, _updSchedule[_curr_size].from, _updSchedule[_curr_size].to, _updSchedule[_curr_size].fromRook, _updSchedule[_curr_size].toRook);
         break;
     case NN_ENPASS:
-        _nnstack[_curr_size].enpassMove(_updSchedule.color, _updSchedule.from, _updSchedule.to);
+        _nnstack[_curr_size].enpassMove(_updSchedule[_curr_size].color, _updSchedule[_curr_size].from, _updSchedule[_curr_size].to);
         break;
     default:
         break;
@@ -70,76 +73,93 @@ void NNstack::performUpdate(){
 
 
 void NNstack::scheduleUpdateMove(Color c, PieceType moving, unsigned int from, unsigned int to){
-    _updSchedule.type = NN_MOVE;
-    _updSchedule.color = c;
-    _updSchedule.movingPiece = moving;
-    _updSchedule.from = from;
-    _updSchedule.to = to;
+    _curr_size++;
 
-    _updDone = false;
+    _updSchedule[_curr_size].type = NN_MOVE;
+    _updSchedule[_curr_size].color = c;
+    _updSchedule[_curr_size].movingPiece = moving;
+    _updSchedule[_curr_size].from = from;
+    _updSchedule[_curr_size].to = to;
+
+    _updDone[_curr_size] = false;
 }
 
 void NNstack::scheduleUpdatePromote(Color c, PieceType promoted, unsigned int from, unsigned int to){
-    _updSchedule.type = NN_PROMO;
-    _updSchedule.color = c;
-    _updSchedule.promotedPiece = promoted;
-    _updSchedule.from = from;
-    _updSchedule.to = to;
+    _curr_size++;
 
-    _updDone = false;
+    _updSchedule[_curr_size].type = NN_PROMO;
+    _updSchedule[_curr_size].color = c;
+    _updSchedule[_curr_size].promotedPiece = promoted;
+    _updSchedule[_curr_size].from = from;
+    _updSchedule[_curr_size].to = to;
+
+    _updDone[_curr_size] = false;
 }
 
 void NNstack::scheduleUpdateCapprom(Color c, PieceType captured, PieceType promoted, unsigned int from, unsigned int to){
-    _updSchedule.type = NN_CAPPROMO;
-    _updSchedule.color = c;
-    _updSchedule.capturedPiece = captured;
-    _updSchedule.promotedPiece = promoted;
-    _updSchedule.from = from;
-    _updSchedule.to = to;
+    _curr_size++;
 
-    _updDone = false;
+    _updSchedule[_curr_size].type = NN_CAPPROMO;
+    _updSchedule[_curr_size].color = c;
+    _updSchedule[_curr_size].capturedPiece = captured;
+    _updSchedule[_curr_size].promotedPiece = promoted;
+    _updSchedule[_curr_size].from = from;
+    _updSchedule[_curr_size].to = to;
+
+    _updDone[_curr_size] = false;
 }
 
 void NNstack::scheduleUpdateCapture(Color c, PieceType moving, PieceType captured, unsigned int from, unsigned int to){
-    _updSchedule.type = NN_CAPTURE;
-    _updSchedule.color = c;
-    _updSchedule.movingPiece = moving;
-    _updSchedule.capturedPiece = captured;
-    _updSchedule.from = from;
-    _updSchedule.to = to;
+    _curr_size++;
 
-    _updDone = false;
+    _updSchedule[_curr_size].type = NN_CAPTURE;
+    _updSchedule[_curr_size].color = c;
+    _updSchedule[_curr_size].movingPiece = moving;
+    _updSchedule[_curr_size].capturedPiece = captured;
+    _updSchedule[_curr_size].from = from;
+    _updSchedule[_curr_size].to = to;
+
+    _updDone[_curr_size] = false;
 }
 
 void NNstack::scheduleUpdateCastle(Color c, unsigned int from, unsigned int to, unsigned int fromR, unsigned int toR){
-    _updSchedule.type = NN_CASTLE;
-    _updSchedule.color = c;
-    _updSchedule.from = from;
-    _updSchedule.to = to;
-    _updSchedule.fromRook = fromR;
-    _updSchedule.toRook = toR;
+    _curr_size++;
 
-    _updDone = false;
+    _updSchedule[_curr_size].type = NN_CASTLE;
+    _updSchedule[_curr_size].color = c;
+    _updSchedule[_curr_size].from = from;
+    _updSchedule[_curr_size].to = to;
+    _updSchedule[_curr_size].fromRook = fromR;
+    _updSchedule[_curr_size].toRook = toR;
+
+    _updDone[_curr_size] = false;
 }
 
 void NNstack::scheduleUpdateEnpass(Color c, unsigned int from, unsigned int to){
-    _updSchedule.type = NN_ENPASS;
-    _updSchedule.color = c;
-    _updSchedule.from = from;
-    _updSchedule.to = to;
+    _curr_size++;
 
-    _updDone = false;
+    _updSchedule[_curr_size].type = NN_ENPASS;
+    _updSchedule[_curr_size].color = c;
+    _updSchedule[_curr_size].from = from;
+    _updSchedule[_curr_size].to = to;
+
+    _updDone[_curr_size] = false;
+}
+
+void NNstack::scheduleUpdateEmpty(){
+    _curr_size++;
+    _updDone[_curr_size] = false;
 }
 
 int NNstack::evaluate(Color color){
     return _nnstack[_curr_size].evaluate(color);
-
 }
 
-void NNstack::popOut(){
-    if (_updDone){
-        _curr_size--;
-        _updDone = false;
-    }
+bool NNstack::popOut(){
+    _curr_size--;
+    return true;
+}
 
+int NNstack::getSize(){
+    return _curr_size;
 }

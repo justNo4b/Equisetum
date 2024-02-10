@@ -56,11 +56,12 @@ class NNstack
 
 private:
 
-    bool _updDone = false;
+    bool           _updDone [MAX_INT_PLY * 2];
     NNueEvaluation _nnstack [MAX_INT_PLY * 2];
+    UpdData        _updSchedule [MAX_INT_PLY * 2];
     int            _curr_size = 0;
 
-    UpdData _updSchedule;
+
 
 
 
@@ -77,8 +78,11 @@ public:
     void scheduleUpdateCapture(Color, PieceType, PieceType, unsigned int, unsigned int);
     void scheduleUpdateCastle(Color, unsigned int, unsigned int, unsigned int, unsigned int);
     void scheduleUpdateEnpass(Color, unsigned int, unsigned int);
+    void scheduleUpdateEmpty();
 
-    void popOut();
+    bool popOut();
+
+    int getSize();
 
     int evaluate(Color);
 

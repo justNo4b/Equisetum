@@ -90,7 +90,7 @@ class Board {
     *
     *
     */
-  void doNool();
+  void doNool(NNstack *);
 
 
   int _getGameClock() const;

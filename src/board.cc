@@ -788,13 +788,13 @@ bool Board::doMove(Move move, NNstack * acc) {
   return true;
 }
 
-void Board:: doNool(){
+void Board:: doNool(NNstack * acc){
   // Clear En passant info after each move if it exists
   if (_enPassant) {
     _zKey.clearEnPassant();
     _enPassant = ZERO;
   }
-
+  acc->scheduleUpdateEmpty();
   _zKey.flipActivePlayer();
   _activePlayer = getInactivePlayer();
 }
