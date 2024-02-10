@@ -770,23 +770,36 @@ int Search::_qSearch(const Board &board, int alpha, int beta) {
   // Check search limits
    _nodes++;
    bool pvNode = alpha != beta - 1;
+   bool incheckNode = board.colorIsInCheck(board.getActivePlayer());
 
   if (_stop || _checkLimits()) {
     _stop = true;
     return 0;
   }
 
-  int standPat = Eval::evaluate(board, board.getActivePlayer());
-
-  if (standPat >= beta) {
-    if (!pvNode) return beta;
-
-    standPat = std::min((alpha + beta) / 2, beta - 1);
+  // Check for threefold repetition draws and 50 - move rule draw
+  // cut pV out if we found draw
+  if (board.getHalfmoveClock() >= 100 || _isRepetitionDraw(board.getZKey().getValue(), board.getHalfmoveClock())) {
+    return _makeDrawScore();
   }
 
-  if (alpha < standPat) {
-    alpha = standPat;
+ //Skip standpatting if we are in check
+
+
+  int standPat = incheckNode ? NOSCORE : Eval::evaluate(board, board.getActivePlayer());
+
+  if (!incheckNode){
+    if (standPat >= beta) {
+        if (!pvNode) return beta;
+
+        standPat = std::min((alpha + beta) / 2, beta - 1);
+    }
+
+    if (alpha < standPat) {
+        alpha = standPat;
+    }
   }
+
 
   // Check transposition table cache
   // If TT is causing a cuttoff, we update move ordering stuff
@@ -810,26 +823,31 @@ int Search::_qSearch(const Board &board, int alpha, int beta) {
     }
   }
 
-  MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
 
+  MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), (MAX_PLY - incheckNode), 0);
+
+  int legalCount = 0;
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
 
-    // in qSearch if Value < 0 it means it is a bad capture
-    // and we should prune it
-    if (move.getValue() < 0){
-      break;
-    }
+    if (legalCount >= 1){
+        // in qSearch if Value < 0 it means it is a bad capture
+        // and we should prune it
+        if (move.getValue() < 0){
+        break;
+        }
 
-    // Use Halogen futility variation
-    if (!(move.getFlags() & Move::PROMOTION) && !board.SEE_GreaterOrEqual(move, (alpha - standPat - DELTA_MOVE_CONST)))
-      continue;;
+        // Use Halogen futility variation
+        if (!(move.getFlags() & Move::PROMOTION) && !board.SEE_GreaterOrEqual(move, (alpha - standPat - DELTA_MOVE_CONST)))
+        continue;
+    }
 
     Board movedBoard = board;
     bool isLegal = movedBoard.doMove(move);
 
     if (isLegal){
           myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
+          legalCount++;
 
           int score = -_qSearch(movedBoard, -beta, -alpha);
           if (score >= beta) {
@@ -846,5 +864,11 @@ int Search::_qSearch(const Board &board, int alpha, int beta) {
 
 
   }
+
+    // Check for checkmate and stalemate
+  if (legalCount == 0 && incheckNode) {
+    return LOST_SCORE + MAX_INT_PLY;
+  }
+
   return alpha;
 }
