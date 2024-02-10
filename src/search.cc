@@ -769,6 +769,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
 int Search::_qSearch(const Board &board, int alpha, int beta) {
   // Check search limits
    _nodes++;
+   int ttMove = 0;
    bool pvNode = alpha != beta - 1;
    bool incheckNode = board.colorIsInCheck(board.getActivePlayer());
 
@@ -806,6 +807,7 @@ int Search::_qSearch(const Board &board, int alpha, int beta) {
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
   if (ttEntry.Flag != NONE){
     if (!pvNode){
+      ttMove = incheckNode ? 0 : ttEntry.move;
       int hashScore = ttEntry.score;
 
       if (abs(hashScore) > WON_IN_X){
@@ -824,7 +826,7 @@ int Search::_qSearch(const Board &board, int alpha, int beta) {
   }
 
 
-  MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), (MAX_PLY - incheckNode), 0);
+  MovePicker movePicker(&_orderingInfo, &board, ttMove, board.getActivePlayer(), (MAX_PLY - incheckNode), 0);
 
   int legalCount = 0;
   while (movePicker.hasNext()) {
