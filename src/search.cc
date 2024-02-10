@@ -348,14 +348,12 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
   pV   thisPV = pV();
   up_pV->length = 0;
   Color behindColor = _sStack.sideBehind;
+  bool isPmQuietCounter = (pMoveScore >= 50000 && pMoveScore <= 200000);
 
     if (ply != _accumulator.getSize()){
           std::cout << ply << " " << _accumulator.getSize() << " "<<  depth  << " " << pvNode << std::endl;
           quick_exit(0);
     }
-
-
-  bool isPmQuietCounter = (pMoveScore >= 50000 && pMoveScore <= 200000);
 
   _nodes++;
   // Check if we are out of time
@@ -575,6 +573,8 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
           tDepth++;
         }
 
+
+/*
         // 6.1 Singular move extention
         // At high depth if we have the TT move, and we are certain
         // that non other moves are even close to it, extend this move
@@ -593,6 +593,10 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
                 singNode = true;
               }
             }
+
+*/
+
+
 
         // 6.2. Passed pawn push extention
         // In the late game  we fear that we may miss
