@@ -323,7 +323,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   return alpha;
 }
 
-int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int beta, bool singSearch, bool cutNode) {
+int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bool singSearch, bool cutNode) {
   bool incheckNode;
   bool ttNode = false;
   bool qttNode = false;
@@ -404,6 +404,8 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
   // Statically evaluate our position
   // Do the Evaluation, unless we are in check or prev move was NULL
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
+
+  board.performUpdate();
   if (incheckNode) {
     _sStack.AddEval(NOSCORE);
   }else {
@@ -770,7 +772,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
   return alpha;
 }
 
-int Search::_qSearch(const Board &board, int alpha, int beta) {
+int Search::_qSearch(Board &board, int alpha, int beta) {
   // Check search limits
    _nodes++;
    bool pvNode = alpha != beta - 1;
@@ -780,6 +782,7 @@ int Search::_qSearch(const Board &board, int alpha, int beta) {
     return 0;
   }
 
+  board.performUpdate();
   int standPat = Eval::evaluate(board, board.getActivePlayer());
 
   if (standPat >= beta) {

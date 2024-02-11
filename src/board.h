@@ -297,6 +297,8 @@ class Board {
   U64  getCastlingRightsColored(Color) const;
   U64 getCastlingRights() const;
 
+  void performUpdate();
+
  private:
   /**
    * @name Attack bitboard generation functions.
@@ -320,6 +322,14 @@ class Board {
   U64 _getBishopMobilityForSquare(int, U64, U64) const;
   U64 _getRookMobilityForSquare(int, U64, U64) const;
   U64 _getQueenMobilityForSquare(int, U64, U64) const;
+
+  void _scheduleUpdateMove(Color, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdatePromote(Color, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdateCapprom(Color, PieceType, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdateCapture(Color, PieceType, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdateCastle(Color, unsigned int, unsigned int, unsigned int, unsigned int);
+  void _scheduleUpdateEnpass(Color, unsigned int, unsigned int);
+  void _scheduleUpdateEmpty();
 
   /**
    * @brief Array of Piece costs used for SEE

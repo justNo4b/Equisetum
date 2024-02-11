@@ -134,8 +134,6 @@ void setPosition(std::istringstream &is) {
     board.setToFen(fen, (optionsMap["UCI_Chess960"].getValue() == "true"));
   }
 
-  NNueEvaluation _nnStack[MAX_GAME_PLY];
-  board.setNnuePtr(&_nnStack[0]);
   while (is >> token) {
     if (token == "moves") {
       continue;
