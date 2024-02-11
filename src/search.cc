@@ -546,15 +546,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
       if (depth <= 3 && isQuiet && cmHistory <= (-4096 * depth + 4096)) continue;
     }
 
-    Board movedBoard = board;
-    bool isLegal = movedBoard.doMove(move);
-    if (isLegal){
-        myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
-        bool doLMR = false;
-        legalCount++;
-        int score;
 
-        bool giveCheck = movedBoard.colorIsInCheck(movedBoard.getActivePlayer());
         int tDepth = depth;
         // 6. EXTENTIONS
         //
@@ -575,8 +567,7 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
             abs(ttEntry.score) < WON_IN_X / 4){
               int sDepth = depth / 2;
               int sBeta = ttEntry.score - depth * 2;
-              Board sBoard = board;
-              int score = depth > 5 ? _negaMax(sBoard, &thisPV, sDepth, sBeta - 1, sBeta, true, cutNode) : nodeEval;
+              int score = depth > 5 ? _negaMax(board, &thisPV, sDepth, sBeta - 1, sBeta, true, cutNode) : nodeEval;
               if (sBeta > score){
                 tDepth += 1 + (fnNode && depth > 5);
                 singNode = true;
@@ -605,6 +596,17 @@ int Search::_negaMax(const Board &board, pV *up_pV, int depth, int alpha, int be
             ttEntry.move != move.getMoveINT()){
               tDepth++;
             }
+
+    Board movedBoard = board;
+    bool isLegal = movedBoard.doMove(move);
+    if (isLegal){
+        myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
+        bool doLMR = false;
+        legalCount++;
+        int score;
+
+        bool giveCheck = movedBoard.colorIsInCheck(movedBoard.getActivePlayer());
+
 
         _posHist.Add(board.getZKey().getValue());
         _sStack.AddMove(move);
