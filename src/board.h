@@ -27,6 +27,31 @@
 
 class Move;
 
+enum UpdateType{
+    NN_MOVE,
+    NN_PROMO,
+    NN_CAPTURE,
+    NN_CAPPROMO,
+    NN_CASTLE,
+    NN_ENPASS
+};
+
+struct UpdData{
+    UpdateType type;
+
+    Color color;
+    PieceType movingPiece;
+    PieceType capturedPiece;
+    PieceType promotedPiece;
+
+    unsigned int from;
+    unsigned int to;
+
+    unsigned int fromRook;
+    unsigned int toRook;
+    // init
+};
+
 /**
  * @brief Represents a chess board.
  *
@@ -197,7 +222,9 @@ class Board {
    */
   PSquareTable getPSquareTable() const;
 
-  NNueEvaluation getNNue() const;
+  int getNNueEval() const;
+
+  void setNnuePtr(NNueEvaluation *);
 
   /**
    * @brief Returns the color whose turn it is to move.
@@ -270,6 +297,8 @@ class Board {
   U64  getCastlingRightsColored(Color) const;
   U64 getCastlingRights() const;
 
+  void performUpdate();
+
  private:
   /**
    * @name Attack bitboard generation functions.
@@ -293,6 +322,14 @@ class Board {
   U64 _getBishopMobilityForSquare(int, U64, U64) const;
   U64 _getRookMobilityForSquare(int, U64, U64) const;
   U64 _getQueenMobilityForSquare(int, U64, U64) const;
+
+  void _scheduleUpdateMove(Color, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdatePromote(Color, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdateCapprom(Color, PieceType, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdateCapture(Color, PieceType, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdateCastle(Color, unsigned int, unsigned int, unsigned int, unsigned int);
+  void _scheduleUpdateEnpass(Color, unsigned int, unsigned int);
+  void _scheduleUpdateEmpty();
 
   /**
    * @brief Array of Piece costs used for SEE
@@ -351,7 +388,7 @@ class Board {
    * @brief Class doing incremental NN updates for evaluation
    *
    */
-  NNueEvaluation _nnue;
+  NNueEvaluation * _nnue;
 
   /**
    * @brief Halfmove clock, used to determine draws by the 50 move rule
@@ -367,6 +404,9 @@ class Board {
    * @brief Castling rights
    */
   U64 _castlingRights;
+
+  bool  _updDone;
+  UpdData _updSchedule;
 
   /**
    * @brief Determines if the given square is under attack by the given color.
