@@ -1115,7 +1115,8 @@ int Eval::evaluate(const Board &board, Color color){
         if (spevType == RETURN_SCORE) return egResult;
     }
 
-    int nnueEval =  board.getNNue().evaluate(color);
+    int nnueEval =  board.getNNueEval();
+    //std::cout << nnueEval << std::endl;
 
     // phase 0 (max) -> 256 (min)
     // scale from 1.5 to 1
