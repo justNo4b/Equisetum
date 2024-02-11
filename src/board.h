@@ -197,7 +197,9 @@ class Board {
    */
   PSquareTable getPSquareTable() const;
 
-  NNueEvaluation getNNue() const;
+  int getNNueEval() const;
+
+  void setNnuePtr(NNueEvaluation *);
 
   /**
    * @brief Returns the color whose turn it is to move.
@@ -351,7 +353,7 @@ class Board {
    * @brief Class doing incremental NN updates for evaluation
    *
    */
-  NNueEvaluation _nnue;
+  NNueEvaluation * _nnue;
 
   /**
    * @brief Halfmove clock, used to determine draws by the 50 move rule

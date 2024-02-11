@@ -119,6 +119,8 @@ class Search {
 
   SEARCH_Data _sStack;
 
+  NNueEvaluation _nnStack[MAX_PLY * 2];
+
   /**
    * @brief OrderingInfo object containing information about the current state
    * of this search

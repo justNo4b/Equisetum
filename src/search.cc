@@ -65,6 +65,8 @@ Search::Search(const Board &board, Limits limits, Hist positionHistory, Ordering
 
   _sStack = SEARCH_Data();
   _posHist = positionHistory;
+  _nnStack[0] = NNueEvaluation(_initialBoard);
+  _initialBoard.setNnuePtr(&_nnStack[0]);
   init_LMR_array();
 }
 
