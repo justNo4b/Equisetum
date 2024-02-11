@@ -27,6 +27,31 @@
 
 class Move;
 
+enum UpdateType{
+    NN_MOVE,
+    NN_PROMO,
+    NN_CAPTURE,
+    NN_CAPPROMO,
+    NN_CASTLE,
+    NN_ENPASS
+};
+
+struct UpdData{
+    UpdateType type;
+
+    Color color;
+    PieceType movingPiece;
+    PieceType capturedPiece;
+    PieceType promotedPiece;
+
+    unsigned int from;
+    unsigned int to;
+
+    unsigned int fromRook;
+    unsigned int toRook;
+    // init
+};
+
 /**
  * @brief Represents a chess board.
  *
@@ -369,6 +394,9 @@ class Board {
    * @brief Castling rights
    */
   U64 _castlingRights;
+
+  bool  _updDone;
+  UpdData _updSchedule;
 
   /**
    * @brief Determines if the given square is under attack by the given color.
