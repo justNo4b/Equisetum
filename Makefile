@@ -10,7 +10,7 @@ LD_FLAGS ?= -pthread -flto
 CC_FLAGS ?= -Wall -std=c++11 -O3 -march=native -flto -pthread -fno-exceptions -D_INCBIN_
 
 # Use INCBIN by default, and no incbin for release
-EVALFILE = equi_768x2e_2.4Bv4_330.nnue
+EVALFILE = equi_1024x2rl_2.4Bv4_330.nnue
 CC_FLAGS += -DEVALFILE=\"$(EVALFILE)\"
 
 
