@@ -48,14 +48,26 @@ public:
     int evaluate(const Color);
 
     // incremental update functions
-    void movePiece(Color, PieceType, unsigned int, unsigned int);
-    void promotePiece(Color, PieceType, unsigned int, unsigned int);
-    void cappromPiece(Color, PieceType, PieceType, unsigned int, unsigned int);
-    void capturePiece(Color, PieceType, PieceType, unsigned int, unsigned int);
-    void castleMove(Color, unsigned int, unsigned int, unsigned int, unsigned int);
-    void enpassMove(Color, unsigned int, unsigned int);
+    void movePiece(Color, PieceType, unsigned int, unsigned int, int, int);
+    void promotePiece(Color, PieceType, unsigned int, unsigned int, int, int);
+    void cappromPiece(Color, PieceType, PieceType, unsigned int, unsigned int, int, int);
+    void capturePiece(Color, PieceType, PieceType, unsigned int, unsigned int, int, int);
+    void castleMove(Color, unsigned int, unsigned int, unsigned int, unsigned int, int, int);
+    void enpassMove(Color, unsigned int, unsigned int, int, int);
 
 private:
+
+    const int BUCKET[64] = {
+            0,  1,  3,  2,  2,  3,  1,  0,
+            0,  0,  2,  2,  2,  2,  0,  0,
+            4,  4,  5,  5,  5,  5,  4,  4,
+            4,  4,  5,  5,  5,  5,  4,  4,
+            4,  4,  5,  5,  5,  5,  4,  4,
+            4,  4,  5,  5,  5,  5,  4,  4,
+            4,  4,  4,  4,  4,  4,  4,  4,
+            4,  4,  4,  4,  4,  4,  4,  4,
+        };
+
 
     // our main holder of pre-calculated hidden layers for both colors
     // two holders, for white and black perspectives
@@ -68,10 +80,14 @@ private:
     static int16_t NNUE_OUTPUT_WEIGHT2[NNUE_HIDDEN];
     static int32_t NNUE_OUTPUT_BIAS[NNUE_OUTPUT];
 
-    inline int _getPieceIndex(int sq, PieceType pt, Color c, Color view){
-        return view == WHITE
-                    ?  (sq + NNUE_PIECE_TO_INDEX[view == c][pt] * 64)
-                    :  (_mir(sq) + NNUE_PIECE_TO_INDEX[view == c][pt] * 64);
+    inline int _getPieceIndex(int sq, PieceType pt, Color c, Color view, int kingSquare){
+
+        if (view != WHITE){
+            sq = _mir(sq);
+            kingSquare = _mir(sq);
+        }
+
+        return sq + NNUE_PIECE_TO_INDEX[view == c][pt] * 64 + BUCKET[kingSquare] * 64 * 6 * 2;
     }
 
     // Activation function
