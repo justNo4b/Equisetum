@@ -30,7 +30,7 @@ INCBIN(network, EVALFILE);
 #endif
 
     int16_t NNueEvaluation::NNUE_HIDDEN_BIAS[NNUE_HIDDEN];
-    int16_t NNueEvaluation::NNUE_HIDDEN_WEIGHT[NNUE_INPUT][NNUE_HIDDEN];
+    int16_t NNueEvaluation::NNUE_HIDDEN_WEIGHT[NNUE_INPUT * NNUE_BUCKETS][NNUE_HIDDEN];
     int16_t NNueEvaluation::NNUE_OUTPUT_WEIGHT[NNUE_HIDDEN];
     int16_t NNueEvaluation::NNUE_OUTPUT_WEIGHT2[NNUE_HIDDEN];
     int32_t NNueEvaluation::NNUE_OUTPUT_BIAS[NNUE_OUTPUT];
@@ -56,7 +56,7 @@ void NNueEvaluation::init(){
 #endif
 
 
-    for (int i = 0; i < NNUE_INPUT; i++){
+    for (int i = 0; i < NNUE_INPUT * NNUE_BUCKETS; i++){
         for (int h = 0; h < NNUE_HIDDEN; h++){
             int16_t tmp_int = 0;
             file.read(reinterpret_cast<char *>(&tmp_int), sizeof(tmp_int));
@@ -126,7 +126,6 @@ NNueEvaluation::NNueEvaluation(const Board &board) {
             _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[indexesToUpdate[BLACK][k]][i];
         }
     }
-
 }
 
 int NNueEvaluation::evaluate(const Color color){

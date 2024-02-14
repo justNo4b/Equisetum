@@ -21,13 +21,14 @@
 #include "defs.h"
 #include "bitutils.h"
 
+#define NNUE_BUCKETS (6)
 #define NNUE_INPUT   (2 * 6 * 64)
-#define NNUE_HIDDEN  (768)
+#define NNUE_HIDDEN  (256)
 #define NNUE_OUTPUT  (1)
 
 const int NNUE_SCALE = 16 * 512;
 
-const std::string EVAL_FILE = "equi_768x2_6b_2.4Bv2_120.nnue";
+const std::string EVAL_FILE = "equi_256x2_6b_2.4Bv4_60.nnue";
 
 class Board;
 
@@ -63,7 +64,7 @@ private:
 
     // Weights etc
     static int16_t NNUE_HIDDEN_BIAS[NNUE_HIDDEN];
-    static int16_t NNUE_HIDDEN_WEIGHT[NNUE_INPUT][NNUE_HIDDEN];
+    static int16_t NNUE_HIDDEN_WEIGHT[NNUE_INPUT * NNUE_BUCKETS][NNUE_HIDDEN];
     static int16_t NNUE_OUTPUT_WEIGHT[NNUE_HIDDEN];
     static int16_t NNUE_OUTPUT_WEIGHT2[NNUE_HIDDEN];
     static int32_t NNUE_OUTPUT_BIAS[NNUE_OUTPUT];
@@ -74,8 +75,8 @@ private:
             sq = _mir(sq);
             kingSquare = _mir(sq);
         }
-
-        return sq + NNUE_PIECE_TO_INDEX[view == c][pt] * 64 + BUCKET[kingSquare] * 64 * 6 * 2;
+        int indx = sq + NNUE_PIECE_TO_INDEX[view == c][pt] * 64 + BUCKET[kingSquare] * 64 * 6 * 2;
+        return indx;
     }
 
     // Activation function

@@ -999,8 +999,7 @@ int Board::getPhase() const{
         _nnue->cappromPiece(_updSchedule.color, _updSchedule.capturedPiece, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to, _updSchedule.wK, _updSchedule.bK);
         break;
     case NN_CASTLE:
-            if (_updSchedule.movingPiece == KING &&
-            BUCKET[_updSchedule.from] != BUCKET[_updSchedule.to]){
+            if (BUCKET[_updSchedule.from] != BUCKET[_updSchedule.to]){
                 // bucket changed, reset everything
                 _nnue = _nnue + 1;
                 *_nnue = NNueEvaluation(*this);
@@ -1033,8 +1032,8 @@ void Board::_scheduleUpdateMove(Color c, PieceType moving, unsigned int from, un
     _updSchedule.from = from;
     _updSchedule.to = to;
 
-    _updSchedule.wK = getPieces(WHITE, KING);
-    _updSchedule.bK = getPieces(BLACK, KING);
+    _updSchedule.wK = _bitscanForward(getPieces(WHITE, KING));
+    _updSchedule.bK = _bitscanForward(getPieces(BLACK, KING));
 
     _updDone = false;
 }
@@ -1047,8 +1046,8 @@ void Board::_scheduleUpdatePromote(Color c, PieceType promoted, unsigned int fro
     _updSchedule.from = from;
     _updSchedule.to = to;
 
-    _updSchedule.wK = getPieces(WHITE, KING);
-    _updSchedule.bK = getPieces(BLACK, KING);
+    _updSchedule.wK = _bitscanForward(getPieces(WHITE, KING));
+    _updSchedule.bK = _bitscanForward(getPieces(BLACK, KING));
 
 
     _updDone = false;
@@ -1063,8 +1062,8 @@ void Board::_scheduleUpdateCapprom(Color c, PieceType captured, PieceType promot
     _updSchedule.from = from;
     _updSchedule.to = to;
 
-    _updSchedule.wK = getPieces(WHITE, KING);
-    _updSchedule.bK = getPieces(BLACK, KING);
+    _updSchedule.wK = _bitscanForward(getPieces(WHITE, KING));
+    _updSchedule.bK = _bitscanForward(getPieces(BLACK, KING));
 
 
     _updDone = false;
@@ -1079,8 +1078,8 @@ void Board::_scheduleUpdateCapture(Color c, PieceType moving, PieceType captured
     _updSchedule.from = from;
     _updSchedule.to = to;
 
-    _updSchedule.wK = getPieces(WHITE, KING);
-    _updSchedule.bK = getPieces(BLACK, KING);
+    _updSchedule.wK = _bitscanForward(getPieces(WHITE, KING));
+    _updSchedule.bK = _bitscanForward(getPieces(BLACK, KING));
 
     _updDone = false;
 }
@@ -1094,8 +1093,8 @@ void Board::_scheduleUpdateCastle(Color c, unsigned int from, unsigned int to, u
     _updSchedule.fromRook = fromR;
     _updSchedule.toRook = toR;
 
-    _updSchedule.wK = getPieces(WHITE, KING);
-    _updSchedule.bK = getPieces(BLACK, KING);
+    _updSchedule.wK = _bitscanForward(getPieces(WHITE, KING));
+    _updSchedule.bK = _bitscanForward(getPieces(BLACK, KING));
 
     _updDone = false;
 }
@@ -1107,9 +1106,12 @@ void Board::_scheduleUpdateEnpass(Color c, unsigned int from, unsigned int to){
     _updSchedule.from = from;
     _updSchedule.to = to;
 
+    _updSchedule.wK = _bitscanForward(getPieces(WHITE, KING));
+    _updSchedule.bK = _bitscanForward(getPieces(BLACK, KING));
+
     _updDone = false;
 }
 
 void Board::_scheduleUpdateEmpty(){
-    _updDone = false;
+    //_updDone = false;
 }
