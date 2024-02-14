@@ -49,6 +49,9 @@ struct UpdData{
 
     unsigned int fromRook;
     unsigned int toRook;
+
+    int wK;
+    int bK;
     // init
 };
 

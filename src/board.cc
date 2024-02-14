@@ -955,29 +955,68 @@ int Board::getPhase() const{
     // mark as updated, copy nnue and perform an update
     _updDone = true;
 
-    // copy accumulator
-    *(_nnue + 1) = *_nnue;
-    _nnue = _nnue + 1;
 
     switch (_updSchedule.type)
     {
     case NN_MOVE:
-        _nnue->movePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.from, _updSchedule.to);
+        if (_updSchedule.movingPiece == KING &&
+            BUCKET[_updSchedule.from] != BUCKET[_updSchedule.to]){
+                // bucket changed, reset everything
+                _nnue = _nnue + 1;
+                *_nnue = NNueEvaluation(*this);
+            }else{
+                *(_nnue + 1) = *_nnue;
+                _nnue = _nnue + 1;
+                _nnue->movePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.from, _updSchedule.to, _updSchedule.wK, _updSchedule.bK);
+            }
         break;
     case NN_PROMO:
-        _nnue->promotePiece(_updSchedule.color, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        // cannot change buckets here, just copy and update
+        // copy accumulator
+        *(_nnue + 1) = *_nnue;
+        _nnue = _nnue + 1;
+        //update
+        _nnue->promotePiece(_updSchedule.color, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to, _updSchedule.wK, _updSchedule.bK);
         break;
     case NN_CAPTURE:
-        _nnue->capturePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.capturedPiece, _updSchedule.from, _updSchedule.to);
+            if (_updSchedule.movingPiece == KING &&
+            BUCKET[_updSchedule.from] != BUCKET[_updSchedule.to]){
+                // bucket changed, reset everything
+                _nnue = _nnue + 1;
+                *_nnue = NNueEvaluation(*this);
+            }else{
+                *(_nnue + 1) = *_nnue;
+                _nnue = _nnue + 1;
+                _nnue->capturePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.capturedPiece, _updSchedule.from, _updSchedule.to, _updSchedule.wK, _updSchedule.bK);
+            }
         break;
     case NN_CAPPROMO:
-        _nnue->cappromPiece(_updSchedule.color, _updSchedule.capturedPiece, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        // cannot change buckets here, just copy and update
+        // copy accumulator
+        *(_nnue + 1) = *_nnue;
+        _nnue = _nnue + 1;
+        //update
+        _nnue->cappromPiece(_updSchedule.color, _updSchedule.capturedPiece, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to, _updSchedule.wK, _updSchedule.bK);
         break;
     case NN_CASTLE:
-        _nnue->castleMove(_updSchedule.color, _updSchedule.from, _updSchedule.to, _updSchedule.fromRook, _updSchedule.toRook);
+            if (_updSchedule.movingPiece == KING &&
+            BUCKET[_updSchedule.from] != BUCKET[_updSchedule.to]){
+                // bucket changed, reset everything
+                _nnue = _nnue + 1;
+                *_nnue = NNueEvaluation(*this);
+            }else{
+                *(_nnue + 1) = *_nnue;
+                _nnue = _nnue + 1;
+                _nnue->castleMove(_updSchedule.color, _updSchedule.from, _updSchedule.to, _updSchedule.fromRook, _updSchedule.toRook, _updSchedule.wK, _updSchedule.bK);
+            }
         break;
     case NN_ENPASS:
-        _nnue->enpassMove(_updSchedule.color, _updSchedule.from, _updSchedule.to);
+        // cannot change buckets here, just copy and update
+        // copy accumulator
+        *(_nnue + 1) = *_nnue;
+        _nnue = _nnue + 1;
+        //update
+        _nnue->enpassMove(_updSchedule.color, _updSchedule.from, _updSchedule.to, _updSchedule.wK, _updSchedule.bK);
         break;
     default:
         break;
@@ -994,6 +1033,9 @@ void Board::_scheduleUpdateMove(Color c, PieceType moving, unsigned int from, un
     _updSchedule.from = from;
     _updSchedule.to = to;
 
+    _updSchedule.wK = getPieces(WHITE, KING);
+    _updSchedule.bK = getPieces(BLACK, KING);
+
     _updDone = false;
 }
 
@@ -1004,6 +1046,10 @@ void Board::_scheduleUpdatePromote(Color c, PieceType promoted, unsigned int fro
     _updSchedule.promotedPiece = promoted;
     _updSchedule.from = from;
     _updSchedule.to = to;
+
+    _updSchedule.wK = getPieces(WHITE, KING);
+    _updSchedule.bK = getPieces(BLACK, KING);
+
 
     _updDone = false;
 }
@@ -1017,6 +1063,10 @@ void Board::_scheduleUpdateCapprom(Color c, PieceType captured, PieceType promot
     _updSchedule.from = from;
     _updSchedule.to = to;
 
+    _updSchedule.wK = getPieces(WHITE, KING);
+    _updSchedule.bK = getPieces(BLACK, KING);
+
+
     _updDone = false;
 }
 
@@ -1029,6 +1079,9 @@ void Board::_scheduleUpdateCapture(Color c, PieceType moving, PieceType captured
     _updSchedule.from = from;
     _updSchedule.to = to;
 
+    _updSchedule.wK = getPieces(WHITE, KING);
+    _updSchedule.bK = getPieces(BLACK, KING);
+
     _updDone = false;
 }
 
@@ -1040,6 +1093,9 @@ void Board::_scheduleUpdateCastle(Color c, unsigned int from, unsigned int to, u
     _updSchedule.to = to;
     _updSchedule.fromRook = fromR;
     _updSchedule.toRook = toR;
+
+    _updSchedule.wK = getPieces(WHITE, KING);
+    _updSchedule.bK = getPieces(BLACK, KING);
 
     _updDone = false;
 }

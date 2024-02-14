@@ -22,12 +22,12 @@
 #include "bitutils.h"
 
 #define NNUE_INPUT   (2 * 6 * 64)
-#define NNUE_HIDDEN  (1024)
+#define NNUE_HIDDEN  (768)
 #define NNUE_OUTPUT  (1)
 
 const int NNUE_SCALE = 16 * 512;
 
-const std::string EVAL_FILE = "equi_1024x2rl_2.4Bv4_330.nnue";
+const std::string EVAL_FILE = "equi_768x2_6b_2.4Bv2_120.nnue";
 
 class Board;
 
@@ -56,18 +56,6 @@ public:
     void enpassMove(Color, unsigned int, unsigned int, int, int);
 
 private:
-
-    const int BUCKET[64] = {
-            0,  1,  3,  2,  2,  3,  1,  0,
-            0,  0,  2,  2,  2,  2,  0,  0,
-            4,  4,  5,  5,  5,  5,  4,  4,
-            4,  4,  5,  5,  5,  5,  4,  4,
-            4,  4,  5,  5,  5,  5,  4,  4,
-            4,  4,  5,  5,  5,  5,  4,  4,
-            4,  4,  4,  4,  4,  4,  4,  4,
-            4,  4,  4,  4,  4,  4,  4,  4,
-        };
-
 
     // our main holder of pre-calculated hidden layers for both colors
     // two holders, for white and black perspectives
