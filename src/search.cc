@@ -363,17 +363,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     return _makeDrawScore();
   }
 
-  // Check our InCheck status
-  incheckNode = board.colorIsInCheck(board.getActivePlayer());
-
-  // Go into the QSearch if depth is 0 and we are not in check
-  // Cut out pV and update our seldepth before dropping into qSearch
-  if ((depth <= 0 && !incheckNode) || ply >= MAX_PLY) {
-    _selDepth = std::max(ply, _selDepth);
-    return _qSearch(board, alpha, beta);
-  }
-
-    // Check transposition table cache
+  // Check transposition table cache
   // If TT is causing a cuttoff, we update move ordering stuff
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
   if (ttEntry.Flag != NONE){
@@ -399,6 +389,17 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         return alpha;
       }
     }
+  }
+
+
+  // Check our InCheck status
+  incheckNode = board.colorIsInCheck(board.getActivePlayer());
+
+  // Go into the QSearch if depth is 0 and we are not in check
+  // Cut out pV and update our seldepth before dropping into qSearch
+  if ((depth <= 0 && !incheckNode) || ply >= MAX_PLY) {
+    _selDepth = std::max(ply, _selDepth);
+    return _qSearch(board, alpha, beta);
   }
 
   // Statically evaluate our position
@@ -782,19 +783,6 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     return 0;
   }
 
-  board.performUpdate();
-  int standPat = Eval::evaluate(board, board.getActivePlayer());
-
-  if (standPat >= beta) {
-    if (!pvNode) return beta;
-
-    standPat = std::min((alpha + beta) / 2, beta - 1);
-  }
-
-  if (alpha < standPat) {
-    alpha = standPat;
-  }
-
   // Check transposition table cache
   // If TT is causing a cuttoff, we update move ordering stuff
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
@@ -815,6 +803,20 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
         return alpha;
       }
     }
+  }
+
+
+  board.performUpdate();
+  int standPat = Eval::evaluate(board, board.getActivePlayer());
+
+  if (standPat >= beta) {
+    if (!pvNode) return beta;
+
+    standPat = std::min((alpha + beta) / 2, beta - 1);
+  }
+
+  if (alpha < standPat) {
+    alpha = standPat;
   }
 
   MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
