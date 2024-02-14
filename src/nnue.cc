@@ -93,30 +93,34 @@ NNueEvaluation::NNueEvaluation() = default;
 
 NNueEvaluation::NNueEvaluation(const Board &board) {
 
-    // Load a net given board
-    // Pre-calculate hidden layer scores for further incremental updates
+    int indexesToUpdate [2][64] = {};
+    int indexesTotal = 0;
 
-    // Load biases
-    // Here we simply set values
-    for (auto color : {WHITE, BLACK}){
-        for (int k = 0; k < NNUE_HIDDEN; k++){
-            _hiddenScore[color][k] =  NNUE_HIDDEN_BIAS[k];
+    // Calculate all needed indexes for weights
+    for (auto pt : {PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
+        for (auto pieceColor : {WHITE, BLACK}){
+            U64 tmpBB = board.getPieces(pieceColor, pt);
+            while (tmpBB){
+                int sq = _popLsb(tmpBB);
+                indexesToUpdate[WHITE][indexesTotal] = _getPieceIndex(sq, pt, pieceColor, WHITE);
+                indexesToUpdate[BLACK][indexesTotal] = _getPieceIndex(sq, pt, pieceColor, BLACK);
+                indexesTotal++;
+            }
         }
     }
 
+    // Load biases
+    // Here we simply set values
+    for (int k = 0; k < NNUE_HIDDEN; k++){
+        _hiddenScore[WHITE][k] =  NNUE_HIDDEN_BIAS[k];
+        _hiddenScore[BLACK][k] =  NNUE_HIDDEN_BIAS[k];
+    }
 
-    // Load pieces
-    // Here we do ++
-    for (auto pt : {PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
-        for (auto color : {WHITE, BLACK}){
-            U64 tmpBB = board.getPieces(color, pt);
-            while (tmpBB){
-                int sq = _popLsb(tmpBB);
-                for (int i = 0; i < NNUE_HIDDEN; i++){
-                    _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[_getPieceIndex(sq, pt, color, WHITE)][i];
-                    _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[_getPieceIndex(sq, pt, color, BLACK)][i];
-                }
-            }
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        for (int k = 0; k < indexesTotal; k++){
+            _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[indexesToUpdate[WHITE][k]][i];
+            _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[indexesToUpdate[BLACK][k]][i];
         }
     }
 
