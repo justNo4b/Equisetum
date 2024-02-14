@@ -114,7 +114,7 @@ void Timer::startIteration(){
     _lastPlyTime = 0;
 }
 
-bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes){
+bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes, int scoreDiff){
     int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _start).count();
     *elapsedTime = elapsed;
     if (_moveTimeMode) return false;
@@ -130,10 +130,15 @@ bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes){
     double nodesCoeff = 1.0 + (51.0 - nodesConfidance) / 50.0;
 
 
+    // set our score confidence
+    double scoreConfidence = abs(scoreDiff) * 0.8;
+    // clamp between 0.5 and 1.5
+    scoreConfidence = std::max(scoreConfidence, 0.5);
+    scoreConfidence = std::min(scoreConfidence, 1.5);
 
 
     *elapsedTime = elapsed;
-    if (_wasThoughtProlonged ||  (elapsed >= (_timeAllocated * nodesCoeff * 0.5))){
+    if (_wasThoughtProlonged ||  (elapsed >= (_timeAllocated * nodesCoeff * 0.5 * scoreConfidence))){
         return true;
     }
 

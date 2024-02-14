@@ -75,6 +75,7 @@ void Search::iterDeep() {
   _nodes = 0;
   _selDepth = 0;
   std::memset(_rootNodesSpent, 0, sizeof(_rootNodesSpent));
+  std::memset(_scoreResults, 0, sizeof(_scoreResults));
   _timer.startIteration();
   int maxDepthSearched = 0;
 
@@ -99,6 +100,7 @@ void Search::iterDeep() {
 
             if (_stop) break;
 
+            _scoreResults[currDepth] = score;
             if (score <= aspAlpha){
                 aspAlpha = std::max(aspAlpha - aspDelta, LOST_SCORE);
             }else if( score >= aspBeta){
@@ -115,8 +117,9 @@ void Search::iterDeep() {
 
         if (_stop) break;
 
+        int scoreDiff = currDepth > 6 ? _scoreResults[currDepth - 3] - _scoreResults[currDepth] : 0;
         int elapsed = 0;
-        bool shouldStop = _timer.finishOnThisDepth(&elapsed, _nodes, _rootNodesSpent[_bestMove.getPieceType()][_bestMove.getTo()]);
+        bool shouldStop = _timer.finishOnThisDepth(&elapsed, _nodes, _rootNodesSpent[_bestMove.getPieceType()][_bestMove.getTo()], scoreDiff);
         if (_logUci) {
             _logUciInfo(_getPv(), currDepth, _bestScore, _nodes, elapsed);
         }
