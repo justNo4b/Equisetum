@@ -548,6 +548,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       if (depth <= 6
          && isQuiet
          && !incheckNode
+         && !pvNode
          && nodeEval + 150 * depth <= alpha) continue;
 
 
