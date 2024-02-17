@@ -131,7 +131,7 @@ bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes, 
 
 
     // set our score confidence
-    double scoreConfidence = abs(scoreDiff) * 0.08;
+    double scoreConfidence = abs(scoreDiff) * 0.12;
     // clamp between 0.5 and 1.5
     scoreConfidence = std::max(scoreConfidence, 0.5);
     scoreConfidence = std::min(scoreConfidence, 1.5);
