@@ -52,7 +52,7 @@ void MovePicker::_scoreMoves() {
       value +=  _board->SEE_GreaterOrEqual(move, th)  ? CAPTURE_BONUS : BAD_CAPTURE;
       move.setValue(value);
     } else if (move.getFlags() & Move::PROMOTION) {
-      int value = _ply == MAX_PLY ? _board->SEE_GreaterOrEqual(move, 0) : PROMOTION_SORT[move.getPromotionPieceType()];
+      int value = _ply == MAX_PLY ? -100 + _board->SEE_GreaterOrEqual(move, 0) * 200 : PROMOTION_SORT[move.getPromotionPieceType()];
       move.setValue(value);
     } else if (moveINT == Killer1) {
       move.setValue(KILLER1_BONUS);
