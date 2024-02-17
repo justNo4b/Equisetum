@@ -830,9 +830,12 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
       break;
     }
 
+    if ((move.getFlags() & Move::PROMOTION) && !board.SEE_GreaterOrEqual(move, 0))
+        continue;
+
     // Use Halogen futility variation
     if (!(move.getFlags() & Move::PROMOTION) && !board.SEE_GreaterOrEqual(move, (alpha - standPat - DELTA_MOVE_CONST)))
-      continue;;
+      continue;
 
     Board movedBoard = board;
     bool isLegal = movedBoard.doMove(move);
