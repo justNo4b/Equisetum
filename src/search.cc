@@ -573,11 +573,13 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
             ttEntry.move == move.getMoveINT() &&
             abs(ttEntry.score) < WON_IN_X / 4){
               int sDepth = depth / 2;
-              int sBeta = ttEntry.score - depth * 2;
+              int sBeta = ttEntry.score - depth;
               int score = depth > 5 ? _negaMax(board, &thisPV, sDepth, sBeta - 1, sBeta, true, cutNode) : nodeEval;
               if (sBeta > score){
                 tDepth += 1 + (fnNode && depth > 5);
                 singNode = true;
+              }else if( depth > 5 && ttEntry.score >= beta){
+                tDepth -= 2;
               }
             }
 
