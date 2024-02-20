@@ -1109,8 +1109,6 @@ bool Eval::isPositionInteresting(const Board &board){
     // Probe eval hash
     U64 index = board.getpCountKey().getValue() & (EG_HASH_SIZE - 1);
     egEvalFunction spEval   = myEvalHash[index].eFunction;
-    egEntryType    spevType = myEvalHash[index].evalType;
-    int            egResult = 1;
     Color          color    = board.getActivePlayer();
     Color          otherColor = getOppositeColor(color);
 
@@ -1119,19 +1117,53 @@ bool Eval::isPositionInteresting(const Board &board){
         return false;
     }
 
-
     // Eval position using nnue to get basic assesment
-    int nnueEval =  board.getNNueEval();
-    nnueEval = (((384 - (board.getPhase() / 2) ) * nnueEval) / 256);
-
-    // return for high eval
-    if (abs(nnueEval) >= 150) return false;
+    int hceScore = 0;
 
     // See if the imbalance is high.
     int wMajorCount = _popCount(board.getAllPieces(WHITE) ^ board.getPieces(WHITE, PAWN));
     int bMajorCount = _popCount(board.getAllPieces(BLACK) ^ board.getPieces(BLACK, PAWN));
 
+
     if (wMajorCount != bMajorCount){
+        return true;
+    }
+
+    //try to see if kingSafety is high for at least one player
+    // Piece square tables
+    hceScore += board.getPSquareTable().getScore(color) - board.getPSquareTable().getScore(otherColor);
+    // Create evalBits stuff
+    evalBits eB = Eval::Setupbits(board);
+
+    // Probe pawnHash, if not found, do full pawn evaluation
+    hceScore += probePawnStructure(board, color, &eB);
+
+    // Evaluate pieces
+    hceScore +=  evaluateBISHOP(board, color, &eB) - evaluateBISHOP(board, otherColor, &eB)
+                + evaluateKNIGHT(board, color, &eB) - evaluateKNIGHT(board, otherColor, &eB)
+                + evaluateROOK  (board, color, &eB) - evaluateROOK  (board, otherColor, &eB)
+                + evaluateQUEEN (board, color, &eB) - evaluateQUEEN (board, otherColor, &eB)
+                + evaluateKING  (board, color, &eB)  - evaluateKING  (board, otherColor, &eB);
+
+    // Interactions between pieces and pawns
+    hceScore +=  PiecePawnInteraction(board, color, &eB)
+               - PiecePawnInteraction(board, otherColor, &eB);
+
+    hceScore +=  kingShieldSafety(board, color, &eB)
+               - kingShieldSafety(board, otherColor, &eB);
+
+    // Transform obtained safety score into game score
+    int colKS = kingDanger(color, &eB);
+    int ocKS  = kingDanger(otherColor, &eB);
+
+    hceScore +=  colKS - ocKS;
+
+    hceScore += winnableEndgame(board, color, &eB, hceScore);
+
+    // Taper and Scale obtained score
+    //int final_eval = TaperAndScale(board, color, hceScore);
+
+    if (opS(colKS) >= 55 || opS(ocKS) >= 55){
         return true;
     }
 

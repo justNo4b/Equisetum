@@ -51,8 +51,9 @@ int main(int argCount, char* argValue[]) {
     testSEE();
     return 0;
   }else if (argCount > 1 && strcmp("trypos", argValue[1]) == 0){
-
-
+    bool i = testSinglePosition(argValue[2]);
+    std::cout << i << std::endl;
+    return 0;
 
   }else{
     Uci::init();

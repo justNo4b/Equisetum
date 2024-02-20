@@ -20,6 +20,7 @@
 #include "search.h"
 #include "move.h"
 #include "timer.h"
+#include "eval.h"
 #include <iostream>
 #include <memory>
 
@@ -47,7 +48,7 @@ void myBench(){
         nodes_total += curNodes;
         myHASH->HASH_Clear();
         myOrdering->clearAllHistory();
-        printf("Position [# %2d] Best: %6s %5i cp  Nodes: %12i", i + 1,search->getBestMove().getNotation(board.getFrcMode()).c_str(),
+        printf("Position [# %2d] Best: %6s %5i cp  Nodes: %12i", i + 1, search->getBestMove().getNotation(board.getFrcMode()).c_str(),
                  search->getBestScore(), curNodes);
         std::cout << std::endl;
     }
@@ -67,5 +68,34 @@ void testSEE(){
         bool k = board.SEE_GreaterOrEqual(move, -100);
         std::cout << i << " " << k << std::endl;
     }
+
+}
+
+bool testSinglePosition(std::string s){
+    // create basics
+    Limits limits;
+    limits.depth = BENCH_SEARCH_DEPTH;
+    Hist history = Hist();
+    std::shared_ptr<Search> search;
+    Board b = Board(s, false);
+    NNueEvaluation nn = NNueEvaluation(b);
+    b.setNnuePtr(&nn);
+
+    // search for a bit.
+    search = std::make_shared<Search>(b, limits, history, myOrdering, false);
+    search->iterDeep();
+
+    int searchScore = search->getBestScore();
+    Move searchMove = search->getBestMove();
+    //std::cout << searchMove.getNotation(b.getFrcMode()).c_str() << " " << searchScore << std::endl;
+
+    if (abs(searchScore) >= INTERESTING_THRESHOLD || !searchMove.isQuiet()){
+
+        return false;
+    }
+
+
+    return Eval::isPositionInteresting(b);
+
 
 }

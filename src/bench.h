@@ -26,6 +26,8 @@
 #define BENCH_POS_NUMBER        (50)
 #define BENCH_SEARCH_DEPTH      (12)
 
+#define INTERESTING_THRESHOLD   (200)
+
 /**
  * @brief returns bench of an engine
  */
@@ -33,6 +35,8 @@ void myBench();
 
 
 void testSEE();
+
+bool testSinglePosition(std::string);
 
 
 const std::string BENCH_POSITION[BENCH_POS_NUMBER] = {
