@@ -50,6 +50,10 @@ int main(int argCount, char* argValue[]) {
   }else if(argCount > 1 && strcmp("see", argValue[1]) == 0){
     testSEE();
     return 0;
+  }else if (argCount > 1 && strcmp("trypos", argValue[1]) == 0){
+
+
+
   }else{
     Uci::init();
     Uci::start();

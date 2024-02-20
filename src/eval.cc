@@ -1102,6 +1102,58 @@ inline int Eval::evaluateMain(const Board &board, Color color) {
   return final_eval + TEMPO;
 }
 
+bool Eval::isPositionInteresting(const Board &board){
+    // What do we want. We want a position with high imbalances, but eval shouldnt be that high
+    // We dont want to exclude shit with low piece count.
+
+    // Probe eval hash
+    U64 index = board.getpCountKey().getValue() & (EG_HASH_SIZE - 1);
+    egEvalFunction spEval   = myEvalHash[index].eFunction;
+    egEntryType    spevType = myEvalHash[index].evalType;
+    int            egResult = 1;
+    Color          color    = board.getActivePlayer();
+    Color          otherColor = getOppositeColor(color);
+
+    // If we found special eval, it is not interesting
+    if (myEvalHash[index].key == board.getpCountKey().getValue() && spEval != nullptr){
+        return false;
+    }
+
+
+    // Eval position using nnue to get basic assesment
+    int nnueEval =  board.getNNueEval();
+    nnueEval = (((384 - (board.getPhase() / 2) ) * nnueEval) / 256);
+
+    // return for high eval
+    if (abs(nnueEval) >= 150) return false;
+
+    // See if the imbalance is high.
+    int wMajorCount = _popCount(board.getAllPieces(WHITE) ^ board.getPieces(WHITE, PAWN));
+    int bMajorCount = _popCount(board.getAllPieces(BLACK) ^ board.getPieces(BLACK, PAWN));
+
+    if (wMajorCount != bMajorCount){
+        return true;
+    }
+
+
+    return false;
+}
+
+int Eval::evaluateHCE(const Board &board){
+    // Probe eval hash
+    U64 index = board.getpCountKey().getValue() & (EG_HASH_SIZE - 1);
+    egEvalFunction spEval   = myEvalHash[index].eFunction;
+    egEntryType    spevType = myEvalHash[index].evalType;
+    int            egResult = 1;
+
+    if (myEvalHash[index].key == board.getpCountKey().getValue() && spEval != nullptr){
+        egResult = spEval(board, board.getActivePlayer());
+        if (spevType == RETURN_SCORE) return egResult;
+    }
+
+    return evaluateMain(board, board.getActivePlayer()) / egResult;
+}
+
 int Eval::evaluate(const Board &board, Color color){
 
     // Probe eval hash

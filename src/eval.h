@@ -449,7 +449,8 @@ void init();
 inline int evaluateMain(const Board &, Color);
 
 int evaluate(const Board &, Color);
-
+int evaluateHCE(const Board &);
+bool isPositionInteresting(const Board &);
 
 void initEG();
 
