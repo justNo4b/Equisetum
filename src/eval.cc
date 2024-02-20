@@ -1121,11 +1121,13 @@ bool Eval::isPositionInteresting(const Board &board){
     int hceScore = 0;
 
     // See if the imbalance is high.
-    int wMajorCount = _popCount(board.getAllPieces(WHITE) ^ board.getPieces(WHITE, PAWN));
-    int bMajorCount = _popCount(board.getAllPieces(BLACK) ^ board.getPieces(BLACK, PAWN));
+    int wMajorCount = _popCount(board.getAllPieces(WHITE) ^ board.getPieces(WHITE, PAWN) ^ board.getPieces(WHITE, KNIGHT) ^ board.getPieces(WHITE, BISHOP));
+    int bMajorCount = _popCount(board.getAllPieces(BLACK) ^ board.getPieces(BLACK, PAWN) ^ board.getPieces(BLACK, KNIGHT) ^ board.getPieces(BLACK, BISHOP));
 
+    int wMinorCount = _popCount(board.getAllPieces(WHITE) ^ board.getPieces(WHITE, PAWN) ^ board.getPieces(WHITE, ROOK) ^ board.getPieces(WHITE, QUEEN));
+    int bMinorCount = _popCount(board.getAllPieces(BLACK) ^ board.getPieces(BLACK, PAWN) ^ board.getPieces(BLACK, ROOK) ^ board.getPieces(BLACK, QUEEN));
 
-    if (wMajorCount != bMajorCount){
+    if ((wMajorCount != bMajorCount) || (wMinorCount != bMinorCount)){
         return true;
     }
 
