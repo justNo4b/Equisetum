@@ -8,16 +8,15 @@
 
 std::vector <std::string> BOOK;
 
-Move DataGen::getRandomLegalMove(const Board &board){
+Move DataGen::getRandomLegalMove(const Board * board ){
     // Generate all moves
-    MoveGen movegen(board, false);
-    MoveList * allMoves = movegen.getMoves();
+    MoveList allMoves = MoveList();
+    MoveGen movegen(board, false, &allMoves);
     MoveList legalMoves;
 
-    for (auto & m : *allMoves){
-        Board movedBoard = board;
-        movedBoard.doMove(m);
-        if (!movedBoard.colorIsInCheck(movedBoard.getInactivePlayer())) legalMoves.push_back(m);
+    for (auto & m : allMoves){
+        Board movedBoard = *board;
+        if (movedBoard.doMove(m))legalMoves.push_back(m);
     }
 
     if (legalMoves.size() > 0){
@@ -58,7 +57,7 @@ void DataGen::readBook(){
 bool DataGen::createRandomOpening(Board &board, int openingDepth){
 
     for (int i = 0; i < openingDepth; i++){
-        Move rndMove = getRandomLegalMove(board);
+        Move rndMove = getRandomLegalMove(&board);
         if (rndMove.getMoveINT() != 0){
             board.doMove(rndMove);
         }else{
@@ -66,7 +65,7 @@ bool DataGen::createRandomOpening(Board &board, int openingDepth){
         }
     }
     // check final position to be leagl
-    Move rndMove = getRandomLegalMove(board);
+    Move rndMove = getRandomLegalMove(&board);
     if (rndMove.getMoveINT() != 0){
         return true;
     }
@@ -128,7 +127,7 @@ void DataGen::playGame(int threadNum){
         b.doMove(best);
 
         // test if position is valid, otherwise adjudigate
-        if (getRandomLegalMove(b).getMoveINT() == 0){
+        if (getRandomLegalMove(&b).getMoveINT() == 0){
             // No legal moves after move is made, Win for moving side
             if (b.colorIsInCheck(b.getActivePlayer())){
                 result =  stmWin(b);

@@ -46,7 +46,7 @@ class Search {
    * @param logUci If logUci is set, UCI info commands about the search will be printed
    * to standard output in real time.k
    */
-  Search(const Board &, Limits, Hist, OrderingInfo *, bool= true);
+  Search(const Board &, Limits, Hist, OrderingInfo *, HASH *, bool= true);
 
   /**
    * @brief Performs an iterative deepening search within the constraints of the given limits.
@@ -126,6 +126,8 @@ class Search {
    * of this search
    */
   OrderingInfo & _orderingInfo;
+
+  HASH & _hash;
 
   /**
    * @brief Timer that is controlling time management and testing to not over

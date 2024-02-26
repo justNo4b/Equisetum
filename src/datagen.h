@@ -14,7 +14,7 @@
 namespace DataGen
 {
 
-    Move getRandomLegalMove(const Board &);
+    Move getRandomLegalMove(const Board *);
 
     /*
         params are board and opening depth in ply

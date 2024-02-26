@@ -299,6 +299,10 @@ class Board {
 
   void performUpdate();
 
+  std::string getFenRep() const;
+
+  std::string getPieceAtSquareString(int) const;
+
  private:
   /**
    * @name Attack bitboard generation functions.

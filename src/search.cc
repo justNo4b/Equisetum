@@ -30,7 +30,6 @@
 extern int myTHREADSCOUNT;
 extern Search         * cSearch[MAX_THREADS];
 extern std::thread      cThread[MAX_THREADS];
-extern HASH           * myHASH;
 
 
 void Search::init_LMR_array(){
@@ -53,8 +52,9 @@ void Search::init_LMR_array(){
 
 }
 
-Search::Search(const Board &board, Limits limits, Hist positionHistory, OrderingInfo *info, bool logUci) :
+Search::Search(const Board &board, Limits limits, Hist positionHistory, OrderingInfo *info, HASH *h, bool logUci) :
     _orderingInfo(*info),
+    _hash(*h),
     _timer(limits, board.getActivePlayer(), board._getGameClock() / 2),
     _initialBoard(board),
     _logUci(logUci),
@@ -261,7 +261,7 @@ inline int Search::_makeDrawScore(){
 int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   _nodes++;
 
-  const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
+  const HASH_Entry ttEntry = _hash.HASH_Get(board.getZKey().getValue());
   int hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
 
   MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0);
@@ -281,7 +281,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
     bool isLegal = movedBoard.doMove(move);
 
     if (isLegal){
-        myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
+        _hash.HASH_Prefetch(movedBoard.getZKey().getValue());
         _sStack.AddMove(move);
         U64 nodesStart = _nodes;
 
@@ -315,7 +315,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   }
 
   if (!_stop && !(bestMove.getFlags() & Move::NULL_MOVE)) {
-    myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, 0);
+    _hash.HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, 0);
     _bestMove = bestMove;
     _bestScore = alpha;
   }
@@ -375,7 +375,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
     // Check transposition table cache
   // If TT is causing a cuttoff, we update move ordering stuff
-  const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
+  const HASH_Entry ttEntry = _hash.HASH_Get(board.getZKey().getValue());
   if (ttEntry.Flag != NONE){
     ttNode = true;
     ttMove = Move(ttEntry.move);
@@ -606,7 +606,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     Board movedBoard = board;
     bool isLegal = movedBoard.doMove(move);
     if (isLegal){
-        myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
+        _hash.HASH_Prefetch(movedBoard.getZKey().getValue());
         bool doLMR = false;
         legalCount++;
         int score;
@@ -716,7 +716,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), depth);
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
-            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
+            _hash.HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
           }
           // we updated beta and in the pVNode so we should update our pV
           if (pvNode && !_stop){
@@ -765,9 +765,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (!_stop && !singSearch){
       if (alpha <= alphaOrig) {
         int saveMove = ttMove.getMoveINT() != 0 ? ttMove.getMoveINT() : 0;
-        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, alpha, depth, ply);
+        _hash.HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, alpha, depth, ply);
       } else {
-        myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, ply);
+        _hash.HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, ply);
       }
   }
 
@@ -799,7 +799,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
 
   // Check transposition table cache
   // If TT is causing a cuttoff, we update move ordering stuff
-  const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
+  const HASH_Entry ttEntry = _hash.HASH_Get(board.getZKey().getValue());
   if (ttEntry.Flag != NONE){
     if (!pvNode){
       int hashScore = ttEntry.score;
@@ -838,13 +838,13 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     bool isLegal = movedBoard.doMove(move);
 
     if (isLegal){
-          myHASH->HASH_Prefetch(movedBoard.getZKey().getValue());
+          _hash.HASH_Prefetch(movedBoard.getZKey().getValue());
 
           int score = -_qSearch(movedBoard, -beta, -alpha);
           if (score >= beta) {
             // Add a new tt entry for this node
             if (!_stop){
-                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, 0, MAX_PLY);
+                _hash.HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, 0, MAX_PLY);
             }
             return beta;
           }

@@ -1057,3 +1057,77 @@ void Board::_scheduleUpdateEnpass(Color c, unsigned int from, unsigned int to){
 void Board::_scheduleUpdateEmpty(){
     _updDone = false;
 }
+
+
+std::string Board::getFenRep() const {
+    std::string fen = "";
+    int eCount = 0;
+
+    std::string strRows[8];
+
+
+    for (int sq = a1; sq <= h8; sq++){
+        if (sq % 8 == 0 && sq != 0){
+            if (eCount) fen += std::to_string(eCount);
+            eCount = 0;
+            strRows[sq / 8] = fen;
+            fen = "";
+        }
+
+        std::string pString = getPieceAtSquareString(sq);
+        if (pString == ""){
+            eCount++;
+        }else{
+            if (eCount) fen += std::to_string(eCount);
+            fen += pString;
+            eCount = 0;
+        }
+
+    }
+    if (eCount) fen += std::to_string(eCount);
+    for (int k = 7; k >= 1; k--){
+        fen += "/";
+        fen += strRows[k];
+
+    }
+
+    // print side to move
+    fen += _activePlayer == WHITE ? " w " : " b ";
+    // print castling rights
+    // NOTE: normal chess only
+    fen += !_castlingRights ? "-" : "";
+    fen += _castlingRights & (ONE << h1) ? "K" : "";
+    fen += _castlingRights & (ONE << a1) ? "Q" : "";
+    fen += _castlingRights & (ONE << h8) ? "k" : "";
+    fen += _castlingRights & (ONE << a8) ? "q" : "";
+
+    // print ep square (always empty for now)
+    fen += " ";
+    fen += _enPassant == ZERO ? "-" : Move::indexToNotation(_bitscanForward(_enPassant));
+
+    fen += " " + std::to_string(_halfmoveClock)
+         + " " + std::to_string(_gameClock / 2);
+
+    return fen;
+}
+
+std::string Board::getPieceAtSquareString(int squareIndex) const {
+  U64 square = ONE << squareIndex;
+
+  std::string res = "";
+
+  if (square & _pieces[WHITE][PAWN]) res = "P";
+  else if (square & _pieces[WHITE][ROOK]) res = "R";
+  else if (square & _pieces[WHITE][KNIGHT]) res = "N";
+  else if (square & _pieces[WHITE][BISHOP]) res = "B";
+  else if (square & _pieces[WHITE][KING]) res = "K";
+  else if (square & _pieces[WHITE][QUEEN]) res = "Q";
+  else if (square & _pieces[BLACK][PAWN]) res = "p";
+  else if (square & _pieces[BLACK][ROOK]) res = "r";
+  else if (square & _pieces[BLACK][KNIGHT]) res = "n";
+  else if (square & _pieces[BLACK][BISHOP]) res = "b";
+  else if (square & _pieces[BLACK][KING]) res = "k";
+  else if (square & _pieces[BLACK][QUEEN]) res = "q";
+
+  return res;
+}

@@ -80,6 +80,11 @@ void HASH::HASH_Clear(){
     }
 }
 
+void HASH::HASH_Destroy(){
+      delete[] hashTable;
+      delete[] pHASH;
+}
+
 void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, int score, int depth, int ply){
       if (abs(score) > WON_IN_X){
         score = (score > 0) ? (score - ply) : (score + ply);

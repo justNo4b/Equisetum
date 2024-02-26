@@ -189,13 +189,13 @@ void go(std::istringstream &is) {
       // clear killers for every ordering
       cOrdering[i]->clearKillers();
       // create search and assign to the thread
-      cSearch[i] = new Search(b, l, h, cOrdering[i], false);
+      cSearch[i] = new Search(b, l, h, cOrdering[i], myHASH, false);
       cThread[i] = std::thread(&Search::iterDeep, cSearch[i]);
     }
   }
 
   myOrdering->clearKillers();
-  search = std::make_shared<Search>(board, limits, positionHistory, myOrdering);
+  search = std::make_shared<Search>(board, limits, positionHistory, myOrdering, myHASH);
 
   std::thread searchThread(&pickBestMove);
   searchThread.detach();
