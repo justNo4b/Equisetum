@@ -22,8 +22,10 @@
 #include "rays.h"
 #include "tuning.h"
 #include "bench.h"
+#include "datagen.h"
 #include "nnue.h"
 #include <cstring>
+#include <thread>
 
 extern  HASH * myHASH;
 OrderingInfo * myOrdering;
@@ -40,6 +42,21 @@ int main(int argCount, char* argValue[]) {
   myHASH->HASH_Initalize_MB(16);
 
   myOrdering = new OrderingInfo();
+
+
+  // Generate random seed
+  const int tNum = 10;
+  std::srand(std::time(NULL));
+  std::vector<std::thread> t(tNum);
+  DataGen::readBook();
+
+  for (int i = 0; i < tNum; i++){
+    t[i] = std::thread(&DataGen::WorkerFunction, i + 1);
+  }
+
+  for (auto& th : t) {
+    th.join();
+  }
 
   #ifdef _TUNE_
   TunerStart();
