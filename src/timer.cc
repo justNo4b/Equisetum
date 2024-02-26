@@ -1,5 +1,5 @@
 /*
-    Drofa - UCI compatable chess engine
+    Equisetum - UCI compatable chess engine
         Copyright (C) 2017 - 2019  Rhys Rustad-Elliott
                       2020 - 2023  Litov Alexander
     This program is free software: you can redistribute it and/or modify
@@ -75,7 +75,7 @@ bool Timer::checkLimits(U64 nodes){
 
   int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _start).count();
 
-  if (_limits.nodes != 0 && (nodes >= _limits.nodes)) return true;
+  if (_limits.nodes != 0 && (nodes >= _limits.nodes * 2)) return true;
   if (_moveTimeMode){
     if (elapsed >= (_timeAllocated)) return true;
     return false;
@@ -115,6 +115,9 @@ void Timer::startIteration(){
 }
 
 bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes){
+
+    if (_limits.nodes != 0 && (totalNodes >= _limits.nodes)) return true;
+  
     int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _start).count();
     *elapsedTime = elapsed;
     if (_moveTimeMode) return false;
@@ -127,7 +130,7 @@ bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes){
     nodesConfidance = std::max(25.0, nodesConfidance);
     nodesConfidance = std::min(85.0, nodesConfidance);
 
-    double nodesCoeff = 1.0 + (51.0 - nodesConfidance) / 50.0;
+    double nodesCoeff = 1.0 + (50.0 - nodesConfidance) / 50.0;
 
 
 
