@@ -36,7 +36,7 @@ void DataGen::readBook(){
 
     // Exit the program if file is not found or cannot be opened
     if (!file){
-        std::cout << "Failed to open file. Exit"<< std::endl;
+        std::cout << "Failed to open opening_book file. Exit"<< std::endl;
         exit(0);
     }
     else
@@ -51,6 +51,7 @@ void DataGen::readBook(){
     }
 
     std::cout << "Book processed."<< BOOK.size() << " positions opened \n"<< std::endl;
+    std::cout << "Book percent "<< CUSTOM_BOOK_PC << "is used \n"<< std::endl;
 }
 
 

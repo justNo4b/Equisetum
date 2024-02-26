@@ -1120,7 +1120,7 @@ int Eval::evaluate(const Board &board, Color color){
 
     // phase 0 (max) -> 256 (min)
     // scale from 1.5 to 1
-    nnueEval = (((384 - (board.getPhase() / 2) ) * nnueEval) / 256);
+    // nnueEval = (((384 - (board.getPhase() / 2) ) * nnueEval) / 256);
 
     return nnueEval / egResult;
 }

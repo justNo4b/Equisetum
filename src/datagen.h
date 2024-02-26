@@ -2,7 +2,7 @@
 #define DATAGEN_H
 
 #define RND_OPENING_PLY   (8)
-#define CUSTOM_BOOK_PC    (100)
+#define CUSTOM_BOOK_PC    (50)
 #define DG_NODES_SEARCHED (5000)
 #define ADJ_WIN_EVAL      (1500)
 #define ADJ_WIN_PLY       (4)
@@ -33,7 +33,7 @@ namespace DataGen
     const std::string DRAW  = "[0.5]";
     const std::string B_WIN = "[0.0]";
 
-    const std::string BOOK_FILE = "DFRC.epd";
+    const std::string BOOK_FILE = "IMBALANCED_FENS.epd";
 
     struct dataReady
     {

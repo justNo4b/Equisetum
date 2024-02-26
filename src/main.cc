@@ -44,20 +44,6 @@ int main(int argCount, char* argValue[]) {
   myOrdering = new OrderingInfo();
 
 
-  // Generate random seed
-  const int tNum = 10;
-  std::srand(std::time(NULL));
-  std::vector<std::thread> t(tNum);
-  DataGen::readBook();
-
-  for (int i = 0; i < tNum; i++){
-    t[i] = std::thread(&DataGen::WorkerFunction, i + 1);
-  }
-
-  for (auto& th : t) {
-    th.join();
-  }
-
   #ifdef _TUNE_
   TunerStart();
   #else
@@ -67,6 +53,22 @@ int main(int argCount, char* argValue[]) {
   }else if(argCount > 1 && strcmp("see", argValue[1]) == 0){
     testSEE();
     return 0;
+  }else if(argCount > 1 && strcmp("datagen", argValue[1]) == 0){
+
+    // Generate random seed
+    const int tNum = atoi(argValue[2]);
+    std::srand(std::time(NULL));
+    std::vector<std::thread> t(tNum);
+    DataGen::readBook();
+
+    for (int i = 0; i < tNum; i++){
+        t[i] = std::thread(&DataGen::WorkerFunction, i + 1);
+    }
+
+    for (auto& th : t) {
+        th.join();
+    }
+
   }else{
     Uci::init();
     Uci::start();
