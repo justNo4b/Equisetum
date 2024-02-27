@@ -528,30 +528,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                         _orderingInfo.getCaptureHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo());
     int cmHistory     = isQuiet ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()) : 0;
 
-    // 5. PRE-MOVELOOP PRUNING
 
-    if (alpha < WON_IN_X
-        && legalCount >= 1){
-
-      // 5.1 LATE MOVE PRUNING
-      // If we made many quiet moves in the position already
-      // we suppose other moves wont improve our situation
-      if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= 0)) break;
-
-      // 5.2. SEE pruning of quiet moves
-      // At shallow depth prune highlyish -negative SEE-moves
-      if (depth <= 10
-          && isQuiet
-          && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
-          //&& board.Calculate_SEE(move) < ) continue;
-
-      // 5.3. COUNTER-MOVE HISTORY PRUNING
-      // Prune quiet moves with poor CMH on the tips of the tree
-      if (depth <= 3 && isQuiet && cmHistory <= (-4096 * depth + 4096)) continue;
-    }
-
-
-        int tDepth = depth;
+    int tDepth = depth;
+    int reduction = 0;
         // 6. EXTENTIONS
         //
         // 6.0 InCheck extention
@@ -603,6 +582,77 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
               tDepth++;
             }
 
+
+    // Pre-calculate reductions
+    //Basic reduction is done according to the array
+    reduction = _lmr_R_array[std::min(33, tDepth)][std::min(33, legalCount)];
+
+    // Reduction tweaks
+    // We generally want to guess if the move will not improve alpha and guess right to do no re-searches
+
+    // if move is quiet, reduce a bit more (from Weiss)
+    reduction += isQuiet;
+
+    //reduce more when side to move is in check
+    reduction += incheckNode;
+
+    // Reduce more for late quiets if ttNode exists and it is non-Quiet move
+    reduction += isQuiet && !qttNode && ttNode;
+
+    // Reduce more when side-to-move was behind prior to NMP on the previous NMP try
+    // Basically copy-pasted Koivisto idea
+    reduction += isQuiet && nmpTree && board.getActivePlayer() == behindColor;
+
+    // Reduce more in the cut-nodes - used by SF/Komodo/etc
+    reduction += cutNode;
+
+    // Reduce less if move on the previous ply was bad
+    // Ie hystorycally bad quiet, see- capture or underpromotion
+    reduction -= pMoveScore < -HALFMAX_HISTORY_SCORE;
+
+    // if we are improving, reduce a bit less (from Weiss)
+    reduction -= improving;
+
+    // reduce less for a position where singular move exists
+    reduction -= singNode;
+
+    // reduce more/less based on the hitory
+    reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
+    reduction -= cmHistory  / HALFMAX_HISTORY_SCORE;
+
+    // reduce less when move is a Queen promotion
+    reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
+
+    // Reduce less for CounterMove and both Killers
+    reduction -= 2 * (move.getMoveINT() == _orderingInfo.getCounterMoveINT(board.getActivePlayer(), pMove) ||
+                     move == _orderingInfo.getKiller1(ply) ||  move == _orderingInfo.getKiller2(ply));
+
+
+    // 5. PRE-MOVELOOP PRUNING
+    if (alpha < WON_IN_X
+        && legalCount >= 1){
+
+       int lmrDepth = tDepth - reduction;
+      // 5.1 LATE MOVE PRUNING
+      // If we made many quiet moves in the position already
+      // we suppose other moves wont improve our situation
+      if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= 0)) break;
+
+      // 5.2. SEE pruning of quiet moves
+      // At shallow depth prune highlyish -negative SEE-moves
+      if (depth <= 10
+          && isQuiet
+          && !board.SEE_GreaterOrEqual(move, (-68 * lmrDepth + 48))) continue;
+          //&& board.Calculate_SEE(move) < ) continue;
+
+      // 5.3. COUNTER-MOVE HISTORY PRUNING
+      // Prune quiet moves with poor CMH on the tips of the tree
+      if (depth <= 3 && isQuiet && cmHistory <= (-4096 * depth + 4096)) continue;
+    }
+
+
+
+
     Board movedBoard = board;
     bool isLegal = movedBoard.doMove(move);
     if (isLegal){
@@ -621,52 +671,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // mix of ideas from Weiss code, own ones and what is written in the chessprogramming wiki
         doLMR = tDepth > 2 && legalCount > 2 + pvNode;
         if (doLMR){
-
-          //Basic reduction is done according to the array
-          int reduction = _lmr_R_array[std::min(33, tDepth)][std::min(33, legalCount)];
-
-          // Reduction tweaks
-          // We generally want to guess if the move will not improve alpha and guess right to do no re-searches
-
-          // if move is quiet, reduce a bit more (from Weiss)
-          reduction += isQuiet;
-
-          //reduce more when side to move is in check
-          reduction += incheckNode;
-
-          // Reduce more for late quiets if ttNode exists and it is non-Quiet move
-          reduction += isQuiet && !qttNode && ttNode;
-
-          // Reduce more when side-to-move was behind prior to NMP on the previous NMP try
-          // Basically copy-pasted Koivisto idea
-          reduction += isQuiet && nmpTree && board.getActivePlayer() == behindColor;
-
-          // Reduce more in the cut-nodes - used by SF/Komodo/etc
-          reduction += cutNode;
-
-          // Reduce less if move on the previous ply was bad
-          // Ie hystorycally bad quiet, see- capture or underpromotion
-          reduction -= pMoveScore < -HALFMAX_HISTORY_SCORE;
-
-          // if we are improving, reduce a bit less (from Weiss)
-          reduction -= improving;
-
           // reduce less when a move is giving check
           reduction -= giveCheck;
 
-          // reduce less for a position where singular move exists
-          reduction -= singNode;
-
-          // reduce more/less based on the hitory
-          reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
-          reduction -= cmHistory  / HALFMAX_HISTORY_SCORE;
-
-          // reduce less when move is a Queen promotion
-          reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
-
-          // Reduce less for CounterMove and both Killers
-          reduction -= 2 * (move.getMoveINT() == _orderingInfo.getCounterMoveINT(board.getActivePlayer(), pMove) ||
-                            move == _orderingInfo.getKiller1(ply) ||  move == _orderingInfo.getKiller2(ply));
 
           // We finished reduction tweaking, calculate final depth and search
           // Idea from SF - > allow extending if our reductions are very negative
