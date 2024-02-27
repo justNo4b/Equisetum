@@ -632,7 +632,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     if (alpha < WON_IN_X
         && legalCount >= 1){
 
-       int lmrDepth = tDepth - reduction;
+       int lmrDepth = std::max(tDepth - reduction, 1);
+
       // 5.1 LATE MOVE PRUNING
       // If we made many quiet moves in the position already
       // we suppose other moves wont improve our situation
