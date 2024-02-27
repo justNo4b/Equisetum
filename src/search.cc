@@ -521,6 +521,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       continue;
     }
     bool isQuiet = move.isQuiet();
+    bool isSpecialQuiet = (move.getMoveINT() == _orderingInfo.getCounterMoveINT(board.getActivePlayer(), pMove) ||
+                            move == _orderingInfo.getKiller1(ply) ||  move == _orderingInfo.getKiller2(ply));
     qCount += isQuiet;
 
     int  moveHistory  = isQuiet ?
@@ -547,7 +549,10 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
       // Prune quiet moves with poor CMH on the tips of the tree
-      if (depth <= 3 && isQuiet && cmHistory <= (-4096 * depth + 4096)) continue;
+      if (depth <= 3
+          && isQuiet
+          && !isSpecialQuiet
+          && cmHistory <= (-4096 * depth + 4096)) continue;
     }
 
 
@@ -665,8 +670,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
 
           // Reduce less for CounterMove and both Killers
-          reduction -= 2 * (move.getMoveINT() == _orderingInfo.getCounterMoveINT(board.getActivePlayer(), pMove) ||
-                            move == _orderingInfo.getKiller1(ply) ||  move == _orderingInfo.getKiller2(ply));
+          reduction -= 2 * isSpecialQuiet;
 
           // We finished reduction tweaking, calculate final depth and search
           // Idea from SF - > allow extending if our reductions are very negative
