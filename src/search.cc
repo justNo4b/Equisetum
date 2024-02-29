@@ -565,20 +565,31 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // that non other moves are even close to it, extend this move
         // At low depth use statEval instead of search (Kimmys idea)
         if (!incheckNode &&
+            depth >= 6 &&
             ttEntry.Flag != ALPHA &&
             ttEntry.depth >= depth - 2 &&
             ttEntry.move == move.getMoveINT() &&
-            abs(ttEntry.score) < WON_IN_X / 4){
+            abs(ttEntry.score) < WON_IN_X / 4 ){
               int sDepth = depth / 2;
               int sBeta = ttEntry.score - depth;
-              int score = depth > 5 ? _negaMax(board, &thisPV, sDepth, sBeta - 1, sBeta, true, cutNode) : nodeEval;
+              int score = _negaMax(board, &thisPV, sDepth, sBeta - 1, sBeta, true, cutNode);
               if (sBeta > score){
-                tDepth += 1 + (fnNode && depth > 5);
+                tDepth += 1 + fnNode;
                 singNode = true;
-              }else if( depth > 5 && ttEntry.score >= beta){
+              }else if(ttEntry.score >= beta){
                 tDepth -= 2;
               }
+            }else if (
+            depth < 6 &&
+            !incheckNode &&
+            cutNode &&
+            ttEntry.Flag != ALPHA &&
+            ttEntry.depth >= depth - 2 &&
+            ttEntry.move == move.getMoveINT() &&
+            ttEntry.score - depth > nodeEval){
+                tDepth += 1;
             }
+
 
         // 6.2. Passed pawn push extention
         // In the late game  we fear that we may miss
