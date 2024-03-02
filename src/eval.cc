@@ -1118,9 +1118,12 @@ int Eval::evaluate(const Board &board, Color color){
     int nnueEval =  board.getNNueEval();
     //std::cout << nnueEval << std::endl;
 
-    // phase 0 (max) -> 256 (min)
-    // scale from 1.5 to 1
-    nnueEval = (((384 - (board.getPhase() / 2) ) * nnueEval) / 256);
+    // 14 (max) -> 0 (min) majors
+    // 14 -> 1.5; 0 -> 1;
+    int majorCount = _popCount(board.getAllPieces(WHITE) ^ board.getPieces(WHITE, PAWN)) +
+                     _popCount(board.getAllPieces(BLACK) ^ board.getPieces(BLACK, PAWN)) - 2;
+
+    nnueEval = (1 + majorCount / 28) * nnueEval;
 
     return nnueEval / egResult;
 }
