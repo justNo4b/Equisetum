@@ -1123,7 +1123,7 @@ int Eval::evaluate(const Board &board, Color color){
     int majorCount = _popCount(board.getAllPieces(WHITE) ^ board.getPieces(WHITE, PAWN)) +
                      _popCount(board.getAllPieces(BLACK) ^ board.getPieces(BLACK, PAWN)) - 2;
 
-    nnueEval = (1 + majorCount * majorCount / 784) * nnueEval;
+    nnueEval = (256 + (majorCount * majorCount * 2) / 3) * nnueEval / 256;
 
     return nnueEval / egResult;
 }
