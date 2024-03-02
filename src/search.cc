@@ -465,7 +465,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Equisetum dont do this reduction after NullMove, because we already reduced a lot,
   // and reducing further may reduce quality of the NM_Search
   if (depth >= 5 && !ttNode && pMove != 0 && !singSearch)
-    depth -= 1 + cutNode;
+    depth -= 1 + pvNode;
 
   // No pruning occured, generate moves and recurse
   MovePicker movePicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), ply, pMove);
