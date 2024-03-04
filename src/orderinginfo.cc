@@ -80,7 +80,7 @@ void OrderingInfo::decrementCapHistory(PieceType capturingPiece, PieceType captu
 
 void OrderingInfo::incrementCounterHistory(Color color, int pMove, PieceType pType, int to, int depth){
   int16_t current = _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to];
-  int16_t bonus   = std::min(depth * 600 - 600, 10000);
+  int16_t bonus   = std::min(depth * 600 * 4 - 600, 10000);
   _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to] += bonus - current * abs(bonus) / 16384;
 }
 
