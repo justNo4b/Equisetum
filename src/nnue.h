@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "bitutils.h"
+#include <cstdint>
 
 #define NNUE_INPUT   (2 * 6 * 64)
 #define NNUE_HIDDEN  (1024)
