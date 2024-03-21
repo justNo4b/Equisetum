@@ -325,11 +325,11 @@ inline int Search::_getCmhPenalty(int dBonus){
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth){
 	if (isQuiet) {
     _orderingInfo.updateKillers(ply, move);
-    _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), depth);
+    _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), _getHistoryBonus(depth));
     _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
-    _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), 2 * depth);
+    _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), _getCmhBonus(depth, 4));
   }else{
-    _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), depth);
+    _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), _getCapBonus(depth));
   }
 }
 
