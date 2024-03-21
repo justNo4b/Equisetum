@@ -42,7 +42,7 @@ class MovePicker {
    * @param board Current board state for all moves in the provided MoveList
    * @param moveList Pointer to the MoveList to pick moves from
    */
-  MovePicker(const OrderingInfo *, const Board *, MoveList *, int, Color, int, int);
+  MovePicker(const OrderingInfo *, const Board *, int, Color, int, int);
 
   /**
    * @brief Returns the next best move from this MovePicker's MoveList.
@@ -69,7 +69,18 @@ class MovePicker {
   /**
    * @brief List of moves this MovePicker picks from
    */
-  MoveList *_moves;
+  MoveList _moves;
+
+  /**
+   * @brief Size of _moves to pre-reserve before generating moves.
+   *
+   * At the current time 218 seems to be an upper bound on the maximum number
+   * of moves from any one position.
+   */
+  static const int MOVELIST_RESERVE_SIZE = 64;
+  static const int MOVELIST_RESERVE_SIZE_CAPS = 24;
+
+  const Board * _board;
 
   /**
    * @brief Bonuses applied to specific move types.
@@ -89,7 +100,7 @@ class MovePicker {
    * @brief Assigns a value to each move in this GeneralMovePicker's MoveList representing desirability
    * in a negamax search.
    */
-  void _scoreMoves(const Board *);
+  void _scoreMoves();
 
   /**
    * @brief Position of the first unpicked move in this GeneralMovePicker's MoveList

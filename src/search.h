@@ -228,6 +228,8 @@ class Search {
 
   SEARCH_Data _sStack;
 
+  NNueEvaluation _nnStack[MAX_PLY * 2];
+
   /**
    * @brief OrderingInfo object containing information about the current state
    * of this search
@@ -326,7 +328,7 @@ class Search {
    * @param  isSing is this a singular re- search
    * @return The score of the given board
    */
-  int _negaMax(const Board &, pV *myPV, int, int, int, bool, bool);
+  int _negaMax(Board &, pV *myPV, int, int, int, bool, bool);
 
   /**
    * @brief Performs a quiescence search
@@ -339,7 +341,7 @@ class Search {
    * @param  beta  Beta value
    * @return The score of the given board
    */
-  int _qSearch(const Board &, int= -INF, int= INF);
+  int _qSearch(Board &, int= -INF, int= INF);
 
   /**
    * @brief Logs info about a search according to the UCI protocol.

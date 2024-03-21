@@ -20,14 +20,15 @@
 
 #include "defs.h"
 #include "bitutils.h"
+#include <cstdint>
 
 #define NNUE_INPUT   (2 * 6 * 64)
-#define NNUE_HIDDEN  (768)
+#define NNUE_HIDDEN  (1024)
 #define NNUE_OUTPUT  (1)
 
 const int NNUE_SCALE = 16 * 512;
 
-const std::string EVAL_FILE = "equi_768x2e_2.4Bv4_330.nnue";
+const std::string EVAL_FILE = "equi_1024x2_4Bv5_430.nnue";
 
 class Board;
 

@@ -21,6 +21,7 @@
 #include "attacks.h"
 #include "eval.h"
 #include <sstream>
+#include <cstring>
 
 Board::Board() {
     setToFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", false);
@@ -144,8 +145,13 @@ PSquareTable Board::getPSquareTable() const {
   return _pst;
 }
 
-NNueEvaluation Board::getNNue() const {
-  return _nnue;
+int Board::getNNueEval() const {
+  return _nnue->evaluate(_activePlayer);
+}
+
+void Board::setNnuePtr(NNueEvaluation * nn){
+    _updDone = true;
+    _nnue = nn;
 }
 
 bool Board::colorIsInCheck(Color color) const {
@@ -392,7 +398,7 @@ void Board::setToFen(std::string fenString, bool isFrc) {
   _pCountKey.setFromPieceCounts(*this);
 
   _pst = PSquareTable(*this);
-  _nnue = NNueEvaluation(*this);
+  _nnue = nullptr;
 
 }
 
@@ -702,7 +708,7 @@ bool Board::doMove(Move move) {
     _movePiece(_activePlayer, move.getPieceType(), from, to);
     // Check if we are in check after moving
     if (colorIsInCheck(_activePlayer)) return false;
-    _nnue.movePiece(_activePlayer, move.getPieceType(), from, to);
+    _scheduleUpdateMove(_activePlayer, move.getPieceType(), from, to);
   } else if ((flags & Move::CAPTURE) && (flags & Move::PROMOTION)) { // Capture promotion special case
     // Remove captured Piece
     PieceType capturedPieceType = move.getCapturedPieceType();
@@ -715,7 +721,7 @@ bool Board::doMove(Move move) {
     PieceType promotionPieceType = move.getPromotionPieceType();
     _addPiece(_activePlayer, promotionPieceType, to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _nnue.cappromPiece(getActivePlayer(), capturedPieceType, promotionPieceType, from, to);
+    _scheduleUpdateCapprom(getActivePlayer(), capturedPieceType, promotionPieceType, from, to);
   } else if (flags & Move::CAPTURE) {
     // Remove captured Piece
     PieceType capturedPieceType = move.getCapturedPieceType();
@@ -724,19 +730,19 @@ bool Board::doMove(Move move) {
     // Move capturing piece
     _movePiece(_activePlayer, move.getPieceType(), from, to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _nnue.capturePiece(_activePlayer, move.getPieceType(), move.getCapturedPieceType(), from, to);
+    _scheduleUpdateCapture(_activePlayer, move.getPieceType(), move.getCapturedPieceType(), from, to);
   } else if (flags & Move::KSIDE_CASTLE) {
     // Move the correct rook
     if (_activePlayer == WHITE) {
       _movePiece(_activePlayer, KING, from, g1);
       _movePiece(WHITE, ROOK, to, f1);
       if (colorIsInCheck(_activePlayer)) return false;
-      _nnue.castleMove(_activePlayer, from, g1, to, f1);
+       _scheduleUpdateCastle(_activePlayer, from, g1, to, f1);
     } else {
       _movePiece(_activePlayer, KING, from, g8);
       _movePiece(BLACK, ROOK, to, f8);
       if (colorIsInCheck(_activePlayer)) return false;
-      _nnue.castleMove(_activePlayer, from, g8, to, f8);
+       _scheduleUpdateCastle(_activePlayer, from, g8, to, f8);
     }
   } else if (flags & Move::QSIDE_CASTLE) {
     // Move the correct rook
@@ -744,12 +750,12 @@ bool Board::doMove(Move move) {
       _movePiece(_activePlayer, KING, from, c1);
       _movePiece(WHITE, ROOK, to, d1);
       if (colorIsInCheck(_activePlayer)) return false;
-      _nnue.castleMove(_activePlayer, from, c1, to, d1);
+       _scheduleUpdateCastle(_activePlayer, from, c1, to, d1);
     } else {
       _movePiece(_activePlayer, KING, from, c8);
       _movePiece(BLACK, ROOK, to, d8);
       if (colorIsInCheck(_activePlayer)) return false;
-      _nnue.castleMove(_activePlayer, from, c8, to, d8);
+       _scheduleUpdateCastle(_activePlayer, from, c8, to, d8);
     }
   } else if (flags & Move::EN_PASSANT) {
     // Remove the correct pawn
@@ -762,7 +768,7 @@ bool Board::doMove(Move move) {
     // Move the capturing pawn
     _movePiece(_activePlayer, move.getPieceType(), from, to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _nnue.enpassMove(_activePlayer, from, to);
+    _scheduleUpdateEnpass(_activePlayer, from, to);
   } else if (flags & Move::PROMOTION) {
     // Remove promoted pawn
     _removePiece(_activePlayer, PAWN, from);
@@ -770,11 +776,11 @@ bool Board::doMove(Move move) {
     // Add promoted piece
     _addPiece(_activePlayer, move.getPromotionPieceType(), to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _nnue.promotePiece(getActivePlayer(), move.getPromotionPieceType(), from, to);
+    _scheduleUpdatePromote(getActivePlayer(), move.getPromotionPieceType(), from, to);
   } else if (flags & Move::DOUBLE_PAWN_PUSH) {
     _movePiece(_activePlayer, move.getPieceType(), from, to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _nnue.movePiece(_activePlayer, move.getPieceType(), from, to);
+    _scheduleUpdateMove(_activePlayer, move.getPieceType(), from, to);
 
     // Set square behind pawn as _enPassant
     unsigned int enPasIndex = _activePlayer == WHITE ? to - 8 : to + 8;
@@ -948,3 +954,114 @@ int Board::getPhase() const{
  bool Board::getFrcMode() const{
     return _frc;
  }
+
+ void Board::performUpdate(){
+
+    // already updated
+    if (_updDone) return;
+
+    // mark as updated, copy nnue and perform an update
+    _updDone = true;
+
+    // copy accumulator
+    *(_nnue + 1) = *_nnue;
+    _nnue = _nnue + 1;
+
+    switch (_updSchedule.type)
+    {
+    case NN_MOVE:
+        _nnue->movePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.from, _updSchedule.to);
+        break;
+    case NN_PROMO:
+        _nnue->promotePiece(_updSchedule.color, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        break;
+    case NN_CAPTURE:
+        _nnue->capturePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.capturedPiece, _updSchedule.from, _updSchedule.to);
+        break;
+    case NN_CAPPROMO:
+        _nnue->cappromPiece(_updSchedule.color, _updSchedule.capturedPiece, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        break;
+    case NN_CASTLE:
+        _nnue->castleMove(_updSchedule.color, _updSchedule.from, _updSchedule.to, _updSchedule.fromRook, _updSchedule.toRook);
+        break;
+    case NN_ENPASS:
+        _nnue->enpassMove(_updSchedule.color, _updSchedule.from, _updSchedule.to);
+        break;
+    default:
+        break;
+    }
+
+}
+
+
+void Board::_scheduleUpdateMove(Color c, PieceType moving, unsigned int from, unsigned int to){
+
+    _updSchedule.type = NN_MOVE;
+    _updSchedule.color = c;
+    _updSchedule.movingPiece = moving;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
+
+    _updDone = false;
+}
+
+void Board::_scheduleUpdatePromote(Color c, PieceType promoted, unsigned int from, unsigned int to){
+
+    _updSchedule.type = NN_PROMO;
+    _updSchedule.color = c;
+    _updSchedule.promotedPiece = promoted;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
+
+    _updDone = false;
+}
+
+void Board::_scheduleUpdateCapprom(Color c, PieceType captured, PieceType promoted, unsigned int from, unsigned int to){
+
+    _updSchedule.type = NN_CAPPROMO;
+    _updSchedule.color = c;
+    _updSchedule.capturedPiece = captured;
+    _updSchedule.promotedPiece = promoted;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
+
+    _updDone = false;
+}
+
+void Board::_scheduleUpdateCapture(Color c, PieceType moving, PieceType captured, unsigned int from, unsigned int to){
+
+    _updSchedule.type = NN_CAPTURE;
+    _updSchedule.color = c;
+    _updSchedule.movingPiece = moving;
+    _updSchedule.capturedPiece = captured;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
+
+    _updDone = false;
+}
+
+void Board::_scheduleUpdateCastle(Color c, unsigned int from, unsigned int to, unsigned int fromR, unsigned int toR){
+
+    _updSchedule.type = NN_CASTLE;
+    _updSchedule.color = c;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
+    _updSchedule.fromRook = fromR;
+    _updSchedule.toRook = toR;
+
+    _updDone = false;
+}
+
+void Board::_scheduleUpdateEnpass(Color c, unsigned int from, unsigned int to){
+
+    _updSchedule.type = NN_ENPASS;
+    _updSchedule.color = c;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
+
+    _updDone = false;
+}
+
+void Board::_scheduleUpdateEmpty(){
+    _updDone = false;
+}
