@@ -44,10 +44,8 @@ struct SearchParms {
    int prcut_beta_base = 218;
    int prcut_depth = 4;
 
-
-
    int sing_search_start = 5;
-
+   int ppe_depth_limit = 8;
 
    int futil_move_const = 232;
 
@@ -87,7 +85,21 @@ struct SearchParms {
    double lmp_multipl_base = 1.71;
    double lmp_multipl_impr = 1.73;
 
+   int hb_multp = 32;
+   int hb_base  = 0;
+   int hp_multp = 32;
+   int hp_base  = 0;
 
+   int chb_multp = 32;
+   int chb_base = 0;
+   int chp_multp = 32;
+   int chp_base = 0;
+
+   int cmhb_multp = 32;
+   int cmhb_base = 0;
+   int cmhp_multp = 32;
+   int cmhp_base = 0;
+   int cmhp_mt_2 = 4;
 
 };
 
@@ -187,6 +199,7 @@ class Search {
    int SEE_Q_DEPTH = -68;
 
    int SING_SEARCH_START = 5;
+   int PPE_DEPTH_LIMIT = 8;
 
    int DELTA_MOVE_CONST = 186;
    int FUTIL_MOVE_CONST = 232;
@@ -205,6 +218,22 @@ class Search {
    int M_HIST_LMR_DIV = 8192;
    int CM_HIST_LMR_DIV = 8192;
    int PM_HIST_MALUS_FACTOR = -8192;
+
+   int HB_MULTP = 32;
+   int HB_BASE  = 0;
+   int HP_MULTP = 32;
+   int HP_BASE  = 0;
+
+   int CHB_MULTP = 32;
+   int CHB_BASE = 0;
+   int CHP_MULTP = 32;
+   int CHP_BASE = 0;
+
+   int CMHB_MULTP = 32;
+   int CMHB_BASE = 0;
+   int CMHP_MULTP = 32;
+   int CMHP_BASE = 0;
+   int CMHP_MT_2 = 4;
 
    double LMR_INIT_A = 0.57;
    double LMR_INIT_DIV = 2.49;

@@ -142,7 +142,23 @@ void loadCosts(){
     ourBoardParams.qSee = atoi(optionsMap["queenSee"].getValue().c_str());
 */
 
+    ourSearchParams.ppe_depth_limit = atoi(optionsMap["ppe_depth_limit"].getValue().c_str());
 
+   ourSearchParams.hb_multp = atoi(optionsMap["hb_multp"].getValue().c_str());
+   ourSearchParams.hb_base  = atoi(optionsMap["hb_base"].getValue().c_str());
+   ourSearchParams.hp_multp = atoi(optionsMap["hp_multp"].getValue().c_str());
+   ourSearchParams.hp_base  = atoi(optionsMap["hp_base"].getValue().c_str());
+
+   ourSearchParams.chb_multp = atoi(optionsMap["chb_multp"].getValue().c_str());
+   ourSearchParams.chb_base = atoi(optionsMap["chb_base"].getValue().c_str());
+   ourSearchParams.chp_multp = atoi(optionsMap["chp_multp"].getValue().c_str());
+   ourSearchParams.chp_base = atoi(optionsMap["chp_base"].getValue().c_str());
+
+   ourSearchParams.cmhb_multp = atoi(optionsMap["cmhb_multp"].getValue().c_str());
+   ourSearchParams.cmhb_base = atoi(optionsMap["cmhb_base"].getValue().c_str());
+   ourSearchParams.cmhp_multp = atoi(optionsMap["cmhp_multp"].getValue().c_str());
+   ourSearchParams.cmhp_base = atoi(optionsMap["cmhp_base"].getValue().c_str());
+   ourSearchParams.cmhp_mt_2 = atoi(optionsMap["cmhp_mt_2"].getValue().c_str());
 
 
     ourSearchParams.lmp_start_base = atoi(optionsMap["lmp_start_base"].getValue().c_str()) / 100;
@@ -248,6 +264,23 @@ void initOptions() {
   optionsMap["nodes_base"] =     Option(100, 1, 200, &loadCosts);
   optionsMap["lpt_multiplier"] =     Option(20, 5, 50, &loadCosts);
 
+  optionsMap["ppe_depth_limit"] =     Option(8, 4, 12, &loadCosts);
+
+  optionsMap["hb_multp"] =     Option(32, 1, 64, &loadCosts);
+  optionsMap["hb_base"] =     Option(1000, 0, 2000, &loadCosts);
+  optionsMap["hp_multp"] =     Option(32, 1, 64, &loadCosts);
+  optionsMap["hp_base"] =     Option(1000, 0, 2000, &loadCosts);
+
+  optionsMap["chb_multp"] =     Option(32, 1, 64, &loadCosts);
+  optionsMap["chb_base"] =     Option(1000, 0, 2000, &loadCosts);
+  optionsMap["chp_multp"] =     Option(32, 1, 64, &loadCosts);
+  optionsMap["chp_base"] =     Option(1000, 0, 2000, &loadCosts);
+
+  optionsMap["cmhb_multp"] =     Option(32, 1, 64, &loadCosts);
+  optionsMap["cmhb_base"] =     Option(1000, 0, 2000, &loadCosts);
+  optionsMap["cmhp_multp"] =     Option(32, 1, 64, &loadCosts);
+  optionsMap["cmhp_base"] =     Option(1000, 0, 2000, &loadCosts);
+  optionsMap["cmhp_mt_2"] =     Option(4, 1, 8, &loadCosts);
 }
 
 void uciNewGame() {

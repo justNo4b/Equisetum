@@ -50,6 +50,7 @@ void Search::init_LMR_array(SearchParms sp){
     PRCUT_DEPTH = sp.prcut_depth;
 
     SING_SEARCH_START = sp.sing_search_start;
+    PPE_DEPTH_LIMIT = sp.ppe_depth_limit;
 
 
     FUTIL_MOVE_CONST = sp.futil_move_const;
@@ -87,6 +88,21 @@ void Search::init_LMR_array(SearchParms sp){
     LMP_MULTIPL_BASE = sp.lmp_multipl_base;
     LMP_MULTIPL_IMPR = sp.lmp_multipl_impr;
 
+   HB_MULTP = sp.hb_multp;
+   HB_BASE  = sp.hb_base;
+   HP_MULTP = sp.hp_multp;
+   HP_BASE  = sp.hp_base;
+
+   CHB_MULTP = sp.chb_multp;
+   CHB_BASE = sp.chb_base;
+   CHP_MULTP = sp.chp_multp;
+   CHP_BASE = sp.chp_base;
+
+   CMHB_MULTP = sp.cmhb_multp;
+   CMHB_BASE = sp.cmhb_base;
+   CMHP_MULTP = sp.cmhp_multp;
+   CMHP_BASE = sp.cmhp_base;
+   CMHP_MT_2 = sp.cmhp_mt_2;
 
 
 
@@ -293,32 +309,32 @@ bool Search::_checkLimits() {
 
 
 inline int Search::_getHistoryBonus(int dBonus){
-    int bonus = 32 * dBonus * dBonus;
+    int bonus = HB_MULTP * dBonus * dBonus + HB_BASE;
     return bonus;
 }
 
 inline int Search::_getHistoryPenalty(int dBonus){
-    int penalty = -32 * dBonus * (dBonus - 1);
+    int penalty = -1 * HP_MULTP * dBonus * (dBonus - 1) + HP_BASE;
     return penalty;
 }
 
 inline int Search::_getCapBonus(int dBonus){
-  int bonus   = 32 * dBonus * dBonus;
+  int bonus   = CHB_MULTP * dBonus * dBonus + CHB_BASE;
   return bonus;
 }
 
 inline int Search::_getCapPenalty(int dBonus){
-  int penalty   = -32 * dBonus * dBonus;
+  int penalty   = -1 * CHP_MULTP * dBonus * dBonus + CHP_BASE;
   return penalty;
 }
 
 inline int Search::_getCmhBonus(int dBonus, int multiplier){
-    int bonus   = 32 * multiplier * dBonus * dBonus;
+    int bonus   = CMHB_MULTP * multiplier * dBonus * dBonus + CMHB_BASE;
     return bonus;
 }
 
 inline int Search::_getCmhPenalty(int dBonus){
-    int penalty   = -32 * dBonus * dBonus;
+    int penalty   = -1 * CMHP_MULTP * dBonus * dBonus + CMHP_BASE;
     return penalty;
 }
 
@@ -327,7 +343,7 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
     _orderingInfo.updateKillers(ply, move);
     _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), _getHistoryBonus(depth));
     _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
-    _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), _getCmhBonus(depth, 4));
+    _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), _getCmhBonus(depth, CMHP_MT_2));
   }else{
     _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), _getCapBonus(depth));
   }
@@ -674,7 +690,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // Thus we extend in the endgame pushes of the non-blocked
         // passers that are near the middle of the board
         // Extend more if null move failed
-        if (depth <= 8 &&
+        if (depth <= PPE_DEPTH_LIMIT &&
             endgameNode &&
             move.isItPasserPush(board) &&
             ttEntry.move != move.getMoveINT()){
