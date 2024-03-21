@@ -312,6 +312,19 @@ class Search {
 
   inline int _makeDrawScore();
 
+  inline int _getHistoryBonus(int dBonus);
+
+    inline int _getHistoryPenalty(int dBonus);
+
+    inline int _getCapBonus(int dBonus);
+
+    inline int _getCapPenalty(int dBonus);
+
+    inline int _getCmhBonus(int dBonus, int multiplier);
+
+    inline int _getCmhPenalty(int dBonus);
+
+
   /**
    * @brief Root negamax function.
    *

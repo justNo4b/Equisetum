@@ -291,6 +291,37 @@ bool Search::_checkLimits() {
   return _timer.checkLimits(_nodes);
 }
 
+
+inline int Search::_getHistoryBonus(int dBonus){
+    int bonus = 32 * dBonus * dBonus;
+    return bonus;
+}
+
+inline int Search::_getHistoryPenalty(int dBonus){
+    int penalty = -32 * dBonus * (dBonus - 1);
+    return penalty;
+}
+
+inline int Search::_getCapBonus(int dBonus){
+  int bonus   = 32 * dBonus * dBonus;
+  return bonus;
+}
+
+inline int Search::_getCapPenalty(int dBonus){
+  int penalty   = -32 * dBonus * dBonus;
+  return penalty;
+}
+
+inline int Search::_getCmhBonus(int dBonus, int multiplier){
+    int bonus   = 32 * multiplier * dBonus * dBonus;
+    return bonus;
+}
+
+inline int Search::_getCmhPenalty(int dBonus){
+    int penalty   = -32 * dBonus * dBonus;
+    return penalty;
+}
+
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth){
 	if (isQuiet) {
     _orderingInfo.updateKillers(ply, move);
