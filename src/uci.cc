@@ -145,19 +145,19 @@ void loadCosts(){
     ourSearchParams.ppe_depth_limit = atoi(optionsMap["ppe_depth_limit"].getValue().c_str());
 
    ourSearchParams.hb_multp = atoi(optionsMap["hb_multp"].getValue().c_str());
-   ourSearchParams.hb_base  = atoi(optionsMap["hb_base"].getValue().c_str());
+   ourSearchParams.hb_base  = atoi(optionsMap["hb_base"].getValue().c_str()) - 1000;
    ourSearchParams.hp_multp = atoi(optionsMap["hp_multp"].getValue().c_str());
-   ourSearchParams.hp_base  = atoi(optionsMap["hp_base"].getValue().c_str());
+   ourSearchParams.hp_base  = atoi(optionsMap["hp_base"].getValue().c_str()) - 1000;
 
    ourSearchParams.chb_multp = atoi(optionsMap["chb_multp"].getValue().c_str());
-   ourSearchParams.chb_base = atoi(optionsMap["chb_base"].getValue().c_str());
+   ourSearchParams.chb_base = atoi(optionsMap["chb_base"].getValue().c_str()) - 1000;
    ourSearchParams.chp_multp = atoi(optionsMap["chp_multp"].getValue().c_str());
-   ourSearchParams.chp_base = atoi(optionsMap["chp_base"].getValue().c_str());
+   ourSearchParams.chp_base = atoi(optionsMap["chp_base"].getValue().c_str()) - 1000;
 
    ourSearchParams.cmhb_multp = atoi(optionsMap["cmhb_multp"].getValue().c_str());
-   ourSearchParams.cmhb_base = atoi(optionsMap["cmhb_base"].getValue().c_str());
+   ourSearchParams.cmhb_base = atoi(optionsMap["cmhb_base"].getValue().c_str()) - 1000;
    ourSearchParams.cmhp_multp = atoi(optionsMap["cmhp_multp"].getValue().c_str());
-   ourSearchParams.cmhp_base = atoi(optionsMap["cmhp_base"].getValue().c_str());
+   ourSearchParams.cmhp_base = atoi(optionsMap["cmhp_base"].getValue().c_str()) - 1000;
    ourSearchParams.cmhp_mt_2 = atoi(optionsMap["cmhp_mt_2"].getValue().c_str());
 
 
