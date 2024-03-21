@@ -35,8 +35,6 @@ extern HASH           * myHASH;
 
 void Search::init_LMR_array(SearchParms sp){
   // Init Tuning Shit
-
-
     ASP_WINDOW = sp.asp_window;
     ASP_DELTA  = sp.asp_delta;
     ASP_DEPTH  = sp.asp_depth;
@@ -51,8 +49,6 @@ void Search::init_LMR_array(SearchParms sp){
     PRCUT_BETA_BASE = sp.prcut_beta_base;
     PRCUT_DEPTH = sp.prcut_depth;
 
-
-
     SING_SEARCH_START = sp.sing_search_start;
 
 
@@ -61,8 +57,6 @@ void Search::init_LMR_array(SearchParms sp){
     REVF_MOVE_CONST = sp.revf_move_const;
     REVF_IMPR_CONST = sp.revf_impr_const;
     REVF_DEPTH = sp.revf_depth;
-
-    RAZORING_MARGIN = sp.razoring_margin;
 
     DELTA_MOVE_CONST = sp.delta_move_const;
     SEE_Q_BASE = sp.see_q_base;
@@ -83,6 +77,11 @@ void Search::init_LMR_array(SearchParms sp){
     LMR_DEPTH_POW = sp.lmr_depth_pow;
     LMR_NUMBER_POW = sp.lmr_number_pow;
 
+    LMR_INIT_A_CAP = sp.lmr_init_a_cap;
+    LMR_INIT_DIV_CAP = sp.lmr_init_div_cap;
+    LMR_DEPTH_POW_CAP = sp.lmr_depth_pow_cap;
+    LMR_NUMBER_POW_CAP = sp.lmr_number_pow_cap;
+
     LMP_START_BASE = sp.lmp_start_base;
     LMP_START_IMPR = sp.lmp_start_impr;
     LMP_MULTIPL_BASE = sp.lmp_multipl_base;
@@ -98,7 +97,8 @@ void Search::init_LMR_array(SearchParms sp){
   for (int depth = 0; depth < 34; depth++){
     for (int movenum = 0; movenum < 34; movenum++){
       //Quiet
-      _lmr_R_array[depth][movenum] = (int) (LMR_INIT_A + (pow(depth, LMR_DEPTH_POW) * pow(movenum, LMR_NUMBER_POW)) / LMR_INIT_DIV);
+      _lmr_R_array[0][depth][movenum] = (int) (LMR_INIT_A + (pow(depth, LMR_DEPTH_POW) * pow(movenum, LMR_NUMBER_POW)) / LMR_INIT_DIV);
+      _lmr_R_array[1][depth][movenum] = (int) (LMR_INIT_A_CAP + (pow(depth, LMR_DEPTH_POW_CAP) * pow(movenum, LMR_NUMBER_POW_CAP)) / LMR_INIT_DIV_CAP);
     }
   }
   // 2. Initialization of the LMP array.
@@ -680,7 +680,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         if (doLMR){
 
           //Basic reduction is done according to the array
-          int reduction = _lmr_R_array[std::min(33, tDepth)][std::min(33, legalCount)];
+          int reduction = _lmr_R_array[!isQuiet][std::min(33, tDepth)][std::min(33, legalCount)];
 
           // Reduction tweaks
           // We generally want to guess if the move will not improve alpha and guess right to do no re-searches

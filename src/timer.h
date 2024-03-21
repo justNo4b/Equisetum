@@ -45,6 +45,8 @@
     int nodes_min;
     int nodes_fact;
     int nodes_div;
+    int nodes_base;
+    int lpt_multiplier;
 
 
     Limits() : nodes(0), depth(0),  moveTime(0), movesToGo(0), time{}, increment{}, infinite(false) {};
@@ -131,11 +133,13 @@
 
        int MTG_CYC_INCR   = 5;
        int MTG_NO_INCR    = 40;
+       int LPT_MULTIPLIER = 20;
 
       double NODES_CONF_MAX = 85.0;
       double NODES_CONF_MIN = 25.0;
       double NODES_FACT     = 50.0;
       double NODES_DIV      = 50.0;
+      double NODES_BASE     = 1.0;
 
     /**@}*/
 

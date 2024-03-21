@@ -76,6 +76,12 @@ struct SearchParms {
    double lmr_init_div = 2.49;
    double lmr_depth_pow = 0.10;
    double lmr_number_pow = 0.16;
+
+   double lmr_init_a_cap = 0.57;
+   double lmr_init_div_cap = 2.49;
+   double lmr_depth_pow_cap = 0.10;
+   double lmr_number_pow_cap = 0.16;
+
    double lmp_start_base = 1.57;
    double lmp_start_impr = 3.51;
    double lmp_multipl_base = 1.71;
@@ -145,7 +151,7 @@ class Search {
    * @brief Array of reductions applied to the branch during
    * LATE MOVE REDUCTION during AB-search
    */
-  int _lmr_R_array[34][34];
+  int _lmr_R_array[2][34][34];
 
   /**
    * @brief Array of the pre-calculated move-nums

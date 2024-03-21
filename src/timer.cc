@@ -33,6 +33,8 @@ Timer::Timer(Limits l, Color color, int movenum){
     NODES_CONF_MIN = _limits.nodes_min;
     NODES_DIV      = _limits.nodes_div;
     NODES_FACT     = _limits.nodes_fact;
+    NODES_BASE     = _limits.nodes_base / 100;
+    LPT_MULTIPLIER = _limits.lpt_multiplier;
 
     _wasThoughtProlonged = false;
     _moveTimeMode = false;
@@ -109,7 +111,7 @@ bool Timer::checkLimits(U64 nodes){
     // if we have so much time left that we supposedly
     // can search last ply ~25 times at least
     // we can prolong thought here.
-    if (_ourTimeLeft > _lastPlyTime * 20 + 30 ){
+    if (_ourTimeLeft > _lastPlyTime * LPT_MULTIPLIER + 30 ){
       _timeAllocated += _lastPlyTime * 2;
       _wasThoughtProlonged = true;
       return false;
@@ -140,10 +142,7 @@ bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes){
     nodesConfidance = std::max(NODES_CONF_MIN, nodesConfidance);
     nodesConfidance = std::min(NODES_CONF_MAX, nodesConfidance);
 
-    double nodesCoeff = 1.0 + (NODES_FACT - nodesConfidance) / NODES_DIV;
-
-
-
+    double nodesCoeff = NODES_BASE + (NODES_FACT - nodesConfidance) / NODES_DIV;
 
     *elapsedTime = elapsed;
     if (_wasThoughtProlonged ||  (elapsed >= (_timeAllocated * nodesCoeff * 0.5))){

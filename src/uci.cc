@@ -85,16 +85,19 @@ void changeThreadsNumber(){
 
 void loadCosts(){
 
-uci_timer.width_a  = atoi(optionsMap["width_a"].getValue().c_str());
-uci_timer.width    = atoi(optionsMap["width"].getValue().c_str());
-uci_timer.t_move   = atoi(optionsMap["t_move"].getValue().c_str());
-uci_timer.c_move   = atoi(optionsMap["crit_move"].getValue().c_str());
+    uci_timer.width_a  = atoi(optionsMap["width_a"].getValue().c_str());
+    uci_timer.width    = atoi(optionsMap["width"].getValue().c_str());
+    uci_timer.t_move   = atoi(optionsMap["t_move"].getValue().c_str());
+    uci_timer.c_move   = atoi(optionsMap["crit_move"].getValue().c_str());
 
-uci_timer.mtg_incr = atoi(optionsMap["mtg_cycl_incr"].getValue().c_str());
-uci_timer.nodes_max = atoi(optionsMap["nodes_max"].getValue().c_str());
-uci_timer.nodes_min = atoi(optionsMap["nodes_min"].getValue().c_str());
-uci_timer.nodes_div = atoi(optionsMap["nodes_div"].getValue().c_str());
-uci_timer.nodes_fact = atoi(optionsMap["nodes_fact"].getValue().c_str());
+    uci_timer.mtg_incr = atoi(optionsMap["mtg_cycl_incr"].getValue().c_str());
+    uci_timer.nodes_max = atoi(optionsMap["nodes_max"].getValue().c_str());
+    uci_timer.nodes_min = atoi(optionsMap["nodes_min"].getValue().c_str());
+    uci_timer.nodes_div = atoi(optionsMap["nodes_div"].getValue().c_str());
+    uci_timer.nodes_fact = atoi(optionsMap["nodes_fact"].getValue().c_str());
+    uci_timer.nodes_base = atoi(optionsMap["nodes_base"].getValue().c_str());
+    uci_timer.lpt_multiplier = atoi(optionsMap["lpt_multiplier"].getValue().c_str());
+
 
     ourSearchParams.asp_window = atoi(optionsMap["asp_window"].getValue().c_str());
     ourSearchParams.asp_delta  = atoi(optionsMap["asp_delta"].getValue().c_str());
@@ -110,34 +113,35 @@ uci_timer.nodes_fact = atoi(optionsMap["nodes_fact"].getValue().c_str());
     ourSearchParams.prcut_beta_base = atoi(optionsMap["prcut_beta_base"].getValue().c_str());
     ourSearchParams.prcut_depth = atoi(optionsMap["prcut_depth"].getValue().c_str());
 
-
-
     ourSearchParams.sing_search_start = atoi(optionsMap["sing_search_start"].getValue().c_str());
 
-
     ourSearchParams.futil_move_const = atoi(optionsMap["futil_move_const"].getValue().c_str());
-
     ourSearchParams.revf_move_const = atoi(optionsMap["revf_move_const"].getValue().c_str());
     ourSearchParams.revf_impr_const = atoi(optionsMap["revf_impr_const"].getValue().c_str());
     ourSearchParams.revf_depth = atoi(optionsMap["revf_depth"].getValue().c_str());
-
-    ourSearchParams.razoring_margin = atoi(optionsMap["razoring_margin"].getValue().c_str());
-
 
     ourSearchParams.lmr_init_a = atoi(optionsMap["lmr_init_a"].getValue().c_str()) / 100;
     ourSearchParams.lmr_init_div = atoi(optionsMap["lmr_init_div"].getValue().c_str()) / 100;
     ourSearchParams.lmr_depth_pow = atoi(optionsMap["lmr_depth_pow"].getValue().c_str()) / 100;
     ourSearchParams.lmr_number_pow = atoi(optionsMap["lmr_number_pow"].getValue().c_str()) / 100;
 
+    ourSearchParams.lmr_init_a_cap = atoi(optionsMap["lmr_init_a_cap"].getValue().c_str()) / 100;
+    ourSearchParams.lmr_init_div_cap = atoi(optionsMap["lmr_init_div_cap"].getValue().c_str()) / 100;
+    ourSearchParams.lmr_depth_pow_cap = atoi(optionsMap["lmr_depth_pow_cap"].getValue().c_str()) / 100;
+    ourSearchParams.lmr_number_pow_cap = atoi(optionsMap["lmr_number_pow_cap"].getValue().c_str()) / 100;
+
     ourSearchParams.delta_move_const = atoi(optionsMap["delta_move_const"].getValue().c_str());
     ourSearchParams.see_q_base = atoi(optionsMap["see_q_base"].getValue().c_str());
     ourSearchParams.see_q_depth = -1 * atoi(optionsMap["see_q_depth"].getValue().c_str());
 
+/*
     ourBoardParams.pSee = atoi(optionsMap["pawnSee"].getValue().c_str());
     ourBoardParams.kSee = atoi(optionsMap["knightSee"].getValue().c_str());
     ourBoardParams.bSee = atoi(optionsMap["bishopSee"].getValue().c_str());
     ourBoardParams.rSee = atoi(optionsMap["rookSee"].getValue().c_str());
     ourBoardParams.qSee = atoi(optionsMap["queenSee"].getValue().c_str());
+*/
+
 
 
 
@@ -192,17 +196,20 @@ void initOptions() {
   optionsMap["revf_move_const"] =    Option(161, 25, 300, &loadCosts);
   optionsMap["revf_impr_const"] =   Option(142, 25, 300, &loadCosts);
   optionsMap["revf_depth"] =   Option(8, 4, 12, &loadCosts);
-  optionsMap["razoring_margin"] =     Option(945, 600, 1500, &loadCosts);
 
   optionsMap["see_q_base"] =     Option(48, 0, 120, &loadCosts);
   optionsMap["see_q_depth"] =    Option(68, 0, 150, &loadCosts); // member to go negative
   optionsMap["delta_move_const"] =   Option(186, 50, 500, &loadCosts);
 
+
+/*
   optionsMap["pawnSee"] =    Option(100, 50, 250, &loadCosts);
   optionsMap["knightSee"] =   Option(300, 150, 450, &loadCosts);
   optionsMap["bishopSee"] =   Option(300, 150, 450, &loadCosts);
   optionsMap["rookSee"] =     Option(500, 400, 700, &loadCosts);
   optionsMap["queenSee"] =     Option(1000, 800, 1200, &loadCosts);
+*/
+
 
   optionsMap["cmh_depth"] =     Option(4096, 0, 10000, &loadCosts); // member to go negative
   optionsMap["cmh_base"] =     Option(4096, 0, 10000, &loadCosts);
@@ -218,6 +225,12 @@ void initOptions() {
   optionsMap["lmr_init_div"] =   Option(249, 0, 500, &loadCosts);
   optionsMap["lmr_depth_pow"] =   Option(10, 5, 25, &loadCosts);
   optionsMap["lmr_number_pow"] =     Option(16, 5, 25, &loadCosts);
+
+  optionsMap["lmr_init_a_cap"] =    Option(57, 0, 400, &loadCosts);
+  optionsMap["lmr_init_div_cap"] =   Option(249, 0, 500, &loadCosts);
+  optionsMap["lmr_depth_pow_cap"] =   Option(10, 5, 25, &loadCosts);
+  optionsMap["lmr_number_pow_cap"] =     Option(16, 5, 25, &loadCosts);
+
   optionsMap["lmp_start_base"] =    Option(157, 0, 300, &loadCosts);
   optionsMap["lmp_start_impr"] =   Option(351, 0, 600, &loadCosts);
   optionsMap["lmp_multipl_base"] =   Option(171, 0, 300, &loadCosts);
@@ -232,6 +245,8 @@ void initOptions() {
   optionsMap["nodes_min"] =     Option(25, 1, 50, &loadCosts);
   optionsMap["nodes_fact"] =    Option(50, 25, 75, &loadCosts);
   optionsMap["nodes_div"] =     Option(50, 25, 75, &loadCosts);
+  optionsMap["nodes_base"] =     Option(100, 1, 200, &loadCosts);
+  optionsMap["lpt_multiplier"] =     Option(20, 5, 50, &loadCosts);
 
 }
 
