@@ -78,7 +78,7 @@ class OrderingInfo {
 
   void decrementCapHistory(PieceType, PieceType, int, int);
 
-  void incrementCounterHistory(Color, int, PieceType, int, int);
+  void incrementCounterHistory(Color, int, PieceType, int, int, int);
 
   void decrementCounterHistory(Color, int, PieceType, int, int);
 

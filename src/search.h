@@ -86,7 +86,7 @@ class Search {
    * @brief Array of reductions applied to the branch during
    * LATE MOVE REDUCTION during AB-search
    */
-  int _lmr_R_array[34][34];
+  int _lmr_R_array[2][34][34];
 
   /**
    * @brief Array of the pre-calculated move-nums
@@ -103,12 +103,9 @@ class Search {
 
   //search_constants
   //
-  const int NULL_MOVE_REDUCTION = 4;
-  const int DELTA_MOVE_CONST = 186;
+  const int DELTA_MOVE_CONST = 253;
 
-  const int REVF_MOVE_CONST = 150;
-  const int RAZORING_MARGIN = 945;
-  //
+
 
   /**
    * @brief Structure of ZKeys for each position that has occurred in the game

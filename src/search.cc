@@ -41,17 +41,22 @@ void Search::init_LMR_array(){
 
   for (int depth = 0; depth < 34; depth++){
     for (int movenum = 0; movenum < 34; movenum++){
-      _lmr_R_array[depth][movenum] = (int) (0.57 + (pow(depth, 0.10) * pow(movenum, 0.16))/2.49);
+      // quiet
+      _lmr_R_array[0][depth][movenum] = (int) (0.87 + (pow(depth, 0.08) * pow(movenum, 0.15)) / 2.47);
+      // captures
+      _lmr_R_array[1][depth][movenum] = (int) (0.88 + (pow(depth, 0.07) * pow(movenum, 0.16)) / 3.16);
     }
   }
   // 2. Initialization of the LMP array.
   // Current formula is completely based on the Weiss chess engine.
   for (int depth = 0; depth < MAX_PLY; depth++){
-    _lmp_Array[depth][0] = (int)  (1.57 + pow((depth - 1), 2) * 1.71);
-    _lmp_Array[depth][1] = (int)  (3.51 + pow((depth - 1), 2) * 1.73);
+    _lmp_Array[depth][0] = (int)  (1.54 + pow((depth - 1), 2) * 1.43);
+    // improving
+    _lmp_Array[depth][1] = (int)  (2.81 + pow((depth - 1), 2) * 2.74);
   }
 
 }
+
 
 Search::Search(const Board &board, Limits limits, Hist positionHistory, OrderingInfo *info, bool logUci) :
     _orderingInfo(*info),
@@ -79,8 +84,8 @@ void Search::iterDeep() {
   int maxDepthSearched = 0;
 
   int targetDepth = _timer.getSearchDepth();
-  int aspWindow = 30;
-  int aspDelta  = 48;
+  int aspWindow = 23;
+  int aspDelta  = 44;
 
     for (int currDepth = 1; currDepth <= targetDepth; currDepth++) {
         maxDepthSearched = std::max(maxDepthSearched, currDepth);
@@ -88,7 +93,7 @@ void Search::iterDeep() {
 
         int aspAlpha = LOST_SCORE;
         int aspBeta  =-LOST_SCORE;
-        if (currDepth > 6){
+        if (currDepth >= 7){
             aspAlpha = _bestScore - aspWindow;
             aspBeta  = _bestScore + aspWindow;
         }
@@ -239,7 +244,7 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
     _orderingInfo.updateKillers(ply, move);
     _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), depth);
     _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
-    _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), 2 * depth);
+    _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), depth, 5);
   }else{
     _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), depth);
   }
@@ -429,7 +434,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // The idea is so if we are very far ahead of beta at low
   // depth, we can just return estimated eval (eval - margin),
   // because beta probably will be beaten
-  if (isPrune && depth <= 8 && ((nodeEval - 161 * depth + 142 * improving) >= beta)){
+  if (isPrune && depth <= 7 && ((nodeEval - 125 * depth + 131 * improving) >= beta)){
       return beta;
   }
 
@@ -438,13 +443,13 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // No nmp in pvNode, InCheck, when doing singular, or just after Null move was made
   // Use SF-like conditional of requsting Eval being higher than beta at low depth
   // Equisetum track NMP_failure to use for extending decisions
-  if (isPrune && pMove != 0 && nodeEval >= beta + std::max(0, 118 - 21 * depth) && board.isThereMajorPiece()){
+  if (isPrune && pMove != 0 && nodeEval >= beta + std::max(0, 110 - 19 * depth) && board.isThereMajorPiece()){
           Board movedBoard = board;
           _posHist.Add(board.getZKey().getValue());
           _sStack.AddNullMove(getOppositeColor(board.getActivePlayer()));
           movedBoard.doNool();
 
-          int fDepth = depth - NULL_MOVE_REDUCTION - depth / 4 - std::min((nodeEval - beta) / 128, 5);
+          int fDepth = depth - 3 - depth / 3 - std::min((nodeEval - beta) / 123, 7);
           int score = -_negaMax(movedBoard, &thisPV, fDepth , -beta, -beta + 1, false, false);
 
           _posHist.Remove();
@@ -472,9 +477,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
   // Probcut
   if (!pvNode &&
-       depth >= 4 &&
+       depth >= 3 &&
        alpha < WON_IN_X){
-        int pcBeta = beta + 218;
+        int pcBeta = beta + 239;
         while (movePicker.hasNext()){
             Move move = movePicker.getNext();
 
@@ -536,20 +541,19 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       // 5.1 LATE MOVE PRUNING
       // If we made many quiet moves in the position already
       // we suppose other moves wont improve our situation
-      if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= 0)) break;
+      if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= 727)) break;
 
       // 5.2. SEE pruning of quiet moves
       // At shallow depth prune highlyish -negative SEE-moves
       if (depth <= 10
           && isQuiet
-          && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
+          && !board.SEE_GreaterOrEqual(move, (-78 * depth + 39))) continue;
           //&& board.Calculate_SEE(move) < ) continue;
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
       // Prune quiet moves with poor CMH on the tips of the tree
-      if (depth <= 3 && isQuiet && cmHistory <= (-4096 * depth + 4096)) continue;
+      if (depth <= 2 && isQuiet && cmHistory <= (-6384 * depth + 4352)) continue;
     }
-
 
         int tDepth = depth;
         // 6. EXTENTIONS
@@ -586,7 +590,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // Thus we extend in the endgame pushes of the non-blocked
         // passers that are near the middle of the board
         // Extend more if null move failed
-        if (depth <= 8 &&
+        if (depth <= 7 &&
             endgameNode &&
             move.isItPasserPush(board) &&
             ttEntry.move != move.getMoveINT()){
@@ -623,7 +627,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         if (doLMR){
 
           //Basic reduction is done according to the array
-          int reduction = _lmr_R_array[std::min(33, tDepth)][std::min(33, legalCount)];
+          int reduction = _lmr_R_array[!isQuiet][std::min(33, tDepth)][std::min(33, legalCount)];
 
           // Reduction tweaks
           // We generally want to guess if the move will not improve alpha and guess right to do no re-searches
@@ -646,7 +650,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
           // Reduce less if move on the previous ply was bad
           // Ie hystorycally bad quiet, see- capture or underpromotion
-          reduction -= pMoveScore < -HALFMAX_HISTORY_SCORE;
+          reduction -= pMoveScore < -7513;
 
           // if we are improving, reduce a bit less (from Weiss)
           reduction -= improving;
@@ -658,8 +662,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           reduction -= singNode;
 
           // reduce more/less based on the hitory
-          reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
-          reduction -= cmHistory  / HALFMAX_HISTORY_SCORE;
+          reduction -= moveHistory / 7298;
+          reduction -= cmHistory  / 8135;
 
           // reduce less when move is a Queen promotion
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
@@ -713,7 +717,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Add this move as a new killer move and update history if move is quiet
           _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, (depth + 2 * (nodeEval < alpha)));
           // Award counter-move history additionally if we refuted special quite previous move
-          if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), depth);
+          if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), depth, 1);
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
