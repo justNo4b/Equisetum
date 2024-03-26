@@ -68,14 +68,14 @@ void OrderingInfo::decrementHistory(Color color, int from, int to, int depth) {
 
 void OrderingInfo::incrementCapHistory(PieceType capturingPiece, PieceType capturedPiece, int to, int depth){
   int16_t current = _captureHistory[capturingPiece][capturedPiece][to];
-  int16_t bonus   = depth * depth;
-  _captureHistory[capturingPiece][capturedPiece][to] += 32 * bonus - current * abs(bonus) / 512;
+  int16_t bonus   = 37 * depth * depth + 173;
+  _captureHistory[capturingPiece][capturedPiece][to] += bonus - current * abs(bonus) / 16384;
 }
 
 void OrderingInfo::decrementCapHistory(PieceType capturingPiece, PieceType capturedPiece, int to, int depth){
   int16_t current = _captureHistory[capturingPiece][capturedPiece][to];
-  int16_t bonus   = -1 * depth * depth;
-  _captureHistory[capturingPiece][capturedPiece][to] += 32 * bonus - current * abs(bonus) / 512;
+  int16_t bonus   = -37 * depth * depth - 24;
+  _captureHistory[capturingPiece][capturedPiece][to] += bonus - current * abs(bonus) / 16384;
 }
 
 void OrderingInfo::incrementCounterHistory(Color color, int pMove, PieceType pType, int to, int depth){
