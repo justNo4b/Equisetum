@@ -552,7 +552,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       if (!incheckNode
          && depth <= 6
          && !isQuiet
-         && !board.SEE_GreaterOrEqual(move, (alpha - nodeEval - 150 * depth))) continue;
+         && !board.SEE_GreaterOrEqual(move, (alpha - nodeEval - 50 * depth * depth))) continue;
     }
 
 
