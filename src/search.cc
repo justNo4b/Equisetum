@@ -586,7 +586,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // Thus we extend in the endgame pushes of the non-blocked
         // passers that are near the middle of the board
         // Extend more if null move failed
-        if (depth <= 8 &&
+        if (!pvNode &&
+            depth <= 8 &&
             endgameNode &&
             move.isItPasserPush(board) &&
             ttEntry.move != move.getMoveINT()){
