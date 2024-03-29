@@ -959,6 +959,8 @@ int Board::getPhase() const{
     // mark as updated, copy nnue and perform an update
     _updDone = true;
 
+/*
+
     // copy accumulator
     *(_nnue + 1) = *_nnue;
     _nnue = _nnue + 1;
@@ -986,6 +988,9 @@ int Board::getPhase() const{
     default:
         break;
     }
+
+
+*/
 
 }
 
