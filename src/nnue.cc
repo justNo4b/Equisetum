@@ -234,7 +234,7 @@ void NNueEvaluation::capturePiece(Color color, PieceType pieceType, PieceType ca
 
     for (int i = 0; i < NNUE_HIDDEN; i++){
         _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i] - NNUE_HIDDEN_WEIGHT[captured_indexWV][i] - NNUE_HIDDEN_WEIGHT[double_indexWV][i] * doubleChanged;
-        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i] - NNUE_HIDDEN_WEIGHT[captured_indexBV][i] - NNUE_HIDDEN_WEIGHT[double_indexWV][i] * doubleChanged;
+        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i] - NNUE_HIDDEN_WEIGHT[captured_indexBV][i] - NNUE_HIDDEN_WEIGHT[double_indexBV][i] * doubleChanged;
     }
 
 }
