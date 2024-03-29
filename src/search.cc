@@ -691,6 +691,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // So for both of this cases we do limited window search.
         if (doLMR){
           if (score > alpha){
+            _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), depth);
             score = -_negaMax(movedBoard, &thisPV, tDepth - 1, -alpha - 1, -alpha, false, !cutNode);
           }
         } else if (!pvNode || legalCount > 1){
