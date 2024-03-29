@@ -49,6 +49,8 @@ struct UpdData{
 
     unsigned int fromRook;
     unsigned int toRook;
+
+    bool dChanged;
     // init
 };
 
@@ -324,9 +326,9 @@ class Board {
   U64 _getQueenMobilityForSquare(int, U64, U64) const;
 
   void _scheduleUpdateMove(Color, PieceType, unsigned int, unsigned int);
-  void _scheduleUpdatePromote(Color, PieceType, unsigned int, unsigned int);
-  void _scheduleUpdateCapprom(Color, PieceType, PieceType, unsigned int, unsigned int);
-  void _scheduleUpdateCapture(Color, PieceType, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdatePromote(Color, PieceType, unsigned int, unsigned int, bool);
+  void _scheduleUpdateCapprom(Color, PieceType, PieceType, unsigned int, unsigned int, bool);
+  void _scheduleUpdateCapture(Color, PieceType, PieceType, unsigned int, unsigned int, bool);
   void _scheduleUpdateCastle(Color, unsigned int, unsigned int, unsigned int, unsigned int);
   void _scheduleUpdateEnpass(Color, unsigned int, unsigned int);
   void _scheduleUpdateEmpty();

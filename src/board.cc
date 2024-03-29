@@ -713,16 +713,18 @@ bool Board::doMove(Move move) {
     PieceType promotionPieceType = move.getPromotionPieceType();
     _addPiece(_activePlayer, promotionPieceType, to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _scheduleUpdateCapprom(getActivePlayer(), capturedPieceType, promotionPieceType, from, to);
+    // BUGGED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    _scheduleUpdateCapprom(getActivePlayer(), capturedPieceType, promotionPieceType, from, to, false);
   } else if (flags & Move::CAPTURE) {
     // Remove captured Piece
     PieceType capturedPieceType = move.getCapturedPieceType();
+    int capCount = _popCount(getPieces(getInactivePlayer(), capturedPieceType));
     _removePiece(getInactivePlayer(), capturedPieceType, to);
 
     // Move capturing piece
     _movePiece(_activePlayer, move.getPieceType(), from, to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _scheduleUpdateCapture(_activePlayer, move.getPieceType(), move.getCapturedPieceType(), from, to);
+    _scheduleUpdateCapture(_activePlayer, move.getPieceType(), move.getCapturedPieceType(), from, to, (capCount == 2));
   } else if (flags & Move::KSIDE_CASTLE) {
     // Move the correct rook
     if (_activePlayer == WHITE) {
@@ -766,9 +768,11 @@ bool Board::doMove(Move move) {
     _removePiece(_activePlayer, PAWN, from);
 
     // Add promoted piece
-    _addPiece(_activePlayer, move.getPromotionPieceType(), to);
+    PieceType promoPiece = move.getPromotionPieceType();
+    int promoCount = _popCount(getPieces(getInactivePlayer(), promoPiece));
+    _addPiece(_activePlayer, promoPiece, to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _scheduleUpdatePromote(getActivePlayer(), move.getPromotionPieceType(), from, to);
+    _scheduleUpdatePromote(getActivePlayer(), promoPiece, from, to, (promoCount == 1));
   } else if (flags & Move::DOUBLE_PAWN_PUSH) {
     _movePiece(_activePlayer, move.getPieceType(), from, to);
     if (colorIsInCheck(_activePlayer)) return false;
@@ -965,13 +969,13 @@ int Board::getPhase() const{
         _nnue->movePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.from, _updSchedule.to);
         break;
     case NN_PROMO:
-        _nnue->promotePiece(_updSchedule.color, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        _nnue->promotePiece(_updSchedule.color, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to, _updSchedule.dChanged);
         break;
     case NN_CAPTURE:
-        _nnue->capturePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.capturedPiece, _updSchedule.from, _updSchedule.to);
+        _nnue->capturePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.capturedPiece, _updSchedule.from, _updSchedule.to, _updSchedule.dChanged);
         break;
     case NN_CAPPROMO:
-        _nnue->cappromPiece(_updSchedule.color, _updSchedule.capturedPiece, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        _nnue->cappromPiece(_updSchedule.color, _updSchedule.capturedPiece, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to, _updSchedule.dChanged);
         break;
     case NN_CASTLE:
         _nnue->castleMove(_updSchedule.color, _updSchedule.from, _updSchedule.to, _updSchedule.fromRook, _updSchedule.toRook);
@@ -993,22 +997,24 @@ void Board::_scheduleUpdateMove(Color c, PieceType moving, unsigned int from, un
     _updSchedule.movingPiece = moving;
     _updSchedule.from = from;
     _updSchedule.to = to;
+    _updSchedule.dChanged = false;
 
     _updDone = false;
 }
 
-void Board::_scheduleUpdatePromote(Color c, PieceType promoted, unsigned int from, unsigned int to){
+void Board::_scheduleUpdatePromote(Color c, PieceType promoted, unsigned int from, unsigned int to, bool dUpdate){
 
     _updSchedule.type = NN_PROMO;
     _updSchedule.color = c;
     _updSchedule.promotedPiece = promoted;
     _updSchedule.from = from;
     _updSchedule.to = to;
+    _updSchedule.dChanged = dUpdate;
 
     _updDone = false;
 }
 
-void Board::_scheduleUpdateCapprom(Color c, PieceType captured, PieceType promoted, unsigned int from, unsigned int to){
+void Board::_scheduleUpdateCapprom(Color c, PieceType captured, PieceType promoted, unsigned int from, unsigned int to, bool dUpdate){
 
     _updSchedule.type = NN_CAPPROMO;
     _updSchedule.color = c;
@@ -1016,11 +1022,12 @@ void Board::_scheduleUpdateCapprom(Color c, PieceType captured, PieceType promot
     _updSchedule.promotedPiece = promoted;
     _updSchedule.from = from;
     _updSchedule.to = to;
+    _updSchedule.dChanged = dUpdate;
 
     _updDone = false;
 }
 
-void Board::_scheduleUpdateCapture(Color c, PieceType moving, PieceType captured, unsigned int from, unsigned int to){
+void Board::_scheduleUpdateCapture(Color c, PieceType moving, PieceType captured, unsigned int from, unsigned int to, bool dUpdate){
 
     _updSchedule.type = NN_CAPTURE;
     _updSchedule.color = c;
@@ -1028,6 +1035,7 @@ void Board::_scheduleUpdateCapture(Color c, PieceType moving, PieceType captured
     _updSchedule.capturedPiece = captured;
     _updSchedule.from = from;
     _updSchedule.to = to;
+    _updSchedule.dChanged = dUpdate;
 
     _updDone = false;
 }
@@ -1040,6 +1048,7 @@ void Board::_scheduleUpdateCastle(Color c, unsigned int from, unsigned int to, u
     _updSchedule.to = to;
     _updSchedule.fromRook = fromR;
     _updSchedule.toRook = toR;
+    _updSchedule.dChanged = false;
 
     _updDone = false;
 }
@@ -1050,6 +1059,7 @@ void Board::_scheduleUpdateEnpass(Color c, unsigned int from, unsigned int to){
     _updSchedule.color = c;
     _updSchedule.from = from;
     _updSchedule.to = to;
+    _updSchedule.dChanged = false;
 
     _updDone = false;
 }

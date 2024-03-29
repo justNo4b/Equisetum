@@ -121,6 +121,31 @@ NNueEvaluation::NNueEvaluation(const Board &board) {
         }
     }
 
+    // Load HCE feature
+    // See if features are activated
+    bool twoBishopsWhite = _popCount(board.getPieces(WHITE, BISHOP)) == 2;
+    bool twoBishopsBlack = _popCount(board.getPieces(BLACK, BISHOP)) == 2;
+    bool twoRooksWhite   = _popCount(board.getPieces(WHITE, ROOK)) == 2;
+    bool twoRooksBlack   = _popCount(board.getPieces(BLACK, ROOK)) == 2;
+    bool twoKnightsWhite = _popCount(board.getPieces(WHITE, KNIGHT)) == 2;
+    bool twoKnightsBlack = _popCount(board.getPieces(BLACK, KNIGHT)) == 2;
+
+    // activate features
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[_getPieceIndex(a1, PAWN, WHITE, WHITE)][i] * twoBishopsWhite
+                                + NNUE_HIDDEN_WEIGHT[_getPieceIndex(a8, PAWN, BLACK, WHITE)][i] * twoBishopsBlack
+                                + NNUE_HIDDEN_WEIGHT[_getPieceIndex(b1, PAWN, WHITE, WHITE)][i] * twoRooksWhite
+                                + NNUE_HIDDEN_WEIGHT[_getPieceIndex(b8, PAWN, BLACK, WHITE)][i] * twoRooksBlack
+                                + NNUE_HIDDEN_WEIGHT[_getPieceIndex(c1, PAWN, WHITE, WHITE)][i] * twoKnightsWhite
+                                + NNUE_HIDDEN_WEIGHT[_getPieceIndex(c8, PAWN, BLACK, WHITE)][i] * twoKnightsBlack;
+
+        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[_getPieceIndex(a1, PAWN, WHITE, BLACK)][i] * twoBishopsWhite
+                                + NNUE_HIDDEN_WEIGHT[_getPieceIndex(a8, PAWN, BLACK, BLACK)][i] * twoBishopsBlack
+                                + NNUE_HIDDEN_WEIGHT[_getPieceIndex(b1, PAWN, WHITE, BLACK)][i] * twoRooksWhite
+                                + NNUE_HIDDEN_WEIGHT[_getPieceIndex(b8, PAWN, BLACK, BLACK)][i] * twoRooksBlack
+                                + NNUE_HIDDEN_WEIGHT[_getPieceIndex(c1, PAWN, WHITE, BLACK)][i] * twoKnightsWhite
+                                + NNUE_HIDDEN_WEIGHT[_getPieceIndex(c8, PAWN, BLACK, BLACK)][i] * twoKnightsBlack;
+    }
 }
 
 int NNueEvaluation::evaluate(const Color color){
@@ -155,7 +180,7 @@ void NNueEvaluation::movePiece(Color color, PieceType pieceType, unsigned int fr
 
 }
 
-void NNueEvaluation::promotePiece(Color color, PieceType promotedTo, unsigned int fromSquare, unsigned int toSquare){
+void NNueEvaluation::promotePiece(Color color, PieceType promotedTo, unsigned int fromSquare, unsigned int toSquare, bool doubleChanged){
     // remove pawn
     int remove_indexWV  = _getPieceIndex(fromSquare, PAWN, color, WHITE);
     int remove_indexBV  = _getPieceIndex(fromSquare, PAWN, color, BLACK);
@@ -163,15 +188,19 @@ void NNueEvaluation::promotePiece(Color color, PieceType promotedTo, unsigned in
     int add_indexWV     = _getPieceIndex(toSquare, promotedTo, color, WHITE);
     int add_indexBV     = _getPieceIndex(toSquare, promotedTo, color, BLACK);
 
+    //Remove double feature if nessesary
+    int double_indexWV = _getPieceIndex(DF_SQUARE[color][promotedTo], PAWN, color, WHITE);
+    int double_indexBV = _getPieceIndex(DF_SQUARE[color][promotedTo], PAWN, color, BLACK);
+
     for (int i = 0; i < NNUE_HIDDEN; i++){
-        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i];
-        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i];
+        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i] + NNUE_HIDDEN_WEIGHT[double_indexWV][i] * doubleChanged;;
+        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i] + NNUE_HIDDEN_WEIGHT[double_indexBV][i] * doubleChanged;;
     }
 
 }
 
 
-void NNueEvaluation::cappromPiece(Color color, PieceType capturedPiece, PieceType promotedTo, unsigned int fromSquare, unsigned int toSquare){
+void NNueEvaluation::cappromPiece(Color color, PieceType capturedPiece, PieceType promotedTo, unsigned int fromSquare, unsigned int toSquare, bool doubleChanged){
     // Remove pawn
     int remove_indexWV      = _getPieceIndex(fromSquare, PAWN, color, WHITE);
     int remove_indexBV      = _getPieceIndex(fromSquare, PAWN, color, BLACK);
@@ -189,7 +218,7 @@ void NNueEvaluation::cappromPiece(Color color, PieceType capturedPiece, PieceTyp
 
 }
 
-void NNueEvaluation::capturePiece(Color color, PieceType pieceType, PieceType capturedPiece, unsigned int fromSquare, unsigned int toSquare){
+void NNueEvaluation::capturePiece(Color color, PieceType pieceType, PieceType capturedPiece, unsigned int fromSquare, unsigned int toSquare, bool doubleChanged){
     // MovePiece
     int remove_indexWV  = _getPieceIndex(fromSquare, pieceType, color, WHITE);
     int remove_indexBV  = _getPieceIndex(fromSquare, pieceType, color, BLACK);
@@ -199,9 +228,13 @@ void NNueEvaluation::capturePiece(Color color, PieceType pieceType, PieceType ca
     int captured_indexWV    = _getPieceIndex(toSquare, capturedPiece, getOppositeColor(color), WHITE);
     int captured_indexBV    = _getPieceIndex(toSquare, capturedPiece, getOppositeColor(color), BLACK);
 
+    //Remove double feature if nessesary
+    int double_indexWV = _getPieceIndex(DF_SQUARE[getOppositeColor(color)][capturedPiece], PAWN, getOppositeColor(color), WHITE);
+    int double_indexBV = _getPieceIndex(DF_SQUARE[getOppositeColor(color)][capturedPiece], PAWN, getOppositeColor(color), BLACK);
+
     for (int i = 0; i < NNUE_HIDDEN; i++){
-        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i] - NNUE_HIDDEN_WEIGHT[captured_indexWV][i];
-        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i] - NNUE_HIDDEN_WEIGHT[captured_indexBV][i];
+        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i] - NNUE_HIDDEN_WEIGHT[captured_indexWV][i] - NNUE_HIDDEN_WEIGHT[double_indexWV][i] * doubleChanged;
+        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i] - NNUE_HIDDEN_WEIGHT[captured_indexBV][i] - NNUE_HIDDEN_WEIGHT[double_indexWV][i] * doubleChanged;
     }
 
 }

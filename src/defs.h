@@ -197,6 +197,25 @@ const int PHASE_WEIGHTS[6] = {
     [KING] = 0
 };
 
+const SquareIndex DF_SQUARE[2][6] = {
+        [WHITE] = {
+            [PAWN] = e4,
+            [ROOK] = b1,
+            [KNIGHT] = c1,
+            [BISHOP] = a1,
+            [QUEEN] = e4,
+            [KING] = e4
+        },
+        [BLACK] = {
+            [PAWN] = e4,
+            [ROOK] = b8,
+            [KNIGHT] = c8,
+            [BISHOP] = a8,
+            [QUEEN] = e4,
+            [KING] = e4
+        }
+};
+
     // mapping our pieces onto weigth
     // Initialize index coefficients
 const int NNUE_PIECE_TO_INDEX[2][6] = {

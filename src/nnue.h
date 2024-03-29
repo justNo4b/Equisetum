@@ -50,9 +50,9 @@ public:
 
     // incremental update functions
     void movePiece(Color, PieceType, unsigned int, unsigned int);
-    void promotePiece(Color, PieceType, unsigned int, unsigned int);
-    void cappromPiece(Color, PieceType, PieceType, unsigned int, unsigned int);
-    void capturePiece(Color, PieceType, PieceType, unsigned int, unsigned int);
+    void promotePiece(Color, PieceType, unsigned int, unsigned int, bool);
+    void cappromPiece(Color, PieceType, PieceType, unsigned int, unsigned int, bool);
+    void capturePiece(Color, PieceType, PieceType, unsigned int, unsigned int, bool);
     void castleMove(Color, unsigned int, unsigned int, unsigned int, unsigned int);
     void enpassMove(Color, unsigned int, unsigned int);
 
