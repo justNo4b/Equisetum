@@ -259,7 +259,9 @@ inline int Search::_makeDrawScore(){
 }
 
 int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
+  int alphaOrig = alpha;
   _nodes++;
+
 
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
   int hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
@@ -314,7 +316,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
 
   }
 
-  if (!_stop && !(bestMove.getFlags() & Move::NULL_MOVE)) {
+  if (alpha > alphaOrig) {
     myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, 0);
     _bestMove = bestMove;
     _bestScore = alpha;
@@ -350,12 +352,12 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
   bool isPmQuietCounter = (pMoveScore >= 50000 && pMoveScore <= 200000);
 
-  _nodes++;
   // Check if we are out of time
   if (_stop || _checkLimits()) {
     _stop = true;
-    return 0;
+    return alpha;
   }
+  _nodes++;
 
   // Check for threefold repetition draws and 50 - move rule draw
   // cut pV out if we found draw
@@ -715,7 +717,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Award counter-move history additionally if we refuted special quite previous move
           if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), depth);
           // Add a new tt entry for this node
-          if (!_stop && !singSearch){
+          if (!singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
           }
           // we updated beta and in the pVNode so we should update our pV
@@ -762,7 +764,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   }
 
   // Store bestScore in transposition table
-  if (!_stop && !singSearch){
+  if (!singSearch){
       if (alpha <= alphaOrig) {
         int saveMove = ttMove.getMoveINT() != 0 ? ttMove.getMoveINT() : 0;
         myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, alpha, depth, ply);
@@ -776,13 +778,13 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
 int Search::_qSearch(Board &board, int alpha, int beta) {
   // Check search limits
-   _nodes++;
    bool pvNode = alpha != beta - 1;
 
   if (_stop || _checkLimits()) {
     _stop = true;
-    return 0;
+    return alpha;
   }
+   _nodes++;
 
   board.performUpdate();
   int standPat = Eval::evaluate(board, board.getActivePlayer());
@@ -843,9 +845,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
           int score = -_qSearch(movedBoard, -beta, -alpha);
           if (score >= beta) {
             // Add a new tt entry for this node
-            if (!_stop){
                 myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, 0, MAX_PLY);
-            }
             return beta;
           }
           if (score > alpha) {
