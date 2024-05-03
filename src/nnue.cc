@@ -20,6 +20,7 @@
 #include "nnue.h"
 #include "board.h"
 #include "bitutils.h"
+#include <cstdint>
 #include <fstream>
 #include <sstream>
 
