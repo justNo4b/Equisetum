@@ -100,6 +100,7 @@ class Search {
    * @brief that is showing maxDepth with extentions we reached in the search
    */
   int _selDepth = 0;
+  int _curentTargetDepth = 0;
 
   //search_constants
   //

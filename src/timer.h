@@ -129,7 +129,7 @@
   public:
       Timer(Limits, Color, int);
 
-      bool checkLimits(U64);
+      bool checkLimits(U64, int);
 
       void startIteration();
 

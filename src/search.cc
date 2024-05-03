@@ -83,6 +83,7 @@ void Search::iterDeep() {
   int aspDelta  = 48;
 
     for (int currDepth = 1; currDepth <= targetDepth; currDepth++) {
+        _curentTargetDepth = currDepth;
         maxDepthSearched = std::max(maxDepthSearched, currDepth);
 
 
@@ -231,7 +232,7 @@ bool Search::_checkLimits() {
     return false;
   }
 
-  return _timer.checkLimits(_nodes);
+  return _timer.checkLimits(_nodes, _curentTargetDepth);
 }
 
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth){
