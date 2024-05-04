@@ -112,12 +112,22 @@ void DataGen::playGame(int threadNum){
 
 
     while (true){
-        history.Add(b.getZKey().getValue());
-        o->clearKillers();
-        search = std::make_shared<Search>(b, limits, history, o, h, false);
-        search->iterDeep();
-        Move best = search->getBestMove();
-        int eval = search->getBestScore();
+        Move best = Move(0);
+        int eval;
+
+        // search with bigger and bigger nodes until non-null bestmove is found
+        while (best.getNotation() == "(none)"){
+            history.Add(b.getZKey().getValue());
+            o->clearKillers();
+            search = std::make_shared<Search>(b, limits, history, o, h, false);
+            search->iterDeep();
+            best = search->getBestMove();
+            eval = search->getBestScore();
+            limits.nodes = limits.nodes * 2;
+        }
+
+        limits.nodes = DG_NODES_SEARCHED;
+
         // if move is not capture and we are not in check, write fen
         if (abs(eval) < 10000 &&
             !b.colorIsInCheck(b.getActivePlayer()) &&
