@@ -156,6 +156,7 @@ void Search::iterDeep() {
   int aspDelta  = ASP_DELTA;
 
     for (int currDepth = 1; currDepth <= targetDepth; currDepth++) {
+        _curSearchDepth = currDepth;
         maxDepthSearched = std::max(maxDepthSearched, currDepth);
 
 
@@ -304,7 +305,7 @@ bool Search::_checkLimits() {
     return false;
   }
 
-  return _timer.checkLimits(_nodes);
+  return _timer.checkLimits(_nodes, _curSearchDepth);
 }
 
 

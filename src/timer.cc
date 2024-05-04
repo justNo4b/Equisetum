@@ -86,8 +86,9 @@ void Timer::_setupTimer(Color color, int movenum){
     _ourTimeLeft = ourTime - _timeAllocated;
 }
 
-bool Timer::checkLimits(U64 nodes){
+bool Timer::checkLimits(U64 nodes, int searchdepth){
 
+  if (searchdepth < 2) return false;
   int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _start).count();
 
   if (_limits.nodes != 0 && (nodes >= _limits.nodes)) return true;
