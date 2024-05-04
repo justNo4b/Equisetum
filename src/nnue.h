@@ -23,7 +23,7 @@
 #include <cstdint>
 
 #define NNUE_INPUT   (2 * 6 * 64)
-#define NNUE_HIDDEN  (1024)
+#define NNUE_HIDDEN  (128)
 #define NNUE_OUTPUT  (1)
 
 const int NNUE_SCALE = 16 * 512;
