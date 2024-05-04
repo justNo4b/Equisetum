@@ -4,7 +4,7 @@
 #include "datagen.h"
 #include <thread>
 #include <fstream>
-
+#include <memory>
 
 std::vector <std::string> BOOK;
 
@@ -116,7 +116,7 @@ void DataGen::playGame(int threadNum){
         int eval;
 
         // search with bigger and bigger nodes until non-null bestmove is found
-        while (best.getNotation() == "(none)"){
+        while (best.getNotation() == "(none)" || best.getMoveINT() == 0){
             history.Add(b.getZKey().getValue());
             o->clearKillers();
             search = std::make_shared<Search>(b, limits, history, o, h, false);
