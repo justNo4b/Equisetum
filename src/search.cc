@@ -416,7 +416,13 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Check if we are improving
   // The idea is if we are not improving in this line we probably can prune a bit more
 
-  if (ply > 2) improving = !incheckNode && nodeEval > _sStack.statEval[ply - 2];
+  if (ply >= 2){
+    if (ply >= 4 && _sStack.statEval[ply - 2] == NOSCORE){
+        improving = !incheckNode && nodeEval > _sStack.statEval[ply - 4];
+    }else{
+        improving = !incheckNode && nodeEval > _sStack.statEval[ply - 2];
+    }
+  }
 
   // Clear Killers for the children node
   _orderingInfo.clearChildrenKillers(ply);
@@ -474,7 +480,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (!pvNode &&
        depth >= 4 &&
        alpha < WON_IN_X){
-        int pcBeta = beta + 218;
+        int pcBeta = beta + 218 - 100 * improving;;
         while (movePicker.hasNext()){
             Move move = movePicker.getNext();
 
