@@ -575,8 +575,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
               if (sBeta > score){
                 tDepth += 1 + (!pvNode && depth > 5);
                 singNode = true;
-              }else if( depth > 5 && ttEntry.score >= beta){
-                tDepth -= 2;
+              }else if(ttEntry.score >= beta){
+                tDepth -= 1 + (depth > 5);
               }
             }
 
