@@ -661,7 +661,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           reduction -= giveCheck;
 
           // reduce less for a position where singular move exists
-          reduction -= singNode;
+          reduction -= singNode && !pvNode;
 
           // reduce more/less based on the hitory
           reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
