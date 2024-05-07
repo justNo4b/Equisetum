@@ -513,7 +513,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                     _sStack.Remove();
 
                     if (sScore >= pcBeta){
-                         _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), (depth + 2 * (nodeEval < alpha)));
+                         _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), (depth + 2 * (nodeEval < alpha) - 4));
                         return beta;
                     }
                 }
