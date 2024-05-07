@@ -12,8 +12,8 @@ This approach resulted in an engine of moderate strength. One of the few strong 
 
 Equisetum uses an NNUE (efficiently updatable neural network) as an evaluation function.
 
-Current implementation is a very simple (768-768)x2 -> 1 network.
-It is trained on Equisetum self-play games using a mix of a play from a randomized startposition and a randomized positions  
+Current implementation is a very simple (768-1024)x2 -> 1 network.
+It is trained on Equisetum self-play games using a mix of a play from a randomized startposition and a randomized positions
 derived from human high-bias positions.
 
 Network is training using <a href="https://github.com/Luecx/CudAD">CudAD</a>
