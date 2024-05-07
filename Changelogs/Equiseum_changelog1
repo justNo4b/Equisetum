@@ -1,7 +1,12 @@
 ////////////////////////////////////////////////////////////////////
-                  Testing on Equisetum (since public)
+                      Testing of Equisetum
+                      since public ----> 1.0
 Before that seach patches matched Drofa, nets/interference were
                         tested in private
+
+Drofa changelog:
+https://github.com/justNo4b/Drofa/tree/master/Changelogs
+
 ////////////////////////////////////////////////////////////////////
 ------------------------------------------------------------------
 1. Tune basic search constants with SPSA
@@ -90,12 +95,3 @@ SPRT  | 40.0+0.40s Threads=1 Hash=64MB
 LLR   | 2.96 (-2.94, 2.94) [0.00, 4.00]
 Games | N: 5546 W: 1559 L: 1403 D: 2584
 Penta | [29, 595, 1388, 713, 48]
-------------------------------------------------------------------
-12. Double extend every-nonPV node (1.1)
-------------------------------------------------------------------
-Elo   | 12.16 +- 7.51 (95%)
-SPRT  | 40.0+0.40s Threads=1 Hash=64MB
-LLR   | 2.96 (-2.94, 2.94) [0.00, 4.00]
-Games | N: 4060 W: 1074 L: 932 D: 2054
-Penta | [7, 416, 1048, 546, 13]
-------------------------------------------------------------------
