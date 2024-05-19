@@ -32,9 +32,10 @@ MovePicker::MovePicker(const OrderingInfo *orderingInfo, const Board *board, int
 }
 
 void MovePicker::_scoreMoves() {
+  bool isQsearch  = _ply == MAX_PLY;
   _moves = MoveList();
-  _moves.reserve(_ply == MAX_PLY ? MOVELIST_RESERVE_SIZE_CAPS : MOVELIST_RESERVE_SIZE);
-   MoveGen(_board, _ply == MAX_PLY, &_moves);
+  _moves.reserve(isQsearch ? MOVELIST_RESERVE_SIZE_CAPS : MOVELIST_RESERVE_SIZE);
+   MoveGen(_board,isQsearch, &_moves);
 
   int Killer1  = _orderingInfo->getKiller1(_ply);
   int Killer2  = _orderingInfo->getKiller2(_ply);
@@ -45,14 +46,35 @@ void MovePicker::_scoreMoves() {
     int moveINT = move.getMoveINT();
     if (_hashMove != 0 && moveINT == _hashMove) {
       move.setValue(INF);
+
+    // Sort promotions first so that capture-promotions were here
+    } else if (move.getFlags() & Move::PROMOTION) {
+        int value = 0;
+        if (isQsearch){
+            value = -100 + _board->SEE_GreaterOrEqual(move, 0) * 200;
+        }else{
+            // history
+            value += _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
+            // general values
+            value += opS(Eval::MATERIAL_VALUES[move.getPromotionPieceType()])
+                   - opS(Eval::MATERIAL_VALUES[PAWN]);
+            // for SEE+ Q promotions use good capture bonus, otherwise treat as bad captures
+            if (move.getPromotionPieceType() == QUEEN && _board->SEE_GreaterOrEqual(move, 0)){
+                value += CAPTURE_BONUS;
+            }else{
+                value += BAD_CAPTURE;
+            }
+            // for capture-promotions add victim value
+            if (move.getFlags() & Move::CAPTURE){
+                value += opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]);
+            }
+        }
+      move.setValue(value);
     } else if (move.getFlags() & Move::CAPTURE) {
       int hist  = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
       int value = opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]) + hist;
       int th = -((hist / 8192) * 100);
       value +=  _board->SEE_GreaterOrEqual(move, th)  ? CAPTURE_BONUS : BAD_CAPTURE;
-      move.setValue(value);
-    } else if (move.getFlags() & Move::PROMOTION) {
-      int value = _ply == MAX_PLY ? -100 + _board->SEE_GreaterOrEqual(move, 0) * 200 : PROMOTION_SORT[move.getPromotionPieceType()];
       move.setValue(value);
     } else if (moveINT == Killer1) {
       move.setValue(KILLER1_BONUS);
