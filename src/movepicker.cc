@@ -49,25 +49,20 @@ void MovePicker::_scoreMoves() {
 
     // Sort promotions first so that capture-promotions were here
     } else if (move.getFlags() & Move::PROMOTION) {
-        int value = 0;
-        if (isQsearch){
-            value = -100 + _board->SEE_GreaterOrEqual(move, 0) * 200;
+        // history
+        int value = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
+        // general values
+        value += opS(Eval::MATERIAL_VALUES[move.getPromotionPieceType()])
+               - opS(Eval::MATERIAL_VALUES[PAWN]);
+        // for SEE+ Q promotions use good capture bonus, otherwise treat as bad captures
+        if (move.getPromotionPieceType() == QUEEN && _board->SEE_GreaterOrEqual(move, 0)){
+            value += CAPTURE_BONUS;
         }else{
-            // history
-            value += _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
-            // general values
-            value += opS(Eval::MATERIAL_VALUES[move.getPromotionPieceType()])
-                   - opS(Eval::MATERIAL_VALUES[PAWN]);
-            // for SEE+ Q promotions use good capture bonus, otherwise treat as bad captures
-            if (move.getPromotionPieceType() == QUEEN && _board->SEE_GreaterOrEqual(move, 0)){
-                value += CAPTURE_BONUS;
-            }else{
-                value += BAD_CAPTURE;
-            }
-            // for capture-promotions add victim value
-            if (move.getFlags() & Move::CAPTURE){
-                value += opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]);
-            }
+            value += BAD_CAPTURE;
+        }
+        // for capture-promotions add victim value
+        if (move.getFlags() & Move::CAPTURE){
+            value += opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]);
         }
       move.setValue(value);
     } else if (move.getFlags() & Move::CAPTURE) {
