@@ -28,7 +28,7 @@
 
 const int NNUE_SCALE = 16 * 512;
 
-const std::string EVAL_FILE = "equi_1024x2_4Bv5_430.nnue";
+const std::string EVAL_FILE = "equi_1024x2F_5.6B_430.nnue";
 
 class Board;
 
