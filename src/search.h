@@ -42,6 +42,7 @@ struct SearchParms {
    int nmp_cond_depth = 21;
 
    int prcut_beta_base = 218;
+   int prcut_improving = 100;
    int prcut_depth = 4;
 
    int sing_search_start = 5;
@@ -194,6 +195,7 @@ class Search {
    int NMP_COND_DEPTH = 21;
 
    int PRCUT_BETA_BASE = 218;
+   int PRCUT_IMPROVING = 100;
    int PRCUT_DEPTH = 4;
 
    int SEE_Q_BASE = 48;

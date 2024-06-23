@@ -111,6 +111,7 @@ void loadCosts(){
     ourSearchParams.nmp_cond_depth = atoi(optionsMap["nmp_cond_depth"].getValue().c_str());
 
     ourSearchParams.prcut_beta_base = atoi(optionsMap["prcut_beta_base"].getValue().c_str());
+    ourSearchParams.prcut_improving = atoi(optionsMap["prcut_improving"].getValue().c_str());
     ourSearchParams.prcut_depth = atoi(optionsMap["prcut_depth"].getValue().c_str());
 
     ourSearchParams.sing_search_start = atoi(optionsMap["sing_search_start"].getValue().c_str());
@@ -204,6 +205,7 @@ void initOptions() {
   optionsMap["nmp_cond_base"] =     Option(118, 60, 250, &loadCosts);
   optionsMap["nmp_cond_depth"] =    Option(21, 10, 40, &loadCosts);
   optionsMap["prcut_beta_base"] =   Option(218, 100, 350, &loadCosts);
+  optionsMap["prcut_improving"] =   Option(100, 50, 150, &loadCosts);
   optionsMap["prcut_depth"] =   Option(4, 2, 8, &loadCosts);
 
   optionsMap["sing_search_start"] =   Option(5, 2, 8, &loadCosts);
