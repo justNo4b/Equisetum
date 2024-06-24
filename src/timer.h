@@ -21,19 +21,21 @@
 #include "defs.h"
 #include <chrono>
 
+typedef std::chrono::time_point<std::chrono::steady_clock> timerPoint;
 
   /**
    * @brief Represents limits imposed on a search through the UCI protocol.
    */
   struct Limits {
 
-    U64  nodes;         // limit search by nodes searched
-    int  depth;         // limit search by depth
-    int  moveTime;      // limit search by time
-    int  movesToGo;     // (for cyclic) - moves till next time addition
-    int  time[2];       // time left for black and white
-    int  increment[2];   // increment for black and white
-    bool infinite;      // ignore limits (infinite search)
+    U64        nodes;         // limit search by nodes searched
+    int        depth;         // limit search by depth
+    int        moveTime;      // limit search by time
+    int        movesToGo;     // (for cyclic) - moves till next time addition
+    int        time[2];       // time left for black and white
+    int        increment[2];   // increment for black and white
+    bool       infinite;      // ignore limits (infinite search)
+    timerPoint goPoint;       // timer start point
 
     Limits() : nodes(0), depth(0),  moveTime(0), movesToGo(0), time{}, increment{}, infinite(false) {};
   };
@@ -87,7 +89,7 @@
      * @brief time_point object representing the exact moment this search was started.
      *
      */
-    std::chrono::time_point<std::chrono::steady_clock> _start;
+    timerPoint _start;
 
     /**
      * @brief Constants used for time management.

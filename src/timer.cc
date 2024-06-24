@@ -23,6 +23,7 @@ Timer::Timer(Limits l, Color color, int movenum){
     _limits = l;
     _wasThoughtProlonged = false;
     _moveTimeMode = false;
+    _start = l.goPoint;
     if (_limits.infinite) { // Infinite search
         _searchDepth = INF;
         _timeAllocated = INF;
@@ -43,15 +44,18 @@ Timer::Timer(Limits l, Color color, int movenum){
 
 void Timer::_setupTimer(Color color, int movenum){
     int ourTime = _limits.time[color];
-    //int opponentTime = _limits.time[_initialBoard.getInactivePlayer()];
     int ourIncrement = _limits.increment[color];
+    // estimate time from 'go' to this moment
+    int setupTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _start).count();
+    //int opponentTime = _limits.time[_initialBoard.getInactivePlayer()];
+
     double tCoefficient = 0;
 
     // Divide up the remaining time (If movestogo not specified we are in
     // sudden death)
     if (_limits.movesToGo == 0) {
       tCoefficient = INCR_T_WIDTH_A / pow((INCR_T_WIDTH + pow((movenum - INCR_T_MOVE), 2)), 1.5);
-      _timeAllocated = ourTime * tCoefficient;
+      _timeAllocated = ourTime * tCoefficient + setupTime;
       if (movenum > INCR_CRIT_MOVE){
           int div = ourIncrement != 0 ? MTG_CYC_INCR : MTG_NO_INCR;
           _timeAllocated = ourTime / div + ourIncrement;
@@ -61,7 +65,7 @@ void Timer::_setupTimer(Color color, int movenum){
       // when movetogo is specified, use different coefficients
 
       tCoefficient = CYCL_T_WIDTH_A / pow((CYCL_T_WIDTH + pow((movenum - CYCL_T_MOVE), 2)), 1.5);
-      _timeAllocated = ourTime * tCoefficient;
+      _timeAllocated = ourTime * tCoefficient + setupTime;
       if (movenum > CYCL_CRIT_MOVE) _timeAllocated = ourTime / MTG_CYC_INCR + ourIncrement;
       _timeAllocated = std::min(_timeAllocated, ourTime - 10);
     }
@@ -110,7 +114,6 @@ bool Timer::checkLimits(U64 nodes){
 }
 
 void Timer::startIteration(){
-    _start = std::chrono::steady_clock::now();
     _lastPlyTime = 0;
 }
 

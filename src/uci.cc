@@ -23,6 +23,7 @@
 #include "timer.h"
 #include <iostream>
 #include <thread>
+#include <chrono>
 
 extern HASH         * myHASH;
 extern OrderingInfo * myOrdering;
@@ -165,6 +166,10 @@ void pickBestMove() {
 void go(std::istringstream &is) {
   std::string token;
   Limits limits;
+
+  // we received 'go', immediately start timer.
+  // Matters when assigning many threads
+  limits.goPoint = std::chrono::steady_clock::now();
 
   while (is >> token) {
     if (token == "depth") is >> limits.depth;
