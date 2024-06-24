@@ -76,14 +76,14 @@ void Search::iterDeep() {
   _selDepth = 0;
   std::memset(_rootNodesSpent, 0, sizeof(_rootNodesSpent));
   _timer.startIteration();
-  int maxDepthSearched = 0;
+  _maxDepthSearched = 0;
 
   int targetDepth = _timer.getSearchDepth();
   int aspWindow = 30;
   int aspDelta  = 48;
 
     for (int currDepth = 1; currDepth <= targetDepth; currDepth++) {
-        maxDepthSearched = std::max(maxDepthSearched, currDepth);
+        _maxDepthSearched = std::max(_maxDepthSearched, currDepth);
 
 
         int aspAlpha = LOST_SCORE;
@@ -127,7 +127,7 @@ void Search::iterDeep() {
 
   // It can be the case where we exited before finishing iteration, and our PV etc can changed.
   // So update search info one more time
-  if (_logUci) _logUciInfo(_getPv(), maxDepthSearched, _bestScore, _nodes, _timer.getElapsed());
+  if (_logUci) _logUciInfo(_getPv(), _maxDepthSearched, _bestScore, _nodes, _timer.getElapsed());
 
   if (_logUci) std::cout << "bestmove " << getBestMove().getNotation(_initialBoard.getFrcMode()) << std::endl;
 
@@ -231,7 +231,7 @@ bool Search::_checkLimits() {
     return false;
   }
 
-  return _timer.checkLimits(_nodes);
+  return _timer.checkLimits(_nodes, _maxDepthSearched);
 }
 
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth){

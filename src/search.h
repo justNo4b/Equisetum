@@ -150,6 +150,8 @@ class Search {
    */
   std::atomic<bool> _stop;
 
+  int _maxDepthSearched;
+
 
   /**
    * @brief Returns True if this search has exceeded its given limits
