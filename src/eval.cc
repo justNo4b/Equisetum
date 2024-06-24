@@ -1118,6 +1118,10 @@ int Eval::evaluate(const Board &board, Color color){
     int nnueEval =  board.getNNueEval();
     //std::cout << nnueEval << std::endl;
 
+    // clamp eval so that we are sure it dont overflow into EG-eval-win/MATE range.
+    nnueEval = std::min(MINIMAL_WON_SCORE, nnueEval);
+    nnueEval = std::max(-MINIMAL_WON_SCORE, nnueEval);
+
     // phase 0 (max) -> 256 (min)
     // scale from 1.5 to 1
     nnueEval = (((384 - (board.getPhase() / 2) ) * nnueEval) / 256);
