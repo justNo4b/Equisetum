@@ -47,6 +47,7 @@ void Search::init_LMR_array(SearchParms sp){
     NMP_COND_DEPTH = sp.nmp_cond_depth;
 
     PRCUT_BETA_BASE = sp.prcut_beta_base;
+    PRCUT_IMPROVING = sp.prcut_improving;
     PRCUT_DEPTH = sp.prcut_depth;
 
     SING_SEARCH_START = sp.sing_search_start;
@@ -585,7 +586,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (!pvNode &&
        depth >= PRCUT_DEPTH &&
        alpha < WON_IN_X){
-        int pcBeta = beta + PRCUT_BETA_BASE;
+        int pcBeta = beta + PRCUT_BETA_BASE - PRCUT_IMPROVING * improving;
         while (movePicker.hasNext()){
             Move move = movePicker.getNext();
 
