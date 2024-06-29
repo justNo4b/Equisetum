@@ -72,7 +72,7 @@ class OrderingInfo {
    * @param to To square to increment history for
    * @param depth Depth of move that caused this increment
    */
-  void decrementHistory(Color, int, int, int);
+  void decrementHistory(Color, int, int, int, int);
 
   void incrementCapHistory(PieceType, PieceType, int, int);
 
@@ -80,7 +80,7 @@ class OrderingInfo {
 
   void incrementCounterHistory(Color, int, PieceType, int, int);
 
-  void decrementCounterHistory(Color, int, PieceType, int, int);
+  void decrementCounterHistory(Color, int, PieceType, int, int, int);
 
   /**
    * @brief Update countermove.
