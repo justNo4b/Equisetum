@@ -539,6 +539,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     if (alpha < WON_IN_X
         && legalCount >= 1){
 
+      int lmrdepth = depth - _lmr_R_array[std::min(33, depth)][std::min(33, legalCount + 1)];
       // 5.1 LATE MOVE PRUNING
       // If we made many quiet moves in the position already
       // we suppose other moves wont improve our situation
@@ -546,9 +547,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
       // 5.2. SEE pruning of quiet moves
       // At shallow depth prune highlyish -negative SEE-moves
-      if (depth <= 10
+      if (lmrdepth <= 10
           && isQuiet
-          && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
+          && !board.SEE_GreaterOrEqual(move, (-68 * lmrdepth + 48))) continue;
           //&& board.Calculate_SEE(move) < ) continue;
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
