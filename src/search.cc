@@ -763,6 +763,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
   // Check for checkmate and stalemate
   if (legalCount == 0) {
+    if (singSearch) return alpha;
     score = incheckNode ? LOST_SCORE + ply : 0; // LOST_SCORE = checkmate, 0 = stalemate (draw)
     return score;
   }
