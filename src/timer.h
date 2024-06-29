@@ -107,10 +107,10 @@
      *
      * @{
      */
-      const int INCR_T_WIDTH_A = 322;
-      const int INCR_T_WIDTH   = 188;
-      const int INCR_T_MOVE    = 22;
-      const int INCR_CRIT_MOVE = 26;
+      const int INCR_T_WIDTH_A = 334;
+      const int INCR_T_WIDTH   = 197;
+      const int INCR_T_MOVE    = 18;
+      const int INCR_CRIT_MOVE = 23;
 
       const int CYCL_T_WIDTH_A = 750;
       const int CYCL_T_WIDTH   = 200;
