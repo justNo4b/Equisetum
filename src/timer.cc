@@ -96,7 +96,7 @@ bool Timer::checkLimits(U64 nodes){
     // if we have so much time left that we supposedly
     // can search last ply ~25 times at least
     // we can prolong thought here.
-    if (_ourTimeLeft > _lastPlyTime * 20 + 30 ){
+    if (_ourTimeLeft > _lastPlyTime * 15 + 30 ){
       _timeAllocated += _lastPlyTime * 2;
       _wasThoughtProlonged = true;
       return false;
@@ -124,10 +124,10 @@ bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes){
     double nodesConfidance = bestNodes * 100.0 / totalNodes;
     // clamp coeff between 25 and 75
     // we assume that standart case is about ~50% of nodes go in bestMove
-    nodesConfidance = std::max(25.0, nodesConfidance);
-    nodesConfidance = std::min(85.0, nodesConfidance);
+    nodesConfidance = std::max(27.0, nodesConfidance);
+    nodesConfidance = std::min(82.0, nodesConfidance);
 
-    double nodesCoeff = 1.0 + (51.0 - nodesConfidance) / 50.0;
+    double nodesCoeff = 1.56 + (46.0 - nodesConfidance) / 49.0;
 
 
 
