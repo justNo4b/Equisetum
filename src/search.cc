@@ -342,6 +342,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int nodeEval = 0;
   int  legalCount = 0;
   int  qCount = 0;
+  int  mCount = 0;
   Move ttMove = Move(0);
   Move bestMove;
   pV   thisPV = pV();
@@ -528,6 +529,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     }
     bool isQuiet = move.isQuiet();
     qCount += isQuiet;
+    mCount++;
 
     int  moveHistory  = isQuiet ?
                         _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) :
@@ -625,11 +627,11 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
         // 8. LATE MOVE REDUCTIONS
         // mix of ideas from Weiss code, own ones and what is written in the chessprogramming wiki
-        doLMR = tDepth > 2 && legalCount > 2 + pvNode;
+        doLMR = tDepth > 2 && mCount > 2 + pvNode;
         if (doLMR){
 
           //Basic reduction is done according to the array
-          int reduction = _lmr_R_array[std::min(33, tDepth)][std::min(33, legalCount)];
+          int reduction = _lmr_R_array[std::min(33, tDepth)][std::min(33, mCount)];
 
           // Reduction tweaks
           // We generally want to guess if the move will not improve alpha and guess right to do no re-searches
@@ -676,7 +678,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
           // We finished reduction tweaking, calculate final depth and search
           // Idea from SF - > allow extending if our reductions are very negative
-          int minReduction = (!isQuiet && legalCount <= 6) ? -2 :
+          int minReduction = (!isQuiet && mCount <= 6) ? -2 :
                              (cutNode || pvNode) ? -1 : 0;
 
           reduction = std::max(minReduction, reduction);
