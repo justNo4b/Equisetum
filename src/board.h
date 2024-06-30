@@ -287,6 +287,11 @@ class Board {
   bool SEE_GreaterOrEqual(const Move, int) const;
 
   /**
+   * @brief Test if the move is giving check. Dont work with discoveries
+   */
+  bool moveGivesCheck(const Move) const;
+
+  /**
    * @brief  get fully calculated phase value of the board
    */
   int getPhase() const;

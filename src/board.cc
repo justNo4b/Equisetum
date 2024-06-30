@@ -615,6 +615,47 @@ bool Board::SEE_GreaterOrEqual(const Move move, int threshold) const{
 
 }
 
+  bool Board::moveGivesCheck(const Move move) const{
+    PieceType pt = move.getPieceType();
+    int to = move.getTo();
+    U64 toBB = (ONE << to);
+    Color inCheckColor = getInactivePlayer();
+    int kingSquare = _bitscanForward(getPieces(inCheckColor, KING));
+
+    if (move.getFlags() & Move::PROMOTION){
+        pt = move.getPromotionPieceType();
+    }
+
+    switch (pt)
+    {
+    case KING:
+        return false;
+        break;
+    case PAWN:
+        if (Attacks::getNonSlidingAttacks(PAWN, kingSquare, inCheckColor) & toBB) return true;
+        break;
+    case KNIGHT:
+        if (Attacks::getNonSlidingAttacks(KNIGHT, kingSquare) & toBB) return true;
+        break;
+    case BISHOP:
+        if (_getBishopAttacksForSquare(kingSquare, ZERO) & toBB) return true;
+        break;
+    case ROOK:
+        if (_getRookAttacksForSquare(kingSquare, ZERO) & toBB) return true;
+        break;
+    case QUEEN:
+        if ((_getBishopAttacksForSquare(kingSquare, ZERO) & toBB)
+        || (_getRookAttacksForSquare(kingSquare, ZERO) & toBB)) return true;
+        break;
+
+    default:
+        return false;
+        break;
+    }
+    return false;
+  }
+
+
 int  Board:: Calculate_SEE(const Move move) const{
 
   // 0. Early exits
