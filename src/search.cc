@@ -566,7 +566,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // that non other moves are even close to it, extend this move
         // At low depth use statEval instead of search (Kimmys idea)
         if (ttEntry.Flag != ALPHA &&
-            ttEntry.depth >= depth - 2 &&
+            ttEntry.depth >= depth - 3 &&
             ttEntry.move == move.getMoveINT() &&
             abs(ttEntry.score) < WON_IN_X / 4){
               int sDepth = depth / 2;
