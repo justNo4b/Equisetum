@@ -572,7 +572,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // At low depth use statEval instead of search (Kimmys idea)
         if (!incheckNode &&
             ttEntry.Flag != ALPHA &&
-            ttEntry.depth >= depth - 2 &&
+            ttEntry.depth >= depth - 3 &&
             ttEntry.move == move.getMoveINT() &&
             abs(ttEntry.score) < WON_IN_X / 4){
               int sDepth = depth / 2;
