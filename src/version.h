@@ -19,7 +19,7 @@
 #define VERSION_H
 
 #define VER_MAJ ("1")
-#define VER_MIN ("7")
+#define VER_MIN ("8")
 #define VER_PATCH ("variegatum.i")
 
 #endif
