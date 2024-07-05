@@ -560,18 +560,12 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         int tDepth = depth;
         // 6. EXTENTIONS
         //
-        // 6.0 InCheck extention
-        // Extend when the side to move is in check
-        if (incheckNode){
-          tDepth++;
-        }
 
         // 6.1 Singular move extention
         // At high depth if we have the TT move, and we are certain
         // that non other moves are even close to it, extend this move
         // At low depth use statEval instead of search (Kimmys idea)
-        if (!incheckNode &&
-            ttEntry.Flag != ALPHA &&
+        if (ttEntry.Flag != ALPHA &&
             ttEntry.depth >= depth - 3 &&
             ttEntry.move == move.getMoveINT() &&
             abs(ttEntry.score) < WON_IN_X / 4){
@@ -581,7 +575,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
               if (sBeta > score){
                 tDepth += 1 + (!pvNode && depth > 5);
                 singNode = true;
-              }else if( depth > 5 && ttEntry.score >= beta){
+              }else if(!incheckNode && depth > 5 && ttEntry.score >= beta){
                 tDepth -= 2;
               }
             }
@@ -763,6 +757,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
   // Check for checkmate and stalemate
   if (legalCount == 0) {
+    if (singSearch) return alpha;
     score = incheckNode ? LOST_SCORE + ply : 0; // LOST_SCORE = checkmate, 0 = stalemate (draw)
     return score;
   }
