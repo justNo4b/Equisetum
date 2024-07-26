@@ -416,7 +416,13 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Check if we are improving
   // The idea is if we are not improving in this line we probably can prune a bit more
 
-  if (ply > 2) improving = !incheckNode && nodeEval > _sStack.statEval[ply - 2];
+  if (ply >= 2){
+    if (ply >= 4 && _sStack.statEval[ply - 2] == NOSCORE){
+        improving = !incheckNode && nodeEval > _sStack.statEval[ply - 4];
+    }else{
+        improving = !incheckNode && nodeEval > _sStack.statEval[ply - 2];
+    }
+  }
 
   // Clear Killers for the children node
   _orderingInfo.clearChildrenKillers(ply);
@@ -474,7 +480,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (!pvNode &&
        depth >= 4 &&
        alpha < WON_IN_X){
-        int pcBeta = beta + 218;
+        int pcBeta = beta + 218 - 100 * improving;;
         while (movePicker.hasNext()){
             Move move = movePicker.getNext();
 
@@ -554,19 +560,13 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         int tDepth = depth;
         // 6. EXTENTIONS
         //
-        // 6.0 InCheck extention
-        // Extend when the side to move is in check
-        if (incheckNode){
-          tDepth++;
-        }
 
         // 6.1 Singular move extention
         // At high depth if we have the TT move, and we are certain
         // that non other moves are even close to it, extend this move
         // At low depth use statEval instead of search (Kimmys idea)
-        if (!incheckNode &&
-            ttEntry.Flag != ALPHA &&
-            ttEntry.depth >= depth - 2 &&
+        if (ttEntry.Flag != ALPHA &&
+            ttEntry.depth >= depth - 3 &&
             ttEntry.move == move.getMoveINT() &&
             abs(ttEntry.score) < WON_IN_X / 4){
               int sDepth = depth / 2;
@@ -575,7 +575,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
               if (sBeta > score){
                 tDepth += 1 + (!pvNode && depth > 5);
                 singNode = true;
-              }else if( depth > 5 && ttEntry.score >= beta){
+              }else if(!incheckNode && depth > 5 && ttEntry.score >= beta){
                 tDepth -= 2;
               }
             }
@@ -757,6 +757,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
   // Check for checkmate and stalemate
   if (legalCount == 0) {
+    if (singSearch) return alpha;
     score = incheckNode ? LOST_SCORE + ply : 0; // LOST_SCORE = checkmate, 0 = stalemate (draw)
     return score;
   }
