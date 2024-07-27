@@ -57,6 +57,8 @@ void DataGen::readBook(){
 
 bool DataGen::createRandomOpening(Board &board, int openingDepth){
 
+    openingDepth += (std::rand() % 100 <= 50);
+
     for (int i = 0; i < openingDepth; i++){
         Move rndMove = getRandomLegalMove(&board);
         if (rndMove.getMoveINT() != 0){
