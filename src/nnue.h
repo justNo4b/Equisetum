@@ -22,6 +22,7 @@
 #include "bitutils.h"
 #include <cstdint>
 
+#define NNUE_BUCKETS (7)
 #define NNUE_INPUT   (2 * 6 * 64)
 #define NNUE_HIDDEN  (1024)
 #define NNUE_OUTPUT  (1)
@@ -49,14 +50,30 @@ public:
     int evaluate(const Color);
 
     // incremental update functions
-    void movePiece(Color, PieceType, unsigned int, unsigned int);
-    void promotePiece(Color, PieceType, unsigned int, unsigned int);
-    void cappromPiece(Color, PieceType, PieceType, unsigned int, unsigned int);
-    void capturePiece(Color, PieceType, PieceType, unsigned int, unsigned int);
-    void castleMove(Color, unsigned int, unsigned int, unsigned int, unsigned int);
-    void enpassMove(Color, unsigned int, unsigned int);
+    void movePiece(UpdData);
+    void promotePiece(UpdData);
+    void cappromPiece(UpdData);
+    void capturePiece(UpdData);
+    //void castleMove(UpdData);
+    void enpassMove(UpdData);
+
+    void fullReset(const Board &board);
+
+    bool resetNeeded(PieceType, int, int, Color);
 
 private:
+
+
+        int BUCKETS[64] {
+            0,  0,  1,  2,  2,  1,  0,  0,
+            3,  3,  3,  2,  2,  3,  3,  3,
+            4,  4,  4,  4,  4,  4,  4,  4,
+            4,  4,  4,  4,  4,  4,  4,  4,
+            5,  5,  5,  5,  5,  5,  5,  5,
+            5,  5,  5,  5,  5,  5,  5,  5,
+            6,  6,  6,  6,  6,  6,  6,  6,
+            6,  6,  6,  6,  6,  6,  6,  6,
+        };
 
     // our main holder of pre-calculated hidden layers for both colors
     // two holders, for white and black perspectives
@@ -64,16 +81,28 @@ private:
 
     // Weights etc
     static int16_t NNUE_HIDDEN_BIAS[NNUE_HIDDEN];
-    static int16_t NNUE_HIDDEN_WEIGHT[NNUE_INPUT][NNUE_HIDDEN];
+    static int16_t NNUE_HIDDEN_WEIGHT[NNUE_INPUT * NNUE_BUCKETS][NNUE_HIDDEN];
     static int16_t NNUE_OUTPUT_WEIGHT[NNUE_HIDDEN];
     static int16_t NNUE_OUTPUT_WEIGHT2[NNUE_HIDDEN];
     static int32_t NNUE_OUTPUT_BIAS[NNUE_OUTPUT];
 
-    inline int _getPieceIndex(int sq, PieceType pt, Color c, Color view){
-        return view == WHITE
-                    ?  (sq + NNUE_PIECE_TO_INDEX[view == c][pt] * 64)
-                    :  (_mir(sq) + NNUE_PIECE_TO_INDEX[view == c][pt] * 64);
+    inline int _getPieceIndex(int sq, PieceType pt, Color c, Color view, int ksq){
+        int r_king = view == WHITE ? ksq : _mir(ksq);
+        int r_sq   = view == WHITE ? sq  : _mir(sq);
+        int k_index = BUCKETS[r_king];
+
+        if (_col(ksq) > 3){
+            r_sq = _horizontal_mir(r_sq);
+        }
+
+        int index = r_sq 
+                  + NNUE_PIECE_TO_INDEX[view == c][pt] * 64
+                  + k_index * 64 * 6 * 2;
+
+        return index;
     }
+
+
 
     // Activation function
     inline int relu(int v){

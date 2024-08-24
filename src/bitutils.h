@@ -143,6 +143,10 @@ inline int _mir(int square){
   return square ^ 56;
 }
 
+inline int _horizontal_mir(int square){
+  return square ^ 7;
+}
+
 inline U64 _sqBB(int square){
     return (ONE << square);
 }
