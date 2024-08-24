@@ -19,7 +19,7 @@
 #define VERSION_H
 
 #define VER_MAJ ("1")
-#define VER_MIN ("9")
-#define VER_PATCH ("arvense")
+#define VER_MIN ("10")
+#define VER_PATCH ("telmateia")
 
 #endif

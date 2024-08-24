@@ -29,7 +29,7 @@
 
 const int NNUE_SCALE = 16 * 512;
 
-const std::string EVAL_FILE = "equi_1024x2F_5.5Bv6_430.nnue";
+const std::string EVAL_FILE = "equi_7b_1024x2F_5.5Bv6_430.nnue";
 
 class Board;
 
@@ -95,7 +95,7 @@ private:
             r_sq = _horizontal_mir(r_sq);
         }
 
-        int index = r_sq 
+        int index = r_sq
                   + NNUE_PIECE_TO_INDEX[view == c][pt] * 64
                   + k_index * 64 * 6 * 2;
 
