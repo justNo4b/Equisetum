@@ -785,19 +785,6 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     return 0;
   }
 
-  board.performUpdate();
-  int standPat = Eval::evaluate(board, board.getActivePlayer());
-
-  if (standPat >= beta) {
-    if (!pvNode) return beta;
-
-    standPat = std::min((alpha + beta) / 2, beta - 1);
-  }
-
-  if (alpha < standPat) {
-    alpha = standPat;
-  }
-
   // Check transposition table cache
   // If TT is causing a cuttoff, we update move ordering stuff
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
@@ -819,6 +806,21 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
       }
     }
   }
+
+  board.performUpdate();
+  int standPat = Eval::evaluate(board, board.getActivePlayer());
+
+  if (standPat >= beta) {
+    if (!pvNode) return beta;
+
+    standPat = std::min((alpha + beta) / 2, beta - 1);
+  }
+
+  if (alpha < standPat) {
+    alpha = standPat;
+  }
+
+
 
   MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
 
