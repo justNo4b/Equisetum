@@ -346,7 +346,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int pMoveScore = _sStack.moves[ply - 1].getValue();
   int pMoveIndx = cmhCalculateIndex(pMove);
   int alphaOrig = alpha;
-  int nodeEval = 0;
+  int nodeEval = NOSCORE;
   int  legalCount = 0;
   int  qCount = 0;
   Move ttMove = Move(0);
@@ -793,7 +793,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
    _nodes++;
    bool pvNode = alpha != beta - 1;
    int standPat;
-   int nodeEval;
+   int nodeEval = NOSCORE;
 
   if (_stop || _checkLimits()) {
     _stop = true;
