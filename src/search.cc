@@ -260,12 +260,19 @@ inline int Search::_makeDrawScore(){
 
 int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   _nodes++;
+  int nodeEval;
 
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
   int hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
 
+  if (ttEntry.Flag != NONE && ttEntry.eval != NOSCORE){
+    nodeEval = ttEntry.eval;
+  }else{
+    nodeEval = Eval::evaluate(board, board.getActivePlayer());
+  }
+
   MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0);
-  _sStack.AddEval(board.colorIsInCheck(board.getActivePlayer()) ? NOSCORE : Eval::evaluate(board, board.getActivePlayer()));
+  _sStack.AddEval(nodeEval);
   pV rootPV = pV();
 
 
@@ -315,7 +322,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   }
 
   if (!_stop && !(bestMove.getFlags() & Move::NULL_MOVE)) {
-    myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, 0);
+    myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), nodeEval, EXACT, alpha, depth, 0);
     _bestMove = bestMove;
     _bestScore = alpha;
   }
@@ -406,10 +413,16 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
   board.performUpdate();
+
   if (incheckNode) {
     _sStack.AddEval(NOSCORE);
   }else {
-    nodeEval = Eval::evaluate(board, board.getActivePlayer());
+
+    if (ttEntry.Flag != NONE && ttEntry.eval != NOSCORE){
+        nodeEval = ttEntry.eval;
+    }else{
+        nodeEval = Eval::evaluate(board, board.getActivePlayer());
+    }
     _sStack.AddEval(nodeEval);
   }
 
@@ -716,7 +729,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), depth);
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
-            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
+            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), nodeEval, BETA, score, depth, ply);
           }
           // we updated beta and in the pVNode so we should update our pV
           if (pvNode && !_stop){
@@ -766,9 +779,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (!_stop && !singSearch){
       if (alpha <= alphaOrig) {
         int saveMove = ttMove.getMoveINT() != 0 ? ttMove.getMoveINT() : 0;
-        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, alpha, depth, ply);
+        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, nodeEval, ALPHA, alpha, depth, ply);
       } else {
-        myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, ply);
+        myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(),nodeEval, EXACT, alpha, depth, ply);
       }
   }
 
@@ -779,23 +792,11 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
   // Check search limits
    _nodes++;
    bool pvNode = alpha != beta - 1;
+   int standPat;
 
   if (_stop || _checkLimits()) {
     _stop = true;
     return 0;
-  }
-
-  board.performUpdate();
-  int standPat = Eval::evaluate(board, board.getActivePlayer());
-
-  if (standPat >= beta) {
-    if (!pvNode) return beta;
-
-    standPat = std::min((alpha + beta) / 2, beta - 1);
-  }
-
-  if (alpha < standPat) {
-    alpha = standPat;
   }
 
   // Check transposition table cache
@@ -819,6 +820,27 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
       }
     }
   }
+
+  board.performUpdate();
+
+  if (ttEntry.Flag != NONE && ttEntry.eval != NOSCORE){
+    standPat = ttEntry.eval;
+  }else{
+    standPat = Eval::evaluate(board, board.getActivePlayer());
+  }
+
+
+
+  if (standPat >= beta) {
+    if (!pvNode) return beta;
+
+    standPat = std::min((alpha + beta) / 2, beta - 1);
+  }
+
+  if (alpha < standPat) {
+    alpha = standPat;
+  }
+
 
   MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
 
@@ -845,7 +867,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
           if (score >= beta) {
             // Add a new tt entry for this node
             if (!_stop){
-                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, 0, MAX_PLY);
+                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), standPat, BETA, score, 0, MAX_PLY);
             }
             return beta;
           }
