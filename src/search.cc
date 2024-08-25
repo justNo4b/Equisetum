@@ -419,8 +419,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Do the Evaluation, unless we are in check or prev move was NULL
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
-  board.performUpdate();
-
   if (incheckNode) {
     _sStack.AddEval(NOSCORE);
   }else {
@@ -428,6 +426,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     if (ttEntry.Flag != NONE && ttEntry.eval != NOSCORE){
         nodeEval = ttEntry.eval;
     }else{
+        board.performUpdate();
         nodeEval = Eval::evaluate(board, board.getActivePlayer());
     }
     _sStack.AddEval(nodeEval);
@@ -458,6 +457,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (isPrune && depth <= 8 && ((nodeEval - 161 * depth + 142 * improving) >= beta)){
       return beta;
   }
+
+  board.performUpdate();
 
   // 3. NULL MOVE
   // If we are doing so well, that giving opponent 2 moves wont improve his position we can safely prune this position.
@@ -832,11 +833,10 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     }
   }
 
-  board.performUpdate();
-
   if (ttEntry.Flag != NONE && ttEntry.eval != NOSCORE){
     nodeEval = ttEntry.eval;
   }else{
+    board.performUpdate();
     nodeEval = Eval::evaluate(board, board.getActivePlayer());
   }
 
@@ -852,7 +852,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     alpha = standPat;
   }
 
-
+  board.performUpdate();
   MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
 
   while (movePicker.hasNext()) {
