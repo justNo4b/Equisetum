@@ -92,13 +92,13 @@ void OrderingInfo::decrementCounterHistory(Color color, int pMoveIndx, PieceType
 
 void OrderingInfo::incrementPawnstructureHistory(Color color, U64 pawnkey, int depth){
   int16_t current = _pawnstructHistory[color][pawnkey & (16384 - 1)];
-  int16_t bonus   = depth * depth;
+  int16_t bonus   = (depth * depth / 2);
   _pawnstructHistory[color][pawnkey & (16384 - 1)] += 32 * bonus - current * abs(bonus) / 512;
 }
 
 void OrderingInfo::decrementPawnstructureHistory(Color color, U64 pawnkey, int depth){
   int16_t current = _pawnstructHistory[color][pawnkey & (16384 - 1)];
-  int16_t bonus   = -1 * depth * depth;
+  int16_t bonus   = (-1 * depth * depth) / 2;
   _pawnstructHistory[color][pawnkey & (16384 - 1)] += 32 * bonus - current * abs(bonus) / 512;
 }
 
