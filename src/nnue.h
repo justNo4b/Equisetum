@@ -22,7 +22,7 @@
 #include "bitutils.h"
 #include <cstdint>
 
-#define NNUE_BUCKETS (7)
+#define NNUE_BUCKETS (4)
 #define NNUE_INPUT   (2 * 6 * 64)
 #define NNUE_HIDDEN  (1024)
 #define NNUE_OUTPUT  (1)
@@ -65,14 +65,14 @@ private:
 
 
         int BUCKETS[64] {
-            0,  0,  1,  2,  2,  1,  0,  0,
-            3,  3,  3,  2,  2,  3,  3,  3,
-            4,  4,  4,  4,  4,  4,  4,  4,
-            4,  4,  4,  4,  4,  4,  4,  4,
-            5,  5,  5,  5,  5,  5,  5,  5,
-            5,  5,  5,  5,  5,  5,  5,  5,
-            6,  6,  6,  6,  6,  6,  6,  6,
-            6,  6,  6,  6,  6,  6,  6,  6,
+		0, 0, 1, 1, 1, 1, 0, 0,
+		2, 2, 2, 2, 2, 2, 2, 2,
+		3, 3, 3, 3, 3, 3, 3, 3,
+		3, 3, 3, 3, 3, 3, 3, 3,
+		3, 3, 3, 3, 3, 3, 3, 3,
+		3, 3, 3, 3, 3, 3, 3, 3,
+		3, 3, 3, 3, 3, 3, 3, 3,
+		3, 3, 3, 3, 3, 3, 3, 3
         };
 
     // our main holder of pre-calculated hidden layers for both colors
