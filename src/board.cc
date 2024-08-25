@@ -447,7 +447,7 @@ void Board::_movePiece(Color color, PieceType pieceType, int from, int to) {
   _occupied ^= squareMask;
 
   // Update pawn structure ZKey if this is a pawn move
-  if (pieceType == PAWN || pieceType == KING) {
+  if (pieceType == PAWN) {
     _pawnStructureZkey.movePiece(color, pieceType, from, to);
   }
 
@@ -954,7 +954,7 @@ int Board::getPhase() const{
 
     // mark as updated, copy nnue and perform an update
     _updDone = true;
-    
+
     if(_nnue->resetNeeded(_updSchedule.movingPiece, _updSchedule.from, _updSchedule.to, _updSchedule.color)){
       _nnue = _nnue + 1;
       _nnue->fullReset(*this);
