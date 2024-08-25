@@ -793,6 +793,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
    _nodes++;
    bool pvNode = alpha != beta - 1;
    int standPat;
+   int nodeEval;
 
   if (_stop || _checkLimits()) {
     _stop = true;
@@ -824,12 +825,12 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
   board.performUpdate();
 
   if (ttEntry.Flag != NONE && ttEntry.eval != NOSCORE){
-    standPat = ttEntry.eval;
+    nodeEval = ttEntry.eval;
   }else{
-    standPat = Eval::evaluate(board, board.getActivePlayer());
+    nodeEval = Eval::evaluate(board, board.getActivePlayer());
   }
 
-
+  standPat = nodeEval;
 
   if (standPat >= beta) {
     if (!pvNode) return beta;
@@ -867,7 +868,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
           if (score >= beta) {
             // Add a new tt entry for this node
             if (!_stop){
-                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), standPat, BETA, score, 0, MAX_PLY);
+                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), nodeEval, BETA, score, 0, MAX_PLY);
             }
             return beta;
           }
