@@ -90,6 +90,19 @@ void OrderingInfo::decrementCounterHistory(Color color, int pMoveIndx, PieceType
   _counterMoveHistory[color][pMoveIndx][pType][to] += 32 * bonus - current * abs(bonus) / 512;
 }
 
+void OrderingInfo::incrementPawnstructureHistory(Color color, U64 pawnkey, int depth){
+  int16_t current = _pawnstructHistory[color][pawnkey % 16384];
+  int16_t bonus   = depth * depth;
+  _pawnstructHistory[color][pawnkey % 16384] += 32 * bonus - current * abs(bonus) / 512;
+}
+
+void OrderingInfo::decrementPawnstructureHistory(Color color, U64 pawnkey, int depth){
+  int16_t current = _pawnstructHistory[color][pawnkey % 16384];
+  int16_t bonus   = -1 * depth * depth;
+  _pawnstructHistory[color][pawnkey % 16384] += 32 * bonus - current * abs(bonus) / 512;
+}
+
+
 int OrderingInfo::getHistory(Color color, int from, int to) const {
   return _history[color][from][to];
 }
@@ -101,6 +114,11 @@ int OrderingInfo::getCaptureHistory(PieceType capturingPiece, PieceType captured
 int OrderingInfo::getCountermoveHistory(Color color, int pMoveIndx, PieceType pType, int to) const{
   return _counterMoveHistory[color][pMoveIndx][pType][to];
 }
+
+int OrderingInfo::getPawnstructHistory(Color color, U64 pawnkey) const {
+    return _pawnstructHistory[color][pawnkey % 16384];
+}
+
 
 void OrderingInfo::updateKillers(int ply, Move move) {
   int t = move.getMoveINT();
