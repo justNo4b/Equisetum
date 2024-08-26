@@ -770,9 +770,10 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 }
 
 int Search::_qSearch(Board &board, int alpha, int beta) {
-  // Check search limits
    _nodes++;
    bool pvNode = alpha != beta - 1;
+   int nodeEval = NOSCORE;
+   int standPat = NOSCORE;
 
   if (_stop || _checkLimits()) {
     _stop = true;
@@ -780,7 +781,8 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
   }
 
   board.performUpdate();
-  int standPat = Eval::evaluate(board, board.getActivePlayer());
+  nodeEval = Eval::evaluate(board, board.getActivePlayer());
+  standPat = nodeEval;
 
   if (standPat >= beta) {
     if (!pvNode) return beta;
