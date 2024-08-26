@@ -406,22 +406,15 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
   board.performUpdate();
-  if (incheckNode) {
-    _sStack.AddEval(NOSCORE);
-  }else {
-    nodeEval = Eval::evaluate(board, board.getActivePlayer());
-    _sStack.AddEval(nodeEval);
-  }
+  nodeEval = Eval::evaluate(board, board.getActivePlayer());
+  _sStack.AddEval(nodeEval);
+
 
   // Check if we are improving
   // The idea is if we are not improving in this line we probably can prune a bit more
 
   if (ply >= 2){
-    if (ply >= 4 && _sStack.statEval[ply - 2] == NOSCORE){
-        improving = !incheckNode && nodeEval > _sStack.statEval[ply - 4];
-    }else{
-        improving = !incheckNode && nodeEval > _sStack.statEval[ply - 2];
-    }
+    improving = nodeEval > _sStack.statEval[ply - 2];
   }
 
   // Clear Killers for the children node
