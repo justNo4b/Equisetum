@@ -269,7 +269,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
 
   // Load TT
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
-  int hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
+  hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
 
   _sStack.AddEval(nodeEval);
 
