@@ -260,20 +260,21 @@ inline int Search::_makeDrawScore(){
 
 int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   _nodes++;
-
-  const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
-  int hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
-
-  MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0);
-  _sStack.AddEval(board.colorIsInCheck(board.getActivePlayer()) ? NOSCORE : Eval::evaluate(board, board.getActivePlayer()));
-  pV rootPV = pV();
-
-
-
+  int nodeEval = Eval::evaluate(board, board.getActivePlayer());
+  int hashMove = 0;
   int currScore;
-
+  pV rootPV = pV();
   Move bestMove;
   bool fullWindow = true;
+
+  // Load TT
+  const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
+  hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
+
+  _sStack.AddEval(nodeEval);
+
+  MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0);
+
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
 
@@ -339,7 +340,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int pMoveScore = _sStack.moves[ply - 1].getValue();
   int pMoveIndx = cmhCalculateIndex(pMove);
   int alphaOrig = alpha;
-  int nodeEval = 0;
+  int nodeEval = NOSCORE;
   int  legalCount = 0;
   int  qCount = 0;
   Move ttMove = Move(0);
@@ -406,22 +407,15 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
   board.performUpdate();
-  if (incheckNode) {
-    _sStack.AddEval(NOSCORE);
-  }else {
-    nodeEval = Eval::evaluate(board, board.getActivePlayer());
-    _sStack.AddEval(nodeEval);
-  }
+  nodeEval = Eval::evaluate(board, board.getActivePlayer());
+  _sStack.AddEval(nodeEval);
+
 
   // Check if we are improving
   // The idea is if we are not improving in this line we probably can prune a bit more
 
   if (ply >= 2){
-    if (ply >= 4 && _sStack.statEval[ply - 2] == NOSCORE){
-        improving = !incheckNode && nodeEval > _sStack.statEval[ply - 4];
-    }else{
-        improving = !incheckNode && nodeEval > _sStack.statEval[ply - 2];
-    }
+    improving = nodeEval > _sStack.statEval[ply - 2];
   }
 
   // Clear Killers for the children node
@@ -776,9 +770,10 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 }
 
 int Search::_qSearch(Board &board, int alpha, int beta) {
-  // Check search limits
    _nodes++;
    bool pvNode = alpha != beta - 1;
+   int nodeEval = NOSCORE;
+   int standPat = NOSCORE;
 
   if (_stop || _checkLimits()) {
     _stop = true;
@@ -786,7 +781,8 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
   }
 
   board.performUpdate();
-  int standPat = Eval::evaluate(board, board.getActivePlayer());
+  nodeEval = Eval::evaluate(board, board.getActivePlayer());
+  standPat = nodeEval;
 
   if (standPat >= beta) {
     if (!pvNode) return beta;
@@ -833,7 +829,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
 
     // Use Halogen futility variation
     if (!(move.getFlags() & Move::PROMOTION) && !board.SEE_GreaterOrEqual(move, (alpha - standPat - DELTA_MOVE_CONST)))
-      continue;;
+      continue;
 
     Board movedBoard = board;
     bool isLegal = movedBoard.doMove(move);
