@@ -80,28 +80,32 @@ void HASH::HASH_Clear(){
     }
 }
 
-void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, int score, int depth, int ply){
+void  HASH::HASH_Store(U64 posKey, int cMove, int eval, CutOffState bound, int score, int depth, int ply){
+      uint32_t shortKey = (uint32_t) posKey;
+
       if (abs(score) > WON_IN_X){
         score = (score > 0) ? (score - ply) : (score + ply);
       }
 
-      U64 index = posKey & TableMask;
-      if (posKey !=  hashTable[index].posKey || depth * 2 >=  hashTable[index].depth || bound == EXACT){
-         hashTable[index] = HASH_Entry(posKey, cMove, (int16_t)score, depth, bound);
+      U64 index = shortKey & TableMask;
+      if (shortKey !=  hashTable[index].posKey || depth * 2 >=  hashTable[index].depth || bound == EXACT){
+         hashTable[index] = HASH_Entry(shortKey, cMove, eval, (int16_t)score, depth, bound);
       }
 }
 
 
 HASH_Entry  HASH::HASH_Get(U64 posKey){
-  U64 index = posKey & TableMask;
-  if (hashTable[index].posKey == posKey){
+  uint32_t shortKey = (uint32_t) posKey;
+  U64 index = shortKey & TableMask;
+  if (hashTable[index].posKey == shortKey){
     return  hashTable[index];
   }
   return HASH_Entry();
 }
 
 void HASH::HASH_Prefetch(U64 posKey){
-  __builtin_prefetch(&hashTable[posKey & TableMask]);
+  uint32_t shortKey = (uint32_t) posKey;
+  __builtin_prefetch(&hashTable[shortKey & TableMask]);
 }
 
 U64 HASH::pHASH_Size(){
