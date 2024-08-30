@@ -240,6 +240,7 @@ inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
 
     //modify
     bonus += 2 * (eval < alpha);
+    bonus += (eval + 100 < alpha);
     return bonus;
 }
 
