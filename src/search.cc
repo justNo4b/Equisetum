@@ -253,6 +253,7 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     penalty -= (!ttNode && depth >= 4);
     penalty += (pmScore < -HALFMAX_HISTORY_SCORE);
     penalty += cutNode;
+    penalty += (eval > alpha + 100);
 
     penalty = std::max(0, penalty);
     return penalty;
