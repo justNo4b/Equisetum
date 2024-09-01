@@ -192,7 +192,7 @@ class Search {
    * @param depth search depth
    */
 
-  inline int _getHistoryBonus(int, int, int);
+  inline int _getHistoryBonus(int, int, int, CutOffState);
   inline int _getHistoryPenalty(int, int, int, int, bool, bool);
 
   inline void _updateBeta(bool, const Move, Color, int, int, int);

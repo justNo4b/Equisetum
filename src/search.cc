@@ -234,12 +234,14 @@ bool Search::_checkLimits() {
   return _timer.checkLimits(_nodes);
 }
 
-inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
+inline int Search::_getHistoryBonus(int depth, int eval, int alpha, CutOffState ttCut){
     // initial bonus is depth
     int bonus = depth;
 
     //modify
     bonus += 2 * (eval < alpha);
+    bonus += ttCut == ALPHA;
+
     return bonus;
 }
 
@@ -728,7 +730,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // Beta cutoff
         if (score >= beta) {
           // Add this move as a new killer move and update history if move is quiet
-          int bonus = _getHistoryBonus(depth, nodeEval, alpha);
+          int bonus = _getHistoryBonus(depth, nodeEval, alpha, (CutOffState)ttEntry.Flag);
           _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, bonus);
           // Award counter-move history additionally if we refuted special quite previous move
           if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), bonus);
