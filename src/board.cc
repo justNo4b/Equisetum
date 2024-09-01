@@ -729,12 +729,12 @@ bool Board::doMove(Move move) {
       _movePiece(_activePlayer, KING, from, g1);
       _movePiece(WHITE, ROOK, to, f1);
       if (colorIsInCheck(_activePlayer)) return false;
-       _scheduleUpdateCastle();
+        _scheduleUpdateCastle(*this, _activePlayer, from, g1, to, f1);
     } else {
       _movePiece(_activePlayer, KING, from, g8);
       _movePiece(BLACK, ROOK, to, f8);
       if (colorIsInCheck(_activePlayer)) return false;
-       _scheduleUpdateCastle();
+       _scheduleUpdateCastle(*this, _activePlayer, from, g8, to, f8);
     }
   } else if (flags & Move::QSIDE_CASTLE) {
     // Move the correct rook
@@ -742,12 +742,12 @@ bool Board::doMove(Move move) {
       _movePiece(_activePlayer, KING, from, c1);
       _movePiece(WHITE, ROOK, to, d1);
       if (colorIsInCheck(_activePlayer)) return false;
-       _scheduleUpdateCastle();
+       _scheduleUpdateCastle(*this, _activePlayer, from, c1, to, d1);
     } else {
       _movePiece(_activePlayer, KING, from, c8);
       _movePiece(BLACK, ROOK, to, d8);
       if (colorIsInCheck(_activePlayer)) return false;
-       _scheduleUpdateCastle();
+       _scheduleUpdateCastle(*this, _activePlayer, from, c8, to, d8);
     }
   } else if (flags & Move::EN_PASSANT) {
     // Remove the correct pawn
@@ -955,22 +955,48 @@ int Board::getPhase() const{
     // mark as updated, copy nnue and perform an update
     _updDone = true;
 
-    if(_nnue->resetNeeded(_updSchedule.movingPiece, _updSchedule.from, _updSchedule.to, _updSchedule.color)){
-        if (_updSchedule.type == NN_MOVE){
-         Color goodcolor = getOppositeColor(_updSchedule.color);
-         int16_t * goodhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
+    // Check if full reset is needed - when we change bucket or a side.
+    bool isResetNeeded = _nnue->resetNeeded(_updSchedule.movingPiece, _updSchedule.from, _updSchedule.to, _updSchedule.color);
 
+    // Reset is needed
+    if(isResetNeeded){
+        // good color - > color of the accumulator that does not need to be updated
+        Color goodcolor = getOppositeColor(_updSchedule.color);
+
+        // Copy "good" part of accumulator to a new shit
+        int16_t * goodhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
         _nnue = _nnue + 1;
         int16_t * newhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
         std::memcpy(newhalf, goodhalf, sizeof(int16_t) * NNUE_HIDDEN);
 
-        _nnue->movePieceHalf(_updSchedule, goodcolor);
-        _nnue->halfReset(*this, _updSchedule.color);
-
-        }else{
-        _nnue = _nnue + 1;
-        _nnue->fullReset(*this);
+        // incrementally update good part by using half update functions
+        switch (_updSchedule.type)
+        {
+        case NN_MOVE:
+            _nnue->movePieceHalf(_updSchedule, goodcolor);
+            break;
+        case NN_PROMO:
+            _nnue->promotePieceHalf(_updSchedule, goodcolor);
+            break;
+        case NN_CAPTURE:
+            _nnue->capturePieceHalf(_updSchedule, goodcolor);
+            break;
+        case NN_CAPPROMO:
+            _nnue->cappromPieceHalf(_updSchedule, goodcolor);
+            break;
+        case NN_CASTLE:
+            //_nnue->fullReset(*this);
+            _nnue->castleMoveHalf(_updSchedule, goodcolor);
+            break;
+        case NN_ENPASS:
+            _nnue->enpassMoveHalf(_updSchedule, goodcolor);
+            break;
+        default:
+            break;
         }
+
+        // half reset "bad" part
+        _nnue->halfReset(*this, _updSchedule.color);
 
       return;
     }
@@ -995,6 +1021,7 @@ int Board::getPhase() const{
         _nnue->cappromPiece(_updSchedule);
         break;
     case NN_CASTLE:
+        // this should never happens, but do a full reset just in case
         _nnue->fullReset(*this);
         //_nnue->castleMove(_updSchedule.color, _updSchedule.from, _updSchedule.to, _updSchedule.fromRook, _updSchedule.toRook);
         break;
@@ -1024,6 +1051,7 @@ void Board::_scheduleUpdateMove(const Board &board, Color c, PieceType moving, u
 void Board::_scheduleUpdatePromote(const Board &board, Color c, PieceType promoted, unsigned int from, unsigned int to){
 
     _updSchedule.type = NN_PROMO;
+    _updSchedule.movingPiece = PAWN;
     _updSchedule.color = c;
     _updSchedule.promotedPiece = promoted;
     _updSchedule.from = from;
@@ -1037,6 +1065,7 @@ void Board::_scheduleUpdatePromote(const Board &board, Color c, PieceType promot
 void Board::_scheduleUpdateCapprom(const Board &board, Color c, PieceType captured, PieceType promoted, unsigned int from, unsigned int to){
 
     _updSchedule.type = NN_CAPPROMO;
+    _updSchedule.movingPiece = PAWN;
     _updSchedule.color = c;
     _updSchedule.capturedPiece = captured;
     _updSchedule.promotedPiece = promoted;
@@ -1063,9 +1092,18 @@ void Board::_scheduleUpdateCapture(const Board &board, Color c, PieceType moving
 }
 
 
-void Board::_scheduleUpdateCastle(){
+void Board::_scheduleUpdateCastle(const Board &board, Color c, unsigned int from, unsigned int to, unsigned int fromR, unsigned int toR){
 
     _updSchedule.type = NN_CASTLE;
+    _updSchedule.movingPiece = KING;
+    _updSchedule.color = c;
+    _updSchedule.from = from;
+    _updSchedule.to = to;
+    _updSchedule.fromRook = fromR;
+    _updSchedule.toRook = toR;
+
+    _updSchedule.wKing = _bitscanForward(board.getPieces(WHITE, KING));
+    _updSchedule.bKing = _bitscanForward(board.getPieces(BLACK, KING));
 
     _updDone = false;
 }
@@ -1075,6 +1113,7 @@ void Board::_scheduleUpdateCastle(){
 void Board::_scheduleUpdateEnpass(const Board &board, Color c, unsigned int from, unsigned int to){
 
     _updSchedule.type = NN_ENPASS;
+    _updSchedule.movingPiece = PAWN;
     _updSchedule.color = c;
     _updSchedule.from = from;
     _updSchedule.to = to;

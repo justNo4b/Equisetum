@@ -254,6 +254,23 @@ void NNueEvaluation::promotePiece(UpdData ud){
 
 }
 
+void NNueEvaluation::promotePieceHalf(UpdData ud, Color half){
+    Color color = ud.color;
+    PieceType promotedTo = ud.promotedPiece;
+    int fromSquare = ud.from;
+    int toSquare = ud.to;
+    int hKing = half == WHITE ? ud.wKing : ud.bKing;
+
+    // remove pawn
+    int remove_index  = _getPieceIndex(fromSquare, PAWN, color, half, hKing);
+    // add promoted piece
+    int add_index     = _getPieceIndex(toSquare, promotedTo, color, half, hKing);
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[add_index][i] - NNUE_HIDDEN_WEIGHT[remove_index][i];
+    }
+
+}
 
 void NNueEvaluation::cappromPiece(UpdData ud){
     Color color = ud.color;
@@ -277,6 +294,27 @@ void NNueEvaluation::cappromPiece(UpdData ud){
     for (int i = 0; i < NNUE_HIDDEN; i++){
         _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i] - NNUE_HIDDEN_WEIGHT[captured_indexWV][i];
         _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i] - NNUE_HIDDEN_WEIGHT[captured_indexBV][i];
+    }
+
+}
+
+void NNueEvaluation::cappromPieceHalf(UpdData ud, Color half){
+    Color color = ud.color;
+    PieceType capturedPiece = ud.capturedPiece;
+    PieceType promotedTo = ud.promotedPiece;
+    int fromSquare = ud.from;
+    int toSquare = ud.to;
+    int hKing = half == WHITE ? ud.wKing : ud.bKing;
+
+    // Remove pawn
+    int remove_index      = _getPieceIndex(fromSquare, PAWN, color, half, hKing);
+    // Add promoted piece
+    int add_index         = _getPieceIndex(toSquare, promotedTo, color, half, hKing);
+    // Remove captured
+    int captured_index    = _getPieceIndex(toSquare, capturedPiece, getOppositeColor(color), half, hKing);
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[add_index][i] - NNUE_HIDDEN_WEIGHT[remove_index][i] - NNUE_HIDDEN_WEIGHT[captured_index][i];
     }
 
 }
@@ -306,28 +344,50 @@ void NNueEvaluation::capturePiece(UpdData ud){
 
 }
 
-/*
-void NNueEvaluation::castleMove(Color color, unsigned int fromSquareKing, unsigned int toSquareKing,unsigned int fromSquareRook, unsigned int toSquareRook){
-    // King
-    int removeK_indexWV  = _getPieceIndex(fromSquareKing, KING, color, WHITE, 0);
-    int removeK_indexBV  = _getPieceIndex(fromSquareKing, KING, color, BLACK, 0);
-    int addK_indexWV     = _getPieceIndex(toSquareKing, KING, color, WHITE, 0);
-    int addK_indexBV     = _getPieceIndex(toSquareKing, KING, color, BLACK, 0);
-    //Rook
-    int removeR_indexWV  = _getPieceIndex(fromSquareRook, ROOK, color, WHITE, 0);
-    int removeR_indexBV  = _getPieceIndex(fromSquareRook, ROOK, color, BLACK, 0);
-    int addR_indexWV     = _getPieceIndex(toSquareRook, ROOK, color, WHITE, 0);
-    int addR_indexBV     = _getPieceIndex(toSquareRook, ROOK, color, BLACK, 0);
+void NNueEvaluation::capturePieceHalf(UpdData ud, Color half){
+    Color color = ud.color;
+    PieceType capturedPiece = ud.capturedPiece;
+    PieceType pieceType = ud.movingPiece;
+    int fromSquare = ud.from;
+    int toSquare = ud.to;
+    int hKing = half == WHITE ? ud.wKing : ud.bKing;
+
+    // MovePiece
+    int remove_index  = _getPieceIndex(fromSquare, pieceType, color, half, hKing);
+    int add_index     = _getPieceIndex(toSquare, pieceType, color, half, hKing);
+
+    // RemoveCaptured
+    int captured_index    = _getPieceIndex(toSquare, capturedPiece, getOppositeColor(color), half, hKing);
 
     for (int i = 0; i < NNUE_HIDDEN; i++){
-        _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[addK_indexWV][i] - NNUE_HIDDEN_WEIGHT[removeK_indexWV][i]
-                                + NNUE_HIDDEN_WEIGHT[addR_indexWV][i] - NNUE_HIDDEN_WEIGHT[removeR_indexWV][i];
-        _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[addK_indexBV][i] - NNUE_HIDDEN_WEIGHT[removeK_indexBV][i]
-                                + NNUE_HIDDEN_WEIGHT[addR_indexBV][i] - NNUE_HIDDEN_WEIGHT[removeR_indexBV][i];
+        _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[add_index][i] - NNUE_HIDDEN_WEIGHT[remove_index][i] - NNUE_HIDDEN_WEIGHT[captured_index][i];
     }
 
 }
-*/
+
+
+void NNueEvaluation::castleMoveHalf(UpdData ud, Color half){
+    Color color = ud.color;
+    int fromSquareKing = ud.from;
+    int toSquareKing = ud.to;
+    int fromSquareRook = ud.fromRook;
+    int toSquareRook = ud.toRook;
+    int hKing = half == WHITE ? ud.wKing : ud.bKing;
+
+    // King
+    int removeK_index  = _getPieceIndex(fromSquareKing, KING, color, half, hKing);
+    int addK_index     = _getPieceIndex(toSquareKing, KING, color, half, hKing);
+    //Rook
+    int removeR_index  = _getPieceIndex(fromSquareRook, ROOK, color, half, hKing);
+    int addR_index     = _getPieceIndex(toSquareRook, ROOK, color, half, hKing);
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[addK_index][i] - NNUE_HIDDEN_WEIGHT[removeK_index][i]
+                                + NNUE_HIDDEN_WEIGHT[addR_index][i] - NNUE_HIDDEN_WEIGHT[removeR_index][i];
+    }
+
+}
+
 
 
 
@@ -351,6 +411,25 @@ void NNueEvaluation::enpassMove(UpdData ud){
     for (int i = 0; i < NNUE_HIDDEN; i++){
         _hiddenScore[WHITE][i] += NNUE_HIDDEN_WEIGHT[add_indexWV][i] - NNUE_HIDDEN_WEIGHT[remove_indexWV][i] - NNUE_HIDDEN_WEIGHT[captured_indexWV][i];
         _hiddenScore[BLACK][i] += NNUE_HIDDEN_WEIGHT[add_indexBV][i] - NNUE_HIDDEN_WEIGHT[remove_indexBV][i] - NNUE_HIDDEN_WEIGHT[captured_indexBV][i];
+    }
+
+}
+
+void NNueEvaluation::enpassMoveHalf(UpdData ud, Color half){
+    Color color = ud.color;
+    int fromSquare = ud.from;
+    int toSquare = ud.to;
+    int hKing = half == WHITE ? ud.wKing : ud.bKing;
+
+    unsigned int epPawn = color == WHITE ? toSquare - 8 : toSquare + 8;
+    // MovePiece
+    int remove_index  = _getPieceIndex(fromSquare, PAWN, color, half, hKing);
+    int add_index     = _getPieceIndex(toSquare, PAWN, color, half, hKing);
+    // RemoveCaptured
+    int captured_index    = _getPieceIndex(epPawn, PAWN, getOppositeColor(color), half, hKing);
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[add_index][i] - NNUE_HIDDEN_WEIGHT[remove_index][i] - NNUE_HIDDEN_WEIGHT[captured_index][i];
     }
 
 }

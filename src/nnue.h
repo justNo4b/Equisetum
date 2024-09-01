@@ -50,16 +50,21 @@ public:
     int evaluate(const Color);
 
     // incremental update functions - full updates
+    // here we assume that castle requires reset in any case
     void movePiece(UpdData);
     void promotePiece(UpdData);
     void cappromPiece(UpdData);
     void capturePiece(UpdData);
-    //void castleMove(UpdData);
+
     void enpassMove(UpdData);
 
     // incremental update - half reset
     void movePieceHalf(UpdData, Color);
-
+    void promotePieceHalf(UpdData, Color);
+    void cappromPieceHalf(UpdData, Color);
+    void capturePieceHalf(UpdData, Color);
+    void castleMoveHalf(UpdData, Color);
+    void enpassMoveHalf(UpdData, Color);
 
     void fullReset(const Board &board);
     void halfReset(const Board &, Color);
