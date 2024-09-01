@@ -49,7 +49,7 @@ public:
     // obvious
     int evaluate(const Color);
 
-    // incremental update functions
+    // incremental update functions - full updates
     void movePiece(UpdData);
     void promotePiece(UpdData);
     void cappromPiece(UpdData);
@@ -57,9 +57,17 @@ public:
     //void castleMove(UpdData);
     void enpassMove(UpdData);
 
+    // incremental update - half reset
+    void movePieceHalf(UpdData, Color);
+
+
     void fullReset(const Board &board);
+    void halfReset(const Board &, Color);
 
     bool resetNeeded(PieceType, int, int, Color);
+
+    int16_t * getHalfAccumulatorPtr(Color);
+
 
 private:
 

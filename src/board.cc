@@ -954,10 +954,24 @@ int Board::getPhase() const{
 
     // mark as updated, copy nnue and perform an update
     _updDone = true;
-    
+
     if(_nnue->resetNeeded(_updSchedule.movingPiece, _updSchedule.from, _updSchedule.to, _updSchedule.color)){
-      _nnue = _nnue + 1;
-      _nnue->fullReset(*this);
+        if (_updSchedule.type == NN_MOVE){
+         Color goodcolor = getOppositeColor(_updSchedule.color);
+         int16_t * goodhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
+
+        _nnue = _nnue + 1;
+        int16_t * newhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
+        std::memcpy(newhalf, goodhalf, sizeof(int16_t) * NNUE_HIDDEN);
+
+        _nnue->movePieceHalf(_updSchedule, goodcolor);
+        _nnue->halfReset(*this, _updSchedule.color);
+
+        }else{
+        _nnue = _nnue + 1;
+        _nnue->fullReset(*this);
+        }
+
       return;
     }
 
