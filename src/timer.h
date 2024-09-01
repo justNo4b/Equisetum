@@ -61,6 +61,8 @@
      */
     int _ourTimeLeft;
 
+    double _currentNodesConfidence;
+
     /**
      * @brief We keep track of times we prolonged thought
      * during the search. It is important to not prolong a more
@@ -133,11 +135,13 @@
 
       void startIteration();
 
-      bool finishOnThisDepth(int *, U64, U64);
+      bool finishOnThisDepth(int *);
 
       int getSearchDepth();
 
       int getElapsed();
+
+      void setCurrentConfidence(U64, U64);
   };
 
 #endif

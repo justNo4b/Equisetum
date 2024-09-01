@@ -114,22 +114,24 @@ void Timer::startIteration(){
     _lastPlyTime = 0;
 }
 
-bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes){
+void Timer::setCurrentConfidence(U64 totalNodes, U64 bestNodes){
+    _currentNodesConfidence = bestNodes * 100.0 / totalNodes;
+}
+
+bool Timer::finishOnThisDepth(int * elapsedTime){
     int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _start).count();
     *elapsedTime = elapsed;
     if (_moveTimeMode) return false;
 
     _lastPlyTime =  elapsed - _lastPlyTime;
 
-    double nodesConfidance = bestNodes * 100.0 / totalNodes;
+    double nodesConfidance = _currentNodesConfidence;
     // clamp coeff between 25 and 75
     // we assume that standart case is about ~50% of nodes go in bestMove
     nodesConfidance = std::max(25.0, nodesConfidance);
     nodesConfidance = std::min(85.0, nodesConfidance);
 
     double nodesCoeff = 1.0 + (51.0 - nodesConfidance) / 50.0;
-
-
 
 
     *elapsedTime = elapsed;
