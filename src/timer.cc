@@ -91,12 +91,12 @@ bool Timer::checkLimits(U64 nodes){
 
   if (_wasThoughtProlonged && elapsed >= (_timeAllocated)){
     return true;
-  } else  if (elapsed >= (_timeAllocated)){
+  } else  if (elapsed >= _timeAllocated){
 
     // if we have so much time left that we supposedly
     // can search last ply ~25 times at least
     // we can prolong thought here.
-    if (_ourTimeLeft > _lastPlyTime * 20 + 30 ){
+    if ((_ourTimeLeft > _lastPlyTime * 20 + 30) && _currentNodesConfidence < 75.0 ){
       _timeAllocated += _lastPlyTime * 2;
       _wasThoughtProlonged = true;
       return false;
