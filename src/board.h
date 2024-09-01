@@ -302,7 +302,7 @@ class Board {
   void _scheduleUpdatePromote(const Board &board, Color, PieceType, unsigned int, unsigned int);
   void _scheduleUpdateCapprom(const Board &board, Color, PieceType, PieceType, unsigned int, unsigned int);
   void _scheduleUpdateCapture(const Board &board, Color, PieceType, PieceType, unsigned int, unsigned int);
-  void _scheduleUpdateCastle();
+  void _scheduleUpdateCastle(const Board &board, Color, unsigned int, unsigned int, unsigned int, unsigned int);
   void _scheduleUpdateEnpass(const Board &board, Color, unsigned int, unsigned int);
   void _scheduleUpdateEmpty();
 
