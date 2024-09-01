@@ -243,7 +243,7 @@ inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
     return bonus;
 }
 
-int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool ttNode, bool cutNode){
+int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool ttNode, bool cutNode, bool pvNode){
     // initial penalty is depth
     int penalty = depth;
 
@@ -252,6 +252,7 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     penalty -= (!ttNode && depth >= 4);
     penalty += (pmScore < -HALFMAX_HISTORY_SCORE);
     penalty += cutNode;
+    penalty += !pvNode && !cutNode;
 
     penalty = std::max(0, penalty);
     return penalty;
@@ -761,7 +762,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
         }else{
           // Beta was not beaten and we dont improve alpha in this case we lower our search history values
-          int penalty = _getHistoryPenalty(depth, nodeEval, alpha, pMoveScore, ttNode, cutNode);
+          int penalty = _getHistoryPenalty(depth, nodeEval, alpha, pMoveScore, ttNode, cutNode, pvNode);
           if (isQuiet){
             _orderingInfo.decrementHistory(board.getActivePlayer(), move.getFrom(), move.getTo(), penalty);
             _orderingInfo.decrementCounterHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo(), penalty);

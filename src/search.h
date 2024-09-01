@@ -193,7 +193,7 @@ class Search {
    */
 
   inline int _getHistoryBonus(int, int, int);
-  inline int _getHistoryPenalty(int, int, int, int, bool, bool);
+  inline int _getHistoryPenalty(int, int, int, int, bool, bool, bool);
 
   inline void _updateBeta(bool, const Move, Color, int, int, int);
 
