@@ -56,37 +56,37 @@ int OrderingInfo::getCounterMoveINT(Color color, int pMove) const{
 // currently use formula clamps history between (-16384 and 16384)
 void OrderingInfo::incrementHistory(Color color, int from, int to, int depth) {
   int16_t current = _history[color][from][to];
-  int16_t bonus   = depth * depth;
+  int16_t bonus   = depth * depth + depth;
   _history[color][from][to] += 32 * bonus - current * abs(bonus) / 512;
 }
 
 void OrderingInfo::decrementHistory(Color color, int from, int to, int depth) {
   int16_t current = _history[color][from][to];
-  int16_t bonus   = -1 * depth * (depth - 1);
+  int16_t bonus   = -1 * (depth * (depth - 1) + depth);
   _history[color][from][to] += 32 * bonus - current * abs(bonus) / 512;
 }
 
 void OrderingInfo::incrementCapHistory(PieceType capturingPiece, PieceType capturedPiece, int to, int depth){
   int16_t current = _captureHistory[capturingPiece][capturedPiece][to];
-  int16_t bonus   = depth * depth;
+  int16_t bonus   = depth * depth + depth;
   _captureHistory[capturingPiece][capturedPiece][to] += 32 * bonus - current * abs(bonus) / 512;
 }
 
 void OrderingInfo::decrementCapHistory(PieceType capturingPiece, PieceType capturedPiece, int to, int depth){
   int16_t current = _captureHistory[capturingPiece][capturedPiece][to];
-  int16_t bonus   = -1 * depth * depth;
+  int16_t bonus   = -1 * (depth * depth + depth);
   _captureHistory[capturingPiece][capturedPiece][to] += 32 * bonus - current * abs(bonus) / 512;
 }
 
 void OrderingInfo::incrementCounterHistory(Color color, int pMove, PieceType pType, int to, int depth){
   int16_t current = _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to];
-  int16_t bonus   = 4 * depth * depth;
+  int16_t bonus   = 4 * depth * depth + depth;
   _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to] += 32 * bonus - current * abs(bonus) / 512;
 }
 
 void OrderingInfo::decrementCounterHistory(Color color, int pMoveIndx, PieceType pType, int to, int depth){
   int16_t current = _counterMoveHistory[color][pMoveIndx][pType][to];
-  int16_t bonus   = -1 * depth * depth;
+  int16_t bonus   = -1 * (depth * depth + depth);
   _counterMoveHistory[color][pMoveIndx][pType][to] += 32 * bonus - current * abs(bonus) / 512;
 }
 
