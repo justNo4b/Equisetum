@@ -531,8 +531,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                     _sStack.Remove();
 
                     if (sScore >= pcBeta){
-                        int bonus = _getHistoryBonus((depth - 4), nodeEval, alpha);
-                        _updateBeta(false, move, board.getActivePlayer(), pMove, ply, bonus);
                         return beta;
                     }else{
                         int penalty = _getHistoryPenalty((depth - 4), nodeEval, alpha, pMoveScore, ttNode, cutNode, (CutOffState)ttEntry.Flag);
