@@ -447,7 +447,7 @@ void Board::_movePiece(Color color, PieceType pieceType, int from, int to) {
   _occupied ^= squareMask;
 
   // Update pawn structure ZKey if this is a pawn move
-  if (pieceType == PAWN || pieceType == KING) {
+  if (pieceType == PAWN) {
     _pawnStructureZkey.movePiece(color, pieceType, from, to);
   }
 
