@@ -82,6 +82,10 @@ class OrderingInfo {
 
   void decrementCounterHistory(Color, int, PieceType, int, int);
 
+  void incrementCorrectionHistory(Color, U64, int, int);
+
+  void decrementCorrectionHistory(Color, U64, int, int);
+
   /**
    * @brief Update countermove.
    *
@@ -110,6 +114,8 @@ class OrderingInfo {
    * @return int History heuristic value for the given from square, to square and color
    */
   int getHistory(Color, int, int) const;
+
+  int getCorrHistory(Color, U64) const;
 
   /**
    * @brief Get history information for the current capture move
@@ -155,6 +161,11 @@ class OrderingInfo {
 
  private:
 
+  const int  CORRECTION_HISTORY_SIZE = 16384;
+  const int  CORRECTION_HISTORY_GRAIN = 256;
+  const int  CORRECTION_HISTORY_WEIGHT_SCALE = 256;
+  const int  CORRECTION_HISTORY_MAX = 8192;
+
   /**
    * @brief Array of first killer moves by ply
    */
@@ -180,6 +191,8 @@ class OrderingInfo {
    * Indexed by [prevPieceType][prevTo][movePieceType][moveTo]
    */
   int16_t _counterMoveHistory[2][6 * 64][6][64];
+
+  int _correctionHistory[2][16384];
 
   /**
    * @brief Array of the moves (represented by their INT), that counter move

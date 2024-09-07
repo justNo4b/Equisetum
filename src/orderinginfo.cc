@@ -111,10 +111,28 @@ void OrderingInfo::updateKillers(int ply, Move move) {
 
 }
 
+  void OrderingInfo::incrementCorrectionHistory(Color color, U64 pawnkey, int depth, int diff){
+    int current = _correctionHistory[color][pawnkey % 16384];
+    int weight  = std::min(depth, 16);
+    int scaled_diff = diff * CORRECTION_HISTORY_GRAIN;
+
+    int update =  current * (CORRECTION_HISTORY_WEIGHT_SCALE - weight) + scaled_diff * weight;
+
+    int newcorr = std::max(-CORRECTION_HISTORY_MAX, update / CORRECTION_HISTORY_WEIGHT_SCALE);
+    newcorr = std::min(CORRECTION_HISTORY_MAX, update / CORRECTION_HISTORY_WEIGHT_SCALE);
+
+    _correctionHistory[color][pawnkey % 16384] = newcorr;
+
+  }
+
 int OrderingInfo::getKiller1(int ply) const {
   return _killer1[ply];
 }
 
 int OrderingInfo::getKiller2(int ply) const {
   return _killer2[ply];
+}
+
+int OrderingInfo::getCorrHistory(Color color, U64 pawnkey) const{
+    return _correctionHistory[color][pawnkey % 16384] / CORRECTION_HISTORY_WEIGHT_SCALE;
 }

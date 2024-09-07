@@ -365,6 +365,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int pMoveIndx = cmhCalculateIndex(pMove);
   int alphaOrig = alpha;
   int nodeEval = NOSCORE;
+  int evalCorrection = 0;
   int  legalCount = 0;
   int  qCount = 0;
   Move ttMove = Move(0);
@@ -432,6 +433,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
   board.performUpdate();
   nodeEval = Eval::evaluate(board, board.getActivePlayer());
+  evalCorrection = _orderingInfo.getCorrHistory(board.getActivePlayer(), board.getPawnStructureZKey().getValue());
+  nodeEval += evalCorrection;
   _sStack.AddEval(nodeEval);
 
 
@@ -736,6 +739,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
+            if(!incheckNode && move.isQuiet() && beta <= nodeEval){
+                _orderingInfo.incrementCorrectionHistory(board.getActivePlayer(), board.getPawnStructureZKey().getValue(), depth, beta - nodeEval);
+            }
           }
           // we updated beta and in the pVNode so we should update our pV
           if (pvNode && !_stop){
@@ -786,6 +792,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       if (alpha <= alphaOrig) {
         int saveMove = ttMove.getMoveINT() != 0 ? ttMove.getMoveINT() : 0;
         myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, alpha, depth, ply);
+        if(!incheckNode && ttMove.isQuiet() && alpha >= nodeEval){
+            _orderingInfo.incrementCorrectionHistory(board.getActivePlayer(), board.getPawnStructureZKey().getValue(), depth, alpha - nodeEval);
+        }
       } else {
         myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, ply);
       }
