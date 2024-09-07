@@ -534,9 +534,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                         int bonus = _getHistoryBonus((depth - 4), nodeEval, alpha);
                         _updateBeta(false, move, board.getActivePlayer(), pMove, ply, bonus);
                         return beta;
-                    }else{
-                        int penalty = _getHistoryPenalty((depth - 4), nodeEval, alpha, pMoveScore, ttNode, cutNode, (CutOffState)ttEntry.Flag);
-                        _orderingInfo.decrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), penalty);
                     }
                 }
             }
