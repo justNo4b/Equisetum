@@ -352,11 +352,11 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   bool incheckNode;
   bool ttNode = false;
   bool qttNode = false;
-  bool fnNode = false;
   bool improving = false;
   bool singNode = false;
   bool nmpTree = _sStack.nmpTree;
   bool pvNode = alpha != beta - 1;
+  bool allNode = !cutNode && !pvNode;
   bool endgameNode = board.isEndGamePosition();
   int score;
   int ply = _sStack.ply;
@@ -477,7 +477,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           if (score >= beta){
             return beta;
           }
-          fnNode = true;
   }
 
   // 4. UN_HASHED REDUCTION
@@ -690,6 +689,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Idea from SF - > allow extending if our reductions are very negative
           int minReduction = (!isQuiet && legalCount <= 6) ? -2 :
                              (cutNode || pvNode) ? -1 : 0;
+
+          if (allNode) minReduction = 0;
 
           reduction = std::max(minReduction, reduction);
           //Avoid to reduce so much that we go to QSearch right away
