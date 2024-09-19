@@ -50,12 +50,8 @@ void Timer::_setupTimer(Color color, int movenum){
     // Divide up the remaining time (If movestogo not specified we are in
     // sudden death)
     if (_limits.movesToGo == 0) {
-      tCoefficient = INCR_T_WIDTH_A / pow((INCR_T_WIDTH + pow((movenum - INCR_T_MOVE), 2)), 1.5);
-      _timeAllocated = ourTime * tCoefficient;
-      if (movenum > INCR_CRIT_MOVE){
-          int div = ourIncrement != 0 ? MTG_CYC_INCR : MTG_NO_INCR;
-          _timeAllocated = ourTime / div + ourIncrement;
-      }
+      int div = ourIncrement != 0 ? MTG_CYC_INCR : MTG_NO_INCR;
+      _timeAllocated = ourTime / div + ourIncrement;
       _timeAllocated = std::min(_timeAllocated, ourTime - 10);
     } else {
       // when movetogo is specified, use different coefficients
