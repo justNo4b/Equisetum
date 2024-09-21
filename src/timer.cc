@@ -26,18 +26,23 @@ Timer::Timer(Limits l, Color color, int movenum){
     if (_limits.infinite) { // Infinite search
         _searchDepth = INF;
         _timeAllocated = INF;
+        _stype = S_INF;
     } else if (_limits.depth != 0) { // Depth search
         _searchDepth = _limits.depth;
         _timeAllocated = INF;
+        _stype = S_DEPTH;
     } else if (_limits.moveTime != 0) {
         _searchDepth = MAX_SEARCH_DEPTH;
         _timeAllocated = _limits.moveTime - 10;
         _moveTimeMode = true;
+        _stype = S_TIME;
     } else if (_limits.time[color] != 0) {
         _setupTimer(color, movenum);
+        _stype = S_GAME;
     } else { // No limits specified, use default depth
         _searchDepth = DEFAULT_SEARCH_DEPTH;
         _timeAllocated = INF;
+        _stype = S_NONE;
     }
 }
 
@@ -115,6 +120,7 @@ void Timer::startIteration(){
 }
 
 void Timer::reallocateTime(Color color, U64 totalNodes, U64 bestNodes){
+    if (_stype != S_GAME) return;
     int ourTime = _limits.time[color];
 
     double nodesConfidance = bestNodes * 100.0 / totalNodes;

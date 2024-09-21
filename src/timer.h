@@ -38,6 +38,14 @@
     Limits() : nodes(0), depth(0),  moveTime(0), movesToGo(0), time{}, increment{}, infinite(false) {};
   };
 
+  enum SearchType{
+    S_INF,
+    S_DEPTH,
+    S_TIME,
+    S_GAME,
+    S_NONE,
+  };
+
   class Timer
   {
   private:
@@ -82,6 +90,8 @@
      * @brief Depth of this search in plys
      */
     int _searchDepth;
+
+    SearchType _stype;
 
     /**
      * @brief time_point object representing the exact moment this search was started.
