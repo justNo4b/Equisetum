@@ -74,6 +74,7 @@ void Timer::_setupTimer(Color color, int movenum){
     // Depth is infinity in a timed search (ends when time runs out)
     _searchDepth = MAX_SEARCH_DEPTH;
     _ourTimeLeft = ourTime - _timeAllocated;
+    _timeAllocatedOriginal = _timeAllocated;
 }
 
 bool Timer::checkLimits(U64 nodes){
