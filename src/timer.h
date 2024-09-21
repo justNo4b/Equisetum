@@ -133,6 +133,8 @@
 
       void startIteration();
 
+      void reallocateTime(Color, U64, U64);
+
       bool finishOnThisDepth(int *, U64, U64);
 
       int getSearchDepth();

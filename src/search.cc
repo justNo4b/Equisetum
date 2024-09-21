@@ -123,6 +123,10 @@ void Search::iterDeep() {
 
         if (shouldStop) break;
 
+        if (currDepth % 5 == 0 && currDepth > 5){
+            _timer.reallocateTime(_initialBoard.getActivePlayer(), _nodes, _rootNodesSpent[_bestMove.getPieceType()][_bestMove.getTo()]);
+        }
+
     }
 
   // It can be the case where we exited before finishing iteration, and our PV etc can changed.

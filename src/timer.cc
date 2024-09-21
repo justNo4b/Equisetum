@@ -114,6 +114,23 @@ void Timer::startIteration(){
     _lastPlyTime = 0;
 }
 
+void Timer::reallocateTime(Color color, U64 totalNodes, U64 bestNodes){
+    int ourTime = _limits.time[color];
+
+    double nodesConfidance = bestNodes * 100.0 / totalNodes;
+    // clamp coeff between 25 and 75
+    // we assume that standart case is about ~50% of nodes go in bestMove
+    nodesConfidance = std::max(25.0, nodesConfidance);
+    nodesConfidance = std::min(85.0, nodesConfidance);
+
+    double nodesCoeff = 1.0 + (51.0 - nodesConfidance) / 50.0;
+
+    _timeAllocated = (double)_timeAllocated * nodesCoeff;
+    _timeAllocated = std::min(_timeAllocated, ourTime - 10);
+
+    _ourTimeLeft = ourTime - _timeAllocated;
+}
+
 bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes){
     int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - _start).count();
     *elapsedTime = elapsed;
