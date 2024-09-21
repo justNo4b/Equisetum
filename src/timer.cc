@@ -131,10 +131,9 @@ void Timer::reallocateTime(Color color, U64 totalNodes, U64 bestNodes){
 
     double nodesCoeff = 1.0 + (51.0 - nodesConfidance) / 50.0;
 
-    _timeAllocated = (double)_timeAllocated * nodesCoeff;
+    _timeAllocated = (double)_timeAllocatedOriginal * nodesCoeff;
     _timeAllocated = std::min(_timeAllocated, ourTime - 10);
 
-    _ourTimeLeft = ourTime - _timeAllocated;
 }
 
 bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes){
