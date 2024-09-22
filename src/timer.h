@@ -62,6 +62,7 @@
      */
     int _timeAllocated;
     int _timeAllocatedOriginal;
+    int _absoluteMaxTime;
 
     /**
      * @brief This variable holds value of how much time left on our

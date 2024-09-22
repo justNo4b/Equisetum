@@ -75,6 +75,7 @@ void Timer::_setupTimer(Color color, int movenum){
     _searchDepth = MAX_SEARCH_DEPTH;
     _ourTimeLeft = ourTime - _timeAllocated;
     _timeAllocatedOriginal = _timeAllocated;
+    _absoluteMaxTime = ourTime * 50 / 100;
 }
 
 bool Timer::checkLimits(U64 nodes){
@@ -134,6 +135,7 @@ void Timer::reallocateTime(Color color, U64 totalNodes, U64 bestNodes){
 
     _timeAllocated = (double)_timeAllocatedOriginal * nodesCoeff;
     _timeAllocated = std::min(_timeAllocated, ourTime - 10);
+    _timeAllocated = std::min(_timeAllocated, _absoluteMaxTime);
 
 }
 
