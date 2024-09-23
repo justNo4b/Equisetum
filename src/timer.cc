@@ -132,7 +132,7 @@ void Timer::reallocateTime(Color color, U64 totalNodes, U64 bestNodes){
     nodesConfidance = std::max(25.0, nodesConfidance);
     nodesConfidance = std::min(85.0, nodesConfidance);
 
-    double nodesCoeff = 1.0 + (51.0 - nodesConfidance) / 50.0;
+    double nodesCoeff = 1.0 + (50.0 - nodesConfidance) / 100.0;
 
     _timeAllocated = (double)_timeAllocatedOriginal * nodesCoeff;
     _timeAllocated = std::min(_timeAllocated, ourTime - 10);
