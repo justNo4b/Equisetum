@@ -76,7 +76,7 @@ void Timer::_setupTimer(Color color, int movenum){
     _ourTimeLeft = ourTime - _timeAllocated;
     _timeAllocatedOriginal = _timeAllocated;
     _absoluteMaxTime = ourTime * 50 / 100;
-    _absoluteMinTime = _timeAllocatedOriginal * 33 / 100;
+    _absoluteMinTime = _timeAllocatedOriginal * 25 / 100;
 }
 
 bool Timer::checkLimits(U64 nodes){
