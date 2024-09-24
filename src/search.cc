@@ -447,7 +447,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
   // Check if we are doing pre-move pruning techniques
   // We do not do them InCheck, in pvNodes and when proving singularity
-  bool isPrune = !pvNode && !incheckNode && !singSearch;
+  bool isPrune = !pvNode && !incheckNode && !singSearch && board.isThereMajorPiece();
 
   // 2. REVERSE FUTILITY
   // The idea is so if we are very far ahead of beta at low
@@ -462,7 +462,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // No nmp in pvNode, InCheck, when doing singular, or just after Null move was made
   // Use SF-like conditional of requsting Eval being higher than beta at low depth
   // Equisetum track NMP_failure to use for extending decisions
-  if (isPrune && pMove != 0 && nodeEval >= beta + std::max(0, 118 - 21 * depth) && board.isThereMajorPiece()){
+  if (isPrune && pMove != 0 && nodeEval >= beta + std::max(0, 118 - 21 * depth)){
           Board movedBoard = board;
           _posHist.Add(board.getZKey().getValue());
           _sStack.AddNullMove(getOppositeColor(board.getActivePlayer()));
