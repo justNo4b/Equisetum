@@ -123,7 +123,7 @@ void Search::iterDeep() {
 
         if (shouldStop) break;
 
-        if (currDepth % 5 == 0 && currDepth > 5){
+        if (currDepth >= 6){
             _timer.reallocateTime(_initialBoard.getActivePlayer(), _nodes, _rootNodesSpent[_bestMove.getPieceType()][_bestMove.getTo()]);
         }
 
