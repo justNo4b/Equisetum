@@ -258,12 +258,13 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     return penalty;
 }
 
-inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int bonus){
+inline void Search::_updateBeta(U64 pawnkey, bool isQuiet, const Move move, Color color, int pMove, int ply, int bonus){
 	if (isQuiet) {
     _orderingInfo.updateKillers(ply, move);
     _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), bonus);
     _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
     _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), bonus);
+    _orderingInfo.incrementPawnstructureHistory(color, pawnkey, move.getPieceType(), move.getTo(), bonus);
   }else{
     _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), bonus);
   }
@@ -416,7 +417,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         return hashScore;
       }
       if (ttEntry.Flag == BETA && hashScore >= beta){
-        _updateBeta(qttNode, ttMove, board.getActivePlayer(), pMove, ply, depth);
+        _updateBeta(board.getPawnStructureZKey().getValue(), qttNode, ttMove, board.getActivePlayer(), pMove, ply, depth);
         return beta;
       }
 
@@ -730,7 +731,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         if (score >= beta) {
           // Add this move as a new killer move and update history if move is quiet
           int bonus = _getHistoryBonus(depth, nodeEval, alpha);
-          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, bonus);
+          _updateBeta(board.getPawnStructureZKey().getValue(), isQuiet, move, board.getActivePlayer(), pMove, ply, bonus);
           // Award counter-move history additionally if we refuted special quite previous move
           if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), bonus);
           // Add a new tt entry for this node
@@ -766,6 +767,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           if (isQuiet){
             _orderingInfo.decrementHistory(board.getActivePlayer(), move.getFrom(), move.getTo(), penalty);
             _orderingInfo.decrementCounterHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo(), penalty);
+            _orderingInfo.decrementPawnstructureHistory(board.getActivePlayer(), board.getPawnStructureZKey().getValue(), move.getPieceType(), move.getTo(), penalty);
           }else{
             _orderingInfo.decrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), penalty);
           }

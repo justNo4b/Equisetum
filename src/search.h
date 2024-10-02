@@ -195,7 +195,7 @@ class Search {
   inline int _getHistoryBonus(int, int, int);
   inline int _getHistoryPenalty(int, int, int, int, bool, bool, CutOffState);
 
-  inline void _updateBeta(bool, const Move, Color, int, int, int);
+  inline void _updateBeta(U64, bool, const Move, Color, int, int, int);
 
   inline bool _isRepetitionDraw(U64, int);
 

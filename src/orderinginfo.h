@@ -82,8 +82,8 @@ class OrderingInfo {
 
   void decrementCounterHistory(Color, int, PieceType, int, int);
 
-  void incrementPawnstructureHistory(Color, U64, int);
-  void decrementPawnstructureHistory(Color, U64, int);
+  void incrementPawnstructureHistory(Color, U64, PieceType, int, int);
+  void decrementPawnstructureHistory(Color, U64, PieceType, int, int);
 
   /**
    * @brief Update countermove.
@@ -132,7 +132,7 @@ class OrderingInfo {
    */
   int getCountermoveHistory(Color, int, PieceType, int) const;
 
-  int getPawnstructHistory(Color, U64) const;
+  int getPawnstructHistory(Color, U64, PieceType, int) const;
 
   /**
    * @brief Update the killer moves for the given ply with the given move.
@@ -186,7 +186,7 @@ class OrderingInfo {
    */
   int16_t _counterMoveHistory[2][6 * 64][6][64];
 
-  int16_t _pawnstructHistory[2][16384];
+  int16_t _pawnstructHistory[2][16384][6][64];
 
   /**
    * @brief Array of the moves (represented by their INT), that counter move

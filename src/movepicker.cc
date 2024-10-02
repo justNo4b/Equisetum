@@ -80,7 +80,7 @@ void MovePicker::_scoreMoves() {
     } else { // Quiet
       move.setValue(_orderingInfo->getHistory(_color, move.getFrom(), move.getTo()) +
                     _orderingInfo->getCountermoveHistory(_color, pMoveInx, move.getPieceType(), move.getTo()) +
-                    _orderingInfo->getPawnstructHistory(_color, _board->getPawnStructureZKey().getValue()));
+                    _orderingInfo->getPawnstructHistory(_color, _board->getPawnStructureZKey().getValue(), move.getPieceType(), move.getTo()));
     }
   }
 }
