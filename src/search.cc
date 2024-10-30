@@ -634,6 +634,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
         _posHist.Add(board.getZKey().getValue());
         _sStack.AddMove(move);
+        _sStack.ChangeMoveScore(moveHistory + cmHistory);
 
         // 8. LATE MOVE REDUCTIONS
         // mix of ideas from Weiss code, own ones and what is written in the chessprogramming wiki

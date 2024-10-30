@@ -41,6 +41,10 @@ struct SEARCH_Data
         ply++;
     };
 
+    void ChangeMoveScore(int s){
+        moves[ply].setValue(s);
+    }
+
     void AddNullMove(Color sB){
         moves[ply] = Move();
         ply++;
