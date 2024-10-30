@@ -247,6 +247,9 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     // initial penalty is depth
     int penalty = depth;
 
+    // we can get a depth == 0 search in check, add penalty in this case
+    penalty += penalty == 0;
+
     // modify
     penalty -= (eval < alpha);
     penalty -= (!ttNode && depth >= 4);
