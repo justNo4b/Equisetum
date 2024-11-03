@@ -218,6 +218,35 @@ const int NNUE_PIECE_TO_INDEX[2][6] = {
         }
     };
 
+
+enum UpdateType{
+    NN_MOVE,
+    NN_PROMO,
+    NN_CAPTURE,
+    NN_CAPPROMO,
+    NN_CASTLE,
+    NN_ENPASS
+};
+
+struct UpdData{
+    UpdateType type;
+
+    Color color;
+    PieceType movingPiece;
+    PieceType capturedPiece;
+    PieceType promotedPiece;
+
+    unsigned int from;
+    unsigned int to;
+
+    unsigned int fromRook;
+    unsigned int toRook;
+
+    unsigned int wKing;
+    unsigned int bKing;
+    // init
+};
+
 /**
  * @brief Returns the opposite of the given color
  *
