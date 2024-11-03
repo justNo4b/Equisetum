@@ -629,11 +629,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         legalCount++;
         int score;
 
-        bool newgiveCheck = board.moveGivesCheck(move);
-        bool giveCheck = movedBoard.colorIsInCheck(board.getActivePlayer());
-        if (newgiveCheck != giveCheck){
-                std::cout << move.getNotation() << std::endl << board.getStringRep() << std::endl;
-        }
+        bool giveCheck = board.moveGivesCheck(move);
 
         _posHist.Add(board.getZKey().getValue());
         _sStack.AddMove(move);

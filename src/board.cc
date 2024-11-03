@@ -616,25 +616,32 @@ bool Board::SEE_GreaterOrEqual(const Move move, int threshold) const{
 }
 
   bool Board::moveGivesCheck(const Move move) const{
-    PieceType pt = move.getPieceType();
-    int to = move.getTo();
-    U64 toBB = (ONE << to);
-    U64 fromBB = (ONE  << (move.getFrom()));
-    U64 newOcc = _occupied & ~fromBB;
     Color inCheckColor = getInactivePlayer();
     Color checkingColor = getActivePlayer();
+
+    PieceType pt = move.getPieceType();
+
+    U64 toBB = (ONE << (move.getTo()));
+    U64 fromBB = (ONE  << (move.getFrom()));
+    U64 newOcc = (_occupied & ~fromBB) | toBB;
+    U64 bishopsQueens = getPieces(checkingColor, BISHOP) | getPieces(checkingColor, QUEEN);
+    U64 rooksQueens = getPieces(checkingColor, ROOK) | getPieces(checkingColor, QUEEN);
+
     int kingSquare = _bitscanForward(getPieces(inCheckColor, KING));
 
     if (move.getFlags() & Move::PROMOTION){
         pt = move.getPromotionPieceType();
+        if (pt == ROOK || pt == QUEEN)   rooksQueens |= toBB;
+        if (pt == BISHOP || pt == QUEEN) bishopsQueens |= toBB;
     }
 
+    // very special case - castling check?
+    // not handled for now
+
     // check if moving piece is giving check
+    // here we skip the king case but not return false cause it can still trigger discovered check
     switch (pt)
     {
-    case KING:
-        return false;
-        break;
     case PAWN:
         if (Attacks::getNonSlidingAttacks(PAWN, kingSquare, inCheckColor) & toBB) return true;
         break;
@@ -651,29 +658,15 @@ bool Board::SEE_GreaterOrEqual(const Move move, int threshold) const{
         if ((_getBishopAttacksForSquare(kingSquare, ZERO) & toBB)
         || (_getRookAttacksForSquare(kingSquare, ZERO) & toBB)) return true;
         break;
-
-    default:
-        return false;
-        break;
     }
 
     // check if it is a discovered check
-    // Check for pawn, knight and king attacks
-
     // Check for bishop/queen attacks
-    U64 bishopsQueens = getPieces(checkingColor, BISHOP) | getPieces(checkingColor, QUEEN);
-    if (Attacks::getSlidingAttacks(BISHOP, kingSquare, newOcc) & bishopsQueens){
 
-      return true;
-    }
-
-    // Check for rook/queen attacks
-    U64 rooksQueens = getPieces(checkingColor, ROOK) | getPieces(checkingColor, QUEEN);
+    if (Attacks::getSlidingAttacks(BISHOP, kingSquare, newOcc) & bishopsQueens) return true;
     if (Attacks::getSlidingAttacks(ROOK, kingSquare, newOcc) & rooksQueens) return true;
 
     return false;
-
-
   }
 
 
