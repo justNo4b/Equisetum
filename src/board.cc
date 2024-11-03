@@ -619,13 +619,17 @@ bool Board::SEE_GreaterOrEqual(const Move move, int threshold) const{
     PieceType pt = move.getPieceType();
     int to = move.getTo();
     U64 toBB = (ONE << to);
+    U64 fromBB = (ONE  << (move.getFrom()));
+    U64 newOcc = _occupied & ~fromBB;
     Color inCheckColor = getInactivePlayer();
+    Color checkingColor = getActivePlayer();
     int kingSquare = _bitscanForward(getPieces(inCheckColor, KING));
 
     if (move.getFlags() & Move::PROMOTION){
         pt = move.getPromotionPieceType();
     }
 
+    // check if moving piece is giving check
     switch (pt)
     {
     case KING:
@@ -652,7 +656,24 @@ bool Board::SEE_GreaterOrEqual(const Move move, int threshold) const{
         return false;
         break;
     }
+
+    // check if it is a discovered check
+    // Check for pawn, knight and king attacks
+
+    // Check for bishop/queen attacks
+    U64 bishopsQueens = getPieces(checkingColor, BISHOP) | getPieces(checkingColor, QUEEN);
+    if (Attacks::getSlidingAttacks(BISHOP, kingSquare, newOcc) & bishopsQueens){
+
+      return true;
+    }
+
+    // Check for rook/queen attacks
+    U64 rooksQueens = getPieces(checkingColor, ROOK) | getPieces(checkingColor, QUEEN);
+    if (Attacks::getSlidingAttacks(ROOK, kingSquare, newOcc) & rooksQueens) return true;
+
     return false;
+
+
   }
 
 
