@@ -626,9 +626,12 @@ bool Board::SEE_GreaterOrEqual(const Move move, int threshold) const{
     U64 newOcc = (_occupied & ~fromBB) | toBB;
     U64 bishopsQueens = getPieces(checkingColor, BISHOP) | getPieces(checkingColor, QUEEN);
     U64 rooksQueens = getPieces(checkingColor, ROOK) | getPieces(checkingColor, QUEEN);
-
     int kingSquare = _bitscanForward(getPieces(inCheckColor, KING));
 
+    if (pt == ROOK || pt == QUEEN)   rooksQueens |= toBB;
+    if (pt == BISHOP || pt == QUEEN) bishopsQueens |= toBB;
+
+    // adjust stuff if it is a promotion
     if (move.getFlags() & Move::PROMOTION){
         pt = move.getPromotionPieceType();
         if (pt == ROOK || pt == QUEEN)   rooksQueens |= toBB;
@@ -640,31 +643,15 @@ bool Board::SEE_GreaterOrEqual(const Move move, int threshold) const{
 
     // check if moving piece is giving check
     // here we skip the king case but not return false cause it can still trigger discovered check
-    switch (pt)
-    {
-    case PAWN:
-        if (Attacks::getNonSlidingAttacks(PAWN, kingSquare, inCheckColor) & toBB) return true;
-        break;
-    case KNIGHT:
-        if (Attacks::getNonSlidingAttacks(KNIGHT, kingSquare) & toBB) return true;
-        break;
-    case BISHOP:
-        if (_getBishopAttacksForSquare(kingSquare, ZERO) & toBB) return true;
-        break;
-    case ROOK:
-        if (_getRookAttacksForSquare(kingSquare, ZERO) & toBB) return true;
-        break;
-    case QUEEN:
-        if ((_getBishopAttacksForSquare(kingSquare, ZERO) & toBB)
-        || (_getRookAttacksForSquare(kingSquare, ZERO) & toBB)) return true;
-        break;
+
+    if ((pt == PAWN && (Attacks::getNonSlidingAttacks(PAWN, kingSquare, inCheckColor) & toBB)) ||
+        (pt == KNIGHT && (Attacks::getNonSlidingAttacks(KNIGHT, kingSquare) & toBB)) ||
+        (Attacks::getSlidingAttacks(BISHOP, kingSquare, newOcc) & bishopsQueens) ||
+        (Attacks::getSlidingAttacks(ROOK, kingSquare, newOcc) & rooksQueens)
+    ){
+       return true;
     }
 
-    // check if it is a discovered check
-    // Check for bishop/queen attacks
-
-    if (Attacks::getSlidingAttacks(BISHOP, kingSquare, newOcc) & bishopsQueens) return true;
-    if (Attacks::getSlidingAttacks(ROOK, kingSquare, newOcc) & rooksQueens) return true;
 
     return false;
   }
