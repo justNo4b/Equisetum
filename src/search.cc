@@ -545,6 +545,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       continue;
     }
     bool isQuiet = move.isQuiet();
+    bool giveCheck = board.moveGivesCheck(move);
+
     qCount += isQuiet;
 
     int  moveHistory  = isQuiet ?
@@ -571,7 +573,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
       // Prune quiet moves with poor CMH on the tips of the tree
-      if (depth <= 3 && isQuiet && cmHistory <= (-4096 * depth + 4096)) continue;
+      if (depth <= 3 && isQuiet && !giveCheck && cmHistory <= (-4096 * depth + 4096)) continue;
     }
 
 
@@ -628,8 +630,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         bool doLMR = false;
         legalCount++;
         int score;
-
-        bool giveCheck = board.moveGivesCheck(move);
 
         _posHist.Add(board.getZKey().getValue());
         _sStack.AddMove(move);
