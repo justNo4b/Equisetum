@@ -385,7 +385,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Check for threefold repetition draws and 50 - move rule draw
   // cut pV out if we found draw
   if (board.getHalfmoveClock() >= 100 || _isRepetitionDraw(board.getZKey().getValue(), board.getHalfmoveClock())) {
-    return _makeDrawScore();
+    return 0;
   }
 
   // Check our InCheck status
