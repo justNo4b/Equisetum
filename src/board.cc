@@ -887,6 +887,10 @@ void Board::_updateCastlingRightsForMove(Move move) {
   _zKey.updateCastlingRights(oldCastlingRights ,_castlingRights);
 }
 
+bool Board::moveIsPseudoLegal(Move m) const{
+    return false;
+}
+
 void Board::setToStartPos() {
   setToFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", false);
 }
@@ -1126,3 +1130,4 @@ void Board::_scheduleUpdateEnpass(const Board &board, Color c, unsigned int from
 void Board::_scheduleUpdateEmpty(){
     _updDone = false;
 }
+

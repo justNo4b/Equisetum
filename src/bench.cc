@@ -69,3 +69,37 @@ void testSEE(){
     }
 
 }
+
+
+void testMove(){
+    Board board = Board();
+    for (int i = 0; i < 1; i++){
+        board = Board(BENCH_POSITION[i], false);
+        // create moves normally for comparasion
+        MoveList normalmoves = MoveList();
+        MoveGen(&board, false, &normalmoves);
+
+        // create every possible move as INT and verify if it is pseudo-legal
+        for (int i = -INF; i <= INF - 1; i++){
+            Move move = Move(i);
+            if (board.moveIsPseudoLegal(move)){
+                std::cout << "move is p-legal according to checker " << move.getNotation(false) << std::endl;
+                bool isGenerated = false;
+                for(size_t j = 0; j < normalmoves.size(); j++){
+                    if (normalmoves[j].getMoveINT() == i){
+                        isGenerated = true;
+                        break;
+                    }
+                }
+                if (isGenerated){
+                    std::cout << "Proper check!"<< std::endl;
+                }else{
+                    std::cout << "False positive on " << i << std::endl;
+                }
+            }
+            // report occasiaonally
+            if (i % (INF / 16) == 1) std::cout << "Moves checked " << i << std::endl;
+        }
+
+    }
+}
