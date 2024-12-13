@@ -72,9 +72,14 @@ void testSEE(){
 
 
 void testMove(){
-    Board board = Board();
-    for (int i = 0; i < 1; i++){
-        board = Board(BENCH_POSITION[i], false);
+    int falsepos = 0;
+    int propers = 0;
+
+    Board board = Board("r2k3r/1Ppb3p/2pp1q2/p4PpQ/1nP1B3/1P2Ppp1/P1QN1nPP/R3K2R w KQkq g6 0 14", false);
+    for (int k = 0; k < BENCH_POS_NUMBER; k++){
+        propers = 0;
+        falsepos = 0;
+        board = Board(BENCH_POSITION[k], false);
         // create moves normally for comparasion
         MoveList normalmoves = MoveList();
         MoveGen(&board, false, &normalmoves);
@@ -83,7 +88,7 @@ void testMove(){
         for (int i = -INF; i <= INF - 1; i++){
             Move move = Move(i);
             if (board.moveIsPseudoLegal(move)){
-                std::cout << "move is p-legal according to checker " << move.getNotation(false) << std::endl;
+                //std::cout << "move is p-legal according to checker " << move.getNotation(false) << std::endl;
                 bool isGenerated = false;
                 for(size_t j = 0; j < normalmoves.size(); j++){
                     if (normalmoves[j].getMoveINT() == i){
@@ -92,14 +97,27 @@ void testMove(){
                     }
                 }
                 if (isGenerated){
-                    std::cout << "Proper check!"<< std::endl;
+                //    std::cout << "Proper check!!! on "<< i << std::endl;
+                    propers++;
                 }else{
-                    std::cout << "False positive on " << i << std::endl;
+                //    std::cout << "False positive on " << i << std::endl;
+                    falsepos++;
                 }
+                /*
+
+                */
+
             }
             // report occasiaonally
-            if (i % (INF / 16) == 1) std::cout << "Moves checked " << i << std::endl;
+            //if (i % (INF / 16) == 1) std::cout << "Moves checked " << i << std::endl;
         }
-
+        if (falsepos == 0 && propers == normalmoves.size()){
+            std::cout << "Position #" << k << " passed the test" << std::endl;
+        }else{
+            std::cout << "Position #" << k << " FAILED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+        }
+        //std::cout << "Total propers: " << propers << " FalsePositives: " << falsepos << " TotalMovePool " << normalmoves.size() << std::endl;
     }
+
+
 }

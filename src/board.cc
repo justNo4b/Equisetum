@@ -888,7 +888,198 @@ void Board::_updateCastlingRightsForMove(Move move) {
 }
 
 bool Board::moveIsPseudoLegal(Move m) const{
-    return false;
+    Color color = getActivePlayer();
+    Color other = getOppositeColor(color);
+    int from = m.getFrom();
+    int to = m.getTo();
+    PieceType pt = m.getPieceType();
+    PieceType captured = m.getCapturedPieceType();
+    PieceType promo = m.getPromotionPieceType();
+
+    U64 attackable = getAttackable(other);
+    U64 fromBit = (ONE << from);
+    U64 toBit = (ONE << to);
+
+    // Handle move depending on what type of move it is
+    unsigned int flags = m.getFlags();
+
+    // First bits of the move should be 0
+    if (m.getMoveINT() & 0xF0000000){
+        return false;
+    }
+
+
+    // basci test - piece actually exists
+    // and moving type == type at square
+    PieceType moving;
+    if (fromBit & _allPieces[color]){
+        moving = getPieceAtSquare(color, from);
+        if (moving != pt) return false;
+    }else{
+        return false;
+    }
+
+  // basic checks are done, now check if the move is okay in details
+  // we start with castling stuff
+    if (flags == Move::KSIDE_CASTLE || flags == Move::QSIDE_CASTLE) {
+        // reproduce movegen and see if move is ok
+        // return if we under check
+        if (colorIsInCheck(color)) return false;
+
+        Move trueCastling;
+        int kingIndex = _bitscanForward(getPieces(color, KING));
+
+        // Add Castlings
+        U64 castlingRights = getCastlingRightsColored(color);
+
+        while(castlingRights){
+            int rookSquare  = _popLsb(castlingRights);
+            // no suitable castling found
+            if ((rookSquare <= kingIndex && flags == Move::KSIDE_CASTLE) || (rookSquare > kingIndex && flags == Move::QSIDE_CASTLE)) continue;
+
+            int toCastle    = color == WHITE ? rookSquare > kingIndex ? g1 : c1
+                                            : rookSquare > kingIndex ? g8 : c8;
+            int toRook      = color == WHITE ? rookSquare > kingIndex ? f1 : d1
+                                            : rookSquare > kingIndex ? f8 : d8;
+            U64 rookToKing  = Eval::detail::IN_BETWEEN[kingIndex][rookSquare];
+            U64 kingJumpSq  = Eval::detail::IN_BETWEEN[kingIndex][toCastle] | (ONE << toCastle);
+
+            // both rookToKing AND king Jump AND Rook landing must be free !!!!
+            U64 toBeFree = rookToKing | kingJumpSq | (ONE << toRook);
+            toBeFree = toBeFree & ~(ONE << kingIndex);
+            toBeFree = toBeFree & ~(ONE << rookSquare);
+            if (toBeFree & getOccupied()) return false;
+            bool pathAttacked = false;
+
+            while (kingJumpSq)
+            {
+                int sq = _popLsb(kingJumpSq);
+                if (squareUnderAttack(getOppositeColor(color), sq)){
+                    pathAttacked = true;
+                    break;
+                    }
+            }
+            Move::Flag flag = rookSquare > kingIndex ? Move::KSIDE_CASTLE : Move::QSIDE_CASTLE;
+            if (!pathAttacked) trueCastling = Move(kingIndex, rookSquare, KING, flag);
+        }
+        if (m.getMoveINT() == trueCastling.getMoveINT()) return true; else return false;
+
+    }
+  else if (moving == PAWN){
+    // single pawn moves
+    // not promotions
+    if ((!flags || flags == Move::DOUBLE_PAWN_PUSH) && captured == 0 && promo == 0){
+          U64 movedPawn = color == WHITE ? fromBit << 8 : fromBit >> 8;
+          movedPawn &= getNotOccupied();
+          movedPawn &= ~PROMOTION_RANK[color];
+
+          if (flags == Move::DOUBLE_PAWN_PUSH){
+            movedPawn = color == WHITE ? movedPawn << 8 : movedPawn >> 8;
+            movedPawn &= getNotOccupied();
+            movedPawn &= DOUBLE_PUSH_RANK[color];
+          }
+
+          if (movedPawn & toBit){
+                return true;
+            }
+
+    }else if(flags == Move::PROMOTION && captured == 0){
+         if ((promo < 1 || promo > 4)) return false;
+
+          U64 movedPawn = color == WHITE ? fromBit << 8 : fromBit >> 8;
+          movedPawn &= getNotOccupied();
+          movedPawn &= PROMOTION_RANK[color];
+
+          if (movedPawn & toBit){
+                return true;
+            }
+
+    }else if (flags == Move::CAPTURE || flags == (Move::CAPTURE | Move::PROMOTION)){
+        // this handles both captures and capture-promotions
+        U64 moves = 0;
+        moves |= color == WHITE ? (fromBit << 7) & ~FILE_H : (fromBit >> 9) & ~FILE_H;
+        moves |= color == WHITE ? (fromBit << 9) & ~FILE_A : (fromBit >> 7) & ~FILE_A;
+
+        // captured piece exists
+        moves &= attackable;
+
+        // not a promotion
+        if (flags & Move::PROMOTION){
+          if ((promo < 1 || promo > 4)) return false;
+          moves &= PROMOTION_RANK[color];
+        }else{
+          if (promo != 0) return false;
+          moves &= ~PROMOTION_RANK[color];
+        }
+
+        // see if captured exists and proper
+        if (toBit & _allPieces[other]){
+            if (captured != getPieceAtSquare(other, to)){
+                return false;
+            }
+        }
+
+        if (moves & toBit){
+            return true;
+        }
+
+    }else if (flags == Move::EN_PASSANT && promo == 0 && captured == PAWN){
+        U64 moves = 0;
+        moves |= color == WHITE ? (fromBit << 7) & ~FILE_H : (fromBit >> 9) & ~FILE_H;
+        moves |= color == WHITE ? (fromBit << 9) & ~FILE_A : (fromBit >> 7) & ~FILE_A;
+
+        moves &= getEnPassant();
+
+        // see if captured exists and proper
+        if (toBit & _allPieces[other]){
+            if (captured != getPieceAtSquare(other, to)){
+                return false;
+            }
+        }
+
+        if (moves & toBit){
+            return true;
+        }
+
+    }
+  }
+  else if (moving != PAWN){
+
+    // normal move by non-pawn
+    if (!flags && captured == 0 && promo == 0) {
+        // No flags set, not a special move
+        // additionally no capture or promotion piece type is set
+        // NOTE - potential bug - since by default 0 is a PAWN
+            U64 moves = getAttacksForSquare(moving, color, from);
+            // to square is empty
+
+            // not a capture
+            moves =  moves & ~attackable;
+
+            if (moves & toBit){
+                return true;
+            }
+
+    // normal moves - captures
+    }else
+    if(flags == Move::CAPTURE && promo == 0){
+        U64 moves = getAttacksForSquare(moving, color, from);
+
+        // see if captured exists and proper
+        if (toBit & _allPieces[other]){
+            if (captured != getPieceAtSquare(other, to)){
+                return false;
+            }
+        }
+
+        moves = moves & attackable;
+        if (moves & toBit){
+            return true;
+        }
+    }
+  }
+
+  return false;
 }
 
 void Board::setToStartPos() {
