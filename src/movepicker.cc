@@ -107,3 +107,12 @@ Move MovePicker::getNext() {
 void MovePicker::refreshPicker(){
   _currHead = 0;
 }
+
+bool MovePicker::moveExists(int moveint){
+    for(size_t j = 0; j < _moves.size(); j++){
+        if (_moves[j].getMoveINT() == moveint){
+            return true;
+        }
+    }
+    return false;
+}

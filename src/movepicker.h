@@ -65,6 +65,7 @@ class MovePicker {
    */
   void refreshPicker();
 
+  bool moveExists(int);
    private:
   /**
    * @brief List of moves this MovePicker picks from
