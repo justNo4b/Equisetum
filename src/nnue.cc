@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <fstream>
 #include <sstream>
+#include <cstring>
 
 // Enable incbin
 #ifdef _INCBIN_
@@ -111,9 +112,8 @@ void NNueEvaluation::fullReset(const Board &board){
     // Load biases
     // Here we simply set values
     for (auto color : {WHITE, BLACK}){
-        for (int k = 0; k < NNUE_HIDDEN; k++){
-            _hiddenScore[color][k] =  NNUE_HIDDEN_BIAS[k];
-        }
+        std::memcpy(_hiddenScore[color], NNUE_HIDDEN_BIAS, sizeof(int16_t) * NNUE_HIDDEN);
+        //_hiddenScore[color][k] =  NNUE_HIDDEN_BIAS[k];
     }
 
 
@@ -141,9 +141,7 @@ void NNueEvaluation::halfReset(const Board &board, Color half){
 
     // Load biases
     // Here we simply set values
-        for (int k = 0; k < NNUE_HIDDEN; k++){
-            _hiddenScore[half][k] =  NNUE_HIDDEN_BIAS[k];
-        }
+    std::memcpy(_hiddenScore[half], NNUE_HIDDEN_BIAS, sizeof(int16_t) * NNUE_HIDDEN);
 
 
     // Load pieces
