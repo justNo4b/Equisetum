@@ -20,7 +20,6 @@
 #include "movepicker.h"
 #include "eval.h"
 #include "rays.h"
-#include "tuning.h"
 #include "bench.h"
 #include "nnue.h"
 #include <cstring>
@@ -41,9 +40,6 @@ int main(int argCount, char* argValue[]) {
 
   myOrdering = new OrderingInfo();
 
-  #ifdef _TUNE_
-  TunerStart();
-  #else
   if (argCount > 1 && strcmp("bench", argValue[1]) == 0){
     myBench();
     return 0;
@@ -54,8 +50,6 @@ int main(int argCount, char* argValue[]) {
     Uci::init();
     Uci::start();
   }
-
-  #endif
 
   return 0;
 }
