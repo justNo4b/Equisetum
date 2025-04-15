@@ -491,20 +491,18 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (depth >= 5 && !ttNode && pMove != 0 && !singSearch)
     depth--;
 
-  // No pruning occured, generate moves and recurse
-  MovePicker movePicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), ply, pMove);
-
   // Probcut
   if (!pvNode &&
        depth >= 4 &&
        alpha < WON_IN_X){
-        int pcBeta = beta + 218 - 100 * improving;;
-        while (movePicker.hasNext()){
-            Move move = movePicker.getNext();
+        int pcBeta = beta + 218 - 100 * improving;
+        MovePicker pcPicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), MAX_PLY, 0);
+
+        while (pcPicker.hasNext()){
+            Move move = pcPicker.getNext();
 
             // exit when there is no more captures
             if (move.getValue() <= 300000){
-                movePicker.refreshPicker();
                 break;
             }
 
@@ -538,6 +536,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         }
     }
 
+  // No pruning occured, generate moves and recurse
+  MovePicker movePicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), ply, pMove);
 
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
