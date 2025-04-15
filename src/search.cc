@@ -494,51 +494,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // No pruning occured, generate moves and recurse
   MovePicker movePicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), ply, pMove);
 
-  // Probcut
-  if (!pvNode &&
-       depth >= 4 &&
-       alpha < WON_IN_X){
-        int pcBeta = beta + 218 - 100 * improving;;
-        while (movePicker.hasNext()){
-            Move move = movePicker.getNext();
-
-            // exit when there is no more captures
-            if (move.getValue() <= 300000){
-                movePicker.refreshPicker();
-                break;
-            }
-
-            // skip quiet TT moves
-            if (move == ttEntry.move && move.isQuiet()){
-                continue;
-            }
-
-            // make a move
-            Board movedBoard = board;
-            bool isLegal = movedBoard.doMove(move);
-            if (isLegal){
-                // see if qSearch holds
-                int qScore = - _qSearch(movedBoard, -pcBeta, -pcBeta + 1);
-
-                // if it holds, do proper reduced search
-                if(qScore >= pcBeta){
-                    _posHist.Add(board.getZKey().getValue());
-                    _sStack.AddMove(move);
-
-                    int sScore = -_negaMax(movedBoard, &thisPV, depth - 4, -pcBeta, -pcBeta + 1, false, !cutNode);
-
-                    _posHist.Remove();
-                    _sStack.Remove();
-
-                    if (sScore >= pcBeta){
-                        return beta;
-                    }
-                }
-            }
-        }
-    }
-
-
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
     if (move == ttEntry.move && singSearch){
