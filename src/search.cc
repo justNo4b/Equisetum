@@ -263,9 +263,6 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
     _orderingInfo.updateKillers(ply, move);
     _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), bonus);
     _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
-    _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), bonus);
-  }else{
-    _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), bonus);
   }
 }
 
@@ -547,11 +544,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     bool isQuiet = move.isQuiet();
     qCount += isQuiet;
 
-    int  moveHistory  = isQuiet ?
-                        _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) :
-                        _orderingInfo.getCaptureHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo());
-    int cmHistory     = isQuiet ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()) : 0;
-
     // 5. PRE-MOVELOOP PRUNING
 
     if (alpha < WON_IN_X
@@ -560,18 +552,14 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       // 5.1 LATE MOVE PRUNING
       // If we made many quiet moves in the position already
       // we suppose other moves wont improve our situation
-      if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= 0)) break;
+      if ((qCount > _lmp_Array[depth][(improving || pvNode)])) break;
 
       // 5.2. SEE pruning of quiet moves
       // At shallow depth prune highlyish -negative SEE-moves
       if (depth <= 10
           && isQuiet
           && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
-          //&& board.Calculate_SEE(move) < ) continue;
 
-      // 5.3. COUNTER-MOVE HISTORY PRUNING
-      // Prune quiet moves with poor CMH on the tips of the tree
-      if (depth <= 3 && isQuiet && cmHistory <= (-4096 * depth + 4096)) continue;
     }
 
 
@@ -675,10 +663,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // reduce less for a position where singular move exists
           reduction -= singNode;
 
-          // reduce more/less based on the hitory
-          reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
-          reduction -= cmHistory  / HALFMAX_HISTORY_SCORE;
-
           // reduce less when move is a Queen promotion
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
 
@@ -731,8 +715,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Add this move as a new killer move and update history if move is quiet
           int bonus = _getHistoryBonus(depth, nodeEval, alpha);
           _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, bonus);
-          // Award counter-move history additionally if we refuted special quite previous move
-          if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), bonus);
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
@@ -758,16 +740,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
             up_pV->pVmoves[0] = move.getMoveINT();
             // memcpy - (куда, откуда, длина)
             std::memcpy(up_pV->pVmoves + 1, thisPV.pVmoves, sizeof(int) * thisPV.length);
-          }
-
-        }else{
-          // Beta was not beaten and we dont improve alpha in this case we lower our search history values
-          int penalty = _getHistoryPenalty(depth, nodeEval, alpha, pMoveScore, ttNode, cutNode, (CutOffState)ttEntry.Flag);
-          if (isQuiet){
-            _orderingInfo.decrementHistory(board.getActivePlayer(), move.getFrom(), move.getTo(), penalty);
-            _orderingInfo.decrementCounterHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo(), penalty);
-          }else{
-            _orderingInfo.decrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), penalty);
           }
         }
       }
