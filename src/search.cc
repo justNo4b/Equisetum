@@ -299,20 +299,6 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
 
   MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0);
 
-        for (int i = -INF; i <= INF - 1; i++){
-            Move move = Move(i);
-            if (board.moveIsPseudoLegal(move)){
-                //std::cout << "move is p-legal according to checker " << move.getNotation(false) << std::endl;
-                bool isGenerated = movePicker.moveExists(i);
-                if (!isGenerated){
-                    std::cout << "False positive on " << i << std::endl;
-                    std::cout << board.getStringRep() << std::endl;
-                }
-
-            }
-        }
-
-
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
 
