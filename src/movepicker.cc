@@ -102,6 +102,7 @@ void MovePicker::_scoreMoves() {
   }
   // swap ttMove first
   if (ttIndx >= 0){
+    _currHead++;
     std::swap(_moves.at(0), _moves.at(ttIndx));
   }
 }
@@ -113,7 +114,6 @@ bool MovePicker::hasNext(){
     }else if (_stage == MP_GENERATE){
         _stage = MP_NORMAL;
         _scoreMoves();
-        _currHead = 1;
     }
 
     return _currHead < _moves.size();
