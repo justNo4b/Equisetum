@@ -55,12 +55,12 @@ int OrderingInfo::getCounterMoveINT(Color color, int pMove) const{
 // currently use formula clamps history between (-16384 and 16384)
 void OrderingInfo::incrementHistory(Color color, int from, int to, int16_t bonus) {
   int16_t current = _history[color][from][to];
-  _history[color][from][to] += 32 * bonus - current * abs(bonus) / 512;
+  _history[color][from][to] += bonus - current * abs(bonus) / 16384;
 }
 
 void OrderingInfo::incrementCounterHistory(Color color, int pMove, PieceType pType, int to, int bonus){
     int16_t current = _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to];
-    _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to] += 32 * bonus - current * abs(bonus) / 512;
+    _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to] += bonus - current * abs(bonus) / 16384;
 }
 
 int OrderingInfo::getHistory(Color color, int from, int to) const {
