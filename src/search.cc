@@ -252,9 +252,9 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
             int m = qMoves[i];
             int f = ((m >> 9) & 0x3f);
             int t = ((m >> 15) & 0x3f);
-            int p = (m & 0x7);
+            PieceType p = static_cast<PieceType>(m & 0x7);
             _orderingInfo.incrementHistory(color, f, t, penalty);
-            _orderingInfo.incrementCounterHistory(color, p, move.getPieceType(), t, penalty);
+            _orderingInfo.incrementCounterHistory(color, pMove, p, t, penalty);
         }
 
   }

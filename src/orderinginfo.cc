@@ -27,6 +27,7 @@ void OrderingInfo::clearAllHistory(){
   std::memset(_counterMove, 0, sizeof(_counterMove));
   std::memset(_killer1, 0, sizeof(_killer1));
   std::memset(_killer2, 0, sizeof(_killer2));
+  std::memset(_counterMoveHistory, 0, sizeof(_counterMoveHistory));
 }
 
 void OrderingInfo::clearKillers(){
