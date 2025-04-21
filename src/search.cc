@@ -47,8 +47,8 @@ void Search::init_LMR_array(){
   // 2. Initialization of the LMP array.
   // Current formula is completely based on the Weiss chess engine.
   for (int depth = 0; depth < MAX_PLY; depth++){
-    _lmp_Array[depth][0] = (int)  (1.57 + pow((depth - 1), 2) * 1.71);
-    _lmp_Array[depth][1] = (int)  (3.51 + pow((depth - 1), 2) * 1.73);
+    _lmp_Array[depth][0] = (int)  (0.57 + pow((depth - 1), 2) * 1.71);
+    _lmp_Array[depth][1] = (int)  (2.51 + pow((depth - 1), 2) * 1.73);
   }
 
 }
