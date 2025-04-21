@@ -236,8 +236,8 @@ bool Search::_checkLimits() {
 
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth, int qMoves[], int qCount){
 	// best move is quiet, update all quiet heuristics (bonuses and penalties)
-    int16_t bonus = depth * depth;
-    int16_t penalty = -1 * depth * depth;
+    int16_t bonus = std::min(2100, 250 * depth - 250);
+    int16_t penalty = -1 * std::min(2100, 250 * depth - 250);
 
     if (isQuiet) {
         // bonuses for best move
