@@ -236,10 +236,13 @@ bool Search::_checkLimits() {
 
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth, int qMoves[], int qCount){
 	// best move is quiet, update all quiet heuristics (bonuses and penalties)
+    int16_t bonus = depth * depth;
+    int16_t penalty = -1 * depth * depth;
+
     if (isQuiet) {
         // bonuses for best move
         _orderingInfo.updateKillers(ply, move);
-        _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), depth);
+        _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), bonus);
         _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
 
         // penalty for failed moves
@@ -248,7 +251,7 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
             int m = qMoves[i];
             int f = ((m >> 9) & 0x3f);
             int t = ((m >> 15) & 0x3f);
-            _orderingInfo.decrementHistory(color, f, t, depth);
+            _orderingInfo.incrementHistory(color, f, t, penalty);
         }
 
   }
