@@ -96,7 +96,8 @@ void MovePicker::_scoreMoves() {
     } else if (moveINT == Counter){
       move.setValue(COUNTERMOVE_BONUS);
     } else { // Quiet
-      move.setValue(_orderingInfo->getHistory(_color, move.getFrom(), move.getTo()));
+      move.setValue(_orderingInfo->getHistory(_color, move.getFrom(), move.getTo()) +
+                    _orderingInfo->getCountermoveHistory(_color, pMoveInx, move.getPieceType(), move.getTo()));
     }
   }
   // swap ttMove first

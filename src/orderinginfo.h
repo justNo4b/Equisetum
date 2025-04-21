@@ -62,6 +62,7 @@ class OrderingInfo {
    * @param depth Depth of move that caused this increment
    */
   void incrementHistory(Color, int, int, int16_t);
+  void incrementCounterHistory(Color, int, PieceType, int, int);
 
   /**
    * @brief Update countermove.
@@ -91,6 +92,15 @@ class OrderingInfo {
    * @return int History heuristic value for the given from square, to square and color
    */
   int getHistory(Color, int, int) const;
+
+    /**
+   * @brief Get CounterMoveHistory for the move
+   *
+   * @param prevMove  previous move made
+   * @param pType     moving piece type
+   * @param to        move to
+   */
+  int getCountermoveHistory(Color, int, PieceType, int) const;
 
   /**
    * @brief Update the killer moves for the given ply with the given move.
@@ -132,6 +142,12 @@ class OrderingInfo {
    * @brief Table of beta-cutoff history values indexed by [color][from_square][to_square]
    */
   int16_t _history[2][64][64];
+
+  /**
+   * @brief Table of beta-cutoff values dependand on the previous move by opponent
+   * Indexed by [prevPieceType][prevTo][movePieceType][moveTo]
+   */
+  int16_t _counterMoveHistory[2][6 * 64][6][64];
 
   /**
    * @brief Array of the moves (represented by their INT), that counter move

@@ -244,6 +244,7 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
         _orderingInfo.updateKillers(ply, move);
         _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), bonus);
         _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
+        _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), bonus);
 
         // penalty for failed moves
         for (int i = 0; i < qCount; i++){
@@ -251,7 +252,9 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
             int m = qMoves[i];
             int f = ((m >> 9) & 0x3f);
             int t = ((m >> 15) & 0x3f);
+            int p = (m & 0x7);
             _orderingInfo.incrementHistory(color, f, t, penalty);
+            _orderingInfo.incrementCounterHistory(color, p, move.getPieceType(), t, penalty);
         }
 
   }

@@ -57,8 +57,17 @@ void OrderingInfo::incrementHistory(Color color, int from, int to, int16_t bonus
   _history[color][from][to] += 32 * bonus - current * abs(bonus) / 512;
 }
 
+void OrderingInfo::incrementCounterHistory(Color color, int pMove, PieceType pType, int to, int bonus){
+    int16_t current = _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to];
+    _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to] += 32 * bonus - current * abs(bonus) / 512;
+}
+
 int OrderingInfo::getHistory(Color color, int from, int to) const {
   return _history[color][from][to];
+}
+
+int OrderingInfo::getCountermoveHistory(Color color, int pMoveIndx, PieceType pType, int to) const{
+    return _counterMoveHistory[color][pMoveIndx][pType][to];
 }
 
 void OrderingInfo::updateKillers(int ply, Move move) {
