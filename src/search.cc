@@ -234,35 +234,22 @@ bool Search::_checkLimits() {
   return _timer.checkLimits(_nodes);
 }
 
-inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
-    // initial bonus is depth
-    int bonus = depth;
+inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth, int qMoves[], int qCount){
+	// best move is quiet, update all quiet heuristics (bonuses and penalties)
+    if (isQuiet) {
+        // bonuses for best move
+        _orderingInfo.updateKillers(ply, move);
+        _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), depth);
+        _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
 
-    //modify
-    bonus += 2 * (eval < alpha);
-    return bonus;
-}
+        // penalty for failed moves
+        for (int i = 0; i < qCount; i++){
+            int m = qMoves[i];
+            int f = ((m >> 9) & 0x3f);
+            int t = ((m >> 15) & 0x3f);
+            _orderingInfo.decrementHistory(color, f, t, depth);
+        }
 
-int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool ttNode, bool cutNode, CutOffState ttCut){
-    // initial penalty is depth
-    int penalty = depth;
-
-    // modify
-    penalty -= (eval < alpha);
-    penalty -= (!ttNode && depth >= 4);
-    penalty -= ttCut == ALPHA;
-    penalty += (pmScore < -HALFMAX_HISTORY_SCORE);
-    penalty += cutNode;
-
-    penalty = std::max(0, penalty);
-    return penalty;
-}
-
-inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int bonus){
-	if (isQuiet) {
-    _orderingInfo.updateKillers(ply, move);
-    _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), bonus);
-    _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
   }
 }
 
@@ -364,6 +351,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int nodeEval = NOSCORE;
   int  legalCount = 0;
   int  qCount = 0;
+  int  cCount = 0;
   Move ttMove = Move(0);
   Move bestMove;
   pV   thisPV = pV();
@@ -413,7 +401,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         return hashScore;
       }
       if (ttEntry.Flag == BETA && hashScore >= beta){
-        _updateBeta(qttNode, ttMove, board.getActivePlayer(), pMove, ply, depth);
         return beta;
       }
 
@@ -537,6 +524,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Initiate normal picker and proceed
   MovePicker movePicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), ply, pMove);
 
+  int qMoves[32];
+  int cMoves[32];
+
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
     if (move == ttEntry.move && singSearch){
@@ -544,6 +534,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     }
     bool isQuiet = move.isQuiet();
     qCount += isQuiet;
+    cCount += !isQuiet;
 
     // 5. PRE-MOVELOOP PRUNING
 
@@ -713,9 +704,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         _sStack.Remove();
         // Beta cutoff
         if (score >= beta) {
-          // Add this move as a new killer move and update history if move is quiet
-          int bonus = _getHistoryBonus(depth, nodeEval, alpha);
-          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, bonus);
+          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, depth, qMoves, qCount);
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
@@ -744,6 +733,14 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           }
         }
       }
+
+
+    // save seen move to punish them later/
+    // this is needed to pnish moves ONLY if we have new best move
+    if (isQuiet && qCount < 32)
+        qMoves[qCount] = move.getMoveINT();
+     if (!isQuiet && cCount < 32)
+        cMoves[cCount] = move.getMoveINT();
 
   }
 
