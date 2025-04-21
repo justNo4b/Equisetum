@@ -610,6 +610,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         int score;
 
         bool giveCheck = movedBoard.colorIsInCheck(movedBoard.getActivePlayer());
+        int  moveHistory  = isQuiet ?
+                        _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) :
+                        0;
 
 
         _posHist.Add(board.getZKey().getValue());
@@ -654,6 +657,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
           // reduce less for a position where singular move exists
           reduction -= singNode;
+
+          reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
 
           // reduce less when move is a Queen promotion
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
