@@ -192,7 +192,7 @@ class Search {
    * @param depth search depth
    */
 
-  inline void _updateBeta(bool, const Move, Color, int, int, int, int [], int);
+  inline void _updateBeta(bool, const Move, Color, int, int, int, int [], int, int[], int);
 
   inline bool _isRepetitionDraw(U64, int);
 

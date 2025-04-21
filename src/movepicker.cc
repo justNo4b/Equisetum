@@ -68,10 +68,10 @@ void MovePicker::_scoreMoves() {
     // Sort promotions first so that capture-promotions were here
     } else if (move.getFlags() & Move::PROMOTION) {
         // history
-        //int value = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
+        int value = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
         // general values
-        int value = opS(Eval::MATERIAL_VALUES[move.getPromotionPieceType()])
-                  - opS(Eval::MATERIAL_VALUES[PAWN]);
+        value += opS(Eval::MATERIAL_VALUES[move.getPromotionPieceType()])
+              - opS(Eval::MATERIAL_VALUES[PAWN]);
         // for SEE+ Q promotions use good capture bonus, otherwise treat as bad captures
         if (move.getPromotionPieceType() == QUEEN && _board->SEE_GreaterOrEqual(move, 0)){
             value += CAPTURE_BONUS;
@@ -84,7 +84,7 @@ void MovePicker::_scoreMoves() {
         }
       move.setValue(value);
     } else if (move.getFlags() & Move::CAPTURE) {
-      int hist  = 0;//_orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
+      int hist  = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
       int value = opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]) + hist;
       int th = -((hist / 8192) * 100);
       value +=  _board->SEE_GreaterOrEqual(move, th)  ? CAPTURE_BONUS : BAD_CAPTURE;
