@@ -539,6 +539,14 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     }
     bool isQuiet = move.isQuiet();
 
+    int  moveHistory  = isQuiet ?
+                        _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) +
+                        _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()):
+                        0;
+    int cmHistory     = isQuiet ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()) : 0;
+
+
+
     // 5. PRE-MOVELOOP PRUNING
 
     if (alpha < WON_IN_X
@@ -555,6 +563,11 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           && isQuiet
           && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
           //&& board.Calculate_SEE(move) < ) continue;
+
+
+      // 5.3. COUNTER-MOVE HISTORY PRUNING
+      // Prune quiet moves with poor CMH on the tips of the tree
+      if (depth <= 3 && isQuiet && cmHistory <= (-4096 * depth + 4096)) continue;
     }
 
 
@@ -613,10 +626,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         int score;
 
         bool giveCheck = movedBoard.colorIsInCheck(movedBoard.getActivePlayer());
-        int  moveHistory  = isQuiet ?
-                        _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) +
-                        _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()):
-                        0;
 
 
         _posHist.Add(board.getZKey().getValue());
