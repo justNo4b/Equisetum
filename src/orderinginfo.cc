@@ -66,7 +66,7 @@ void OrderingInfo::incrementCounterHistory(Color color, int pMove, PieceType pTy
 
 void OrderingInfo::incrementCapHistory(PieceType capturingPiece, PieceType capturedPiece, int to, int bonus){
     int16_t current = _captureHistory[capturingPiece][capturedPiece][to];
-    _captureHistory[capturingPiece][capturedPiece][to] += 32 * bonus - current * abs(bonus) / 16384;
+    _captureHistory[capturingPiece][capturedPiece][to] += bonus - current * abs(bonus) / 16384;
   }
 
 int OrderingInfo::getHistory(Color color, int from, int to) const {
