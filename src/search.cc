@@ -359,8 +359,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   up_pV->length = 0;
   Color behindColor = _sStack.sideBehind;
 
-  bool isPmQuietCounter = (pMoveScore >= 50000 && pMoveScore <= 200000);
-
   _nodes++;
   // Check if we are out of time
   if (_stop || _checkLimits()) {
@@ -525,8 +523,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Initiate normal picker and proceed
   MovePicker movePicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), ply, pMove);
 
-  int qMoves[32];
-  int cMoves[32];
+  int qMoves[32] = {0};
+  int cMoves[32] = {0};
 
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
@@ -534,8 +532,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       continue;
     }
     bool isQuiet = move.isQuiet();
-    qCount += isQuiet;
-    cCount += !isQuiet;
 
     // 5. PRE-MOVELOOP PRUNING
 
@@ -738,10 +734,16 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
     // save seen move to punish them later/
     // this is needed to pnish moves ONLY if we have new best move
-    if (isQuiet && qCount < 32)
+    if (isQuiet && qCount < 32){
         qMoves[qCount] = move.getMoveINT();
-     if (!isQuiet && cCount < 32)
+        qCount++;
+    }
+
+     if (!isQuiet && cCount < 32){
         cMoves[cCount] = move.getMoveINT();
+        cCount++;
+     }
+
 
   }
 
