@@ -244,6 +244,7 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
 
         // penalty for failed moves
         for (int i = 0; i < qCount; i++){
+            if (i >= 32) break;
             int m = qMoves[i];
             int f = ((m >> 9) & 0x3f);
             int t = ((m >> 15) & 0x3f);
