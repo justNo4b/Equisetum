@@ -572,7 +572,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
 
 
-      if (depth == 1 && isQuiet && moveHistory <= -4096) continue;
+      if (depth <= 2 && isQuiet && moveHistory <= -2048 * depth) continue;
 
     }
 
