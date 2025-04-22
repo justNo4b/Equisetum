@@ -555,9 +555,10 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
 
     int  moveHistory  = isQuiet ?
-    _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) +
-    _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()):
-    _orderingInfo.getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
+                        _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) +
+                        _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()):
+                        _orderingInfo.getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
+    int cmHistory =  isQuiet ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()) : 0;
 
     // 5. PRE-MOVELOOP PRUNING
 
@@ -576,7 +577,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
           //&& board.Calculate_SEE(move) < ) continue;
 
-      if (depth == 1 && isQuiet && moveHistory <= -4096 * depth) continue;
+      if (depth == 1 && isQuiet && cmHistory <= -4096 * depth) continue;
 
 }
 
