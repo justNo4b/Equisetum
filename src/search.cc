@@ -234,7 +234,7 @@ bool Search::_checkLimits() {
   return _timer.checkLimits(_nodes);
 }
 
-inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth, int qMoves[], int qCount, int cMoves[], int cCount){
+inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ppMove, int ply, int depth, int qMoves[], int qCount, int cMoves[], int cCount){
 	// best move is quiet, update all quiet heuristics (bonuses and penalties)
     int16_t bonus = std::min(2100, 350 * depth - 350);
     int16_t penalty = -1 * std::min(2100, 350 * depth - 350);
@@ -244,7 +244,8 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
         _orderingInfo.updateKillers(ply, move);
         _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), bonus);
         _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
-        _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), bonus);
+        _orderingInfo.incrementCounterHistory(0, color, pMove, move.getPieceType(), move.getTo(), bonus);
+        _orderingInfo.incrementCounterHistory(1, color, ppMove, move.getPieceType(), move.getTo(), bonus);
 
         // penalty for failed moves
         for (int i = 0; i < qCount; i++){
@@ -254,7 +255,8 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
             int t = ((m >> 15) & 0x3f);
             PieceType p = static_cast<PieceType>(m & 0x7);
             _orderingInfo.incrementHistory(color, f, t, penalty);
-            _orderingInfo.incrementCounterHistory(color, pMove, p, t, penalty);
+            _orderingInfo.incrementCounterHistory(0, color, pMove, p, t, penalty);
+            _orderingInfo.incrementCounterHistory(1, color, ppMove, p, t, penalty);
         }
   }
 
@@ -300,7 +302,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
 
   _sStack.AddEval(nodeEval);
 
-  MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0);
+  MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0, 0);
 
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
@@ -364,8 +366,10 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int score;
   int ply = _sStack.ply;
   int pMove = _sStack.moves[ply - 1].getMoveINT();
+  int ppMove = 0;
   int pMoveScore = _sStack.moves[ply - 1].getValue();
   int pMoveIndx = cmhCalculateIndex(pMove);
+  int ppMoveIndx = 0;
   int alphaOrig = alpha;
   int nodeEval = NOSCORE;
   int  legalCount = 0;
@@ -440,6 +444,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // The idea is if we are not improving in this line we probably can prune a bit more
 
   if (ply >= 2){
+    ppMove = _sStack.moves[ply - 2].getMoveINT();
+    ppMoveIndx = cmhCalculateIndex(pMove);
     improving = nodeEval > _sStack.statEval[ply - 2];
   }
 
@@ -499,7 +505,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
        alpha < WON_IN_X){
         int pcBeta = beta + 218 - 100 * improving;
 
-        MovePicker pcPicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), MAX_PLY, 0);
+        MovePicker pcPicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), MAX_PLY, 0, 0);
         while (pcPicker.hasNext()){
             Move move = pcPicker.getNext();
 
@@ -539,7 +545,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     }
 
   // Initiate normal picker and proceed
-  MovePicker movePicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), ply, pMove);
+  MovePicker movePicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), ply, pMove, ppMove);
 
   int qMoves[32] = {0};
   int cMoves[32] = {0};
@@ -627,7 +633,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         bool giveCheck = movedBoard.colorIsInCheck(movedBoard.getActivePlayer());
         int  moveHistory  = isQuiet ?
                         _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) +
-                        _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()):
+                        _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, ppMoveIndx, move.getPieceType(), move.getTo()):
                         _orderingInfo.getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
 
 
@@ -725,7 +731,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         _sStack.Remove();
         // Beta cutoff
         if (score >= beta) {
-          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, depth, qMoves, qCount, cMoves, cCount);
+          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ppMove, ply, depth, qMoves, qCount, cMoves, cCount);
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
@@ -838,7 +844,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     }
   }
 
-  MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
+  MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0, 0);
 
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();

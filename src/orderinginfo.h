@@ -62,7 +62,7 @@ class OrderingInfo {
    * @param depth Depth of move that caused this increment
    */
   void incrementHistory(Color, int, int, int16_t);
-  void incrementCounterHistory(Color, int, PieceType, int, int);
+  void incrementCounterHistory(int, Color, int, PieceType, int, int);
   void incrementCapHistory(PieceType, PieceType, int, int);
 
   /**
@@ -101,7 +101,7 @@ class OrderingInfo {
    * @param pType     moving piece type
    * @param to        move to
    */
-  int getCountermoveHistory(Color, int, PieceType, int) const;
+  int getCountermoveHistory(Color, int, int, PieceType, int) const;
 
   /**
    * @brief Get history information for the current capture move
@@ -157,7 +157,7 @@ class OrderingInfo {
    * @brief Table of beta-cutoff values dependand on the previous move by opponent
    * Indexed by [prevPieceType][prevTo][movePieceType][moveTo]
    */
-  int16_t _counterMoveHistory[2][6 * 64][6][64];
+  int16_t _counterMoveHistory[2][2][6 * 64][6][64];
 
   /**
    * @brief Table of beta-cutoff values for captures indexed by [capturingPiece][capturedPiece][to_square]
