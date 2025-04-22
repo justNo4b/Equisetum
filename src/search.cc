@@ -369,9 +369,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int alphaOrig = alpha;
   int nodeEval = NOSCORE;
   int  legalCount = 0;
-  int  qCount = 0;
-  int  cCount = 0;
-  int  movesSeen = 0;
+  int  qPlayed = 0;
+  int  cPlayed = 0;
+  int  qSeen  = 0;
   Move ttMove = Move(0);
   Move bestMove;
   pV   thisPV = pV();
@@ -551,7 +551,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       continue;
     }
     bool isQuiet = move.isQuiet();
-    movesSeen++;
+    qSeen += isQuiet;
 
     // 5. PRE-MOVELOOP PRUNING
 
@@ -561,7 +561,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       // 5.1 LATE MOVE PRUNING
       // If we made many quiet moves in the position already
       // we suppose other moves wont improve our situation
-      if ((movesSeen > _lmp_Array[depth][(improving || pvNode)])) break;
+      if ((qSeen > _lmp_Array[depth][(improving || pvNode)])) break;
 
       // 5.2. SEE pruning of quiet moves
       // At shallow depth prune highlyish -negative SEE-moves
@@ -723,7 +723,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         _sStack.Remove();
         // Beta cutoff
         if (score >= beta) {
-          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, depth, qMoves, qCount, cMoves, cCount);
+          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, depth, qMoves, qPlayed, cMoves, cPlayed);
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
@@ -756,14 +756,14 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
     // save seen move to punish them later/
     // this is needed to pnish moves ONLY if we have new best move
-    if (isQuiet && qCount < 32){
-        qMoves[qCount] = move.getMoveINT();
-        qCount++;
+    if (isQuiet && qPlayed < 32){
+        qMoves[qPlayed] = move.getMoveINT();
+        qPlayed++;
     }
 
-     if (!isQuiet && cCount < 32){
-        cMoves[cCount] = move.getMoveINT();
-        cCount++;
+     if (!isQuiet && cPlayed < 32){
+        cMoves[cPlayed] = move.getMoveINT();
+        cPlayed++;
      }
 
 
