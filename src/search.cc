@@ -424,8 +424,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
             _orderingInfo.incrementHistory(board.getActivePlayer(), ttMove.getFrom(), ttMove.getTo(), bonus);
             //_orderingInfo.updateCounterMove(board.getActivePlayer(), pMove, ttMove.getMoveINT());
             //_orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, ttMove.getPieceType(), ttMove.getTo(), bonus);
-        }else{
-            _orderingInfo.incrementCapHistory(ttMove.getPieceType(), ttMove.getCapturedPieceType(), ttMove.getTo(), bonus);
         }
         return beta;
       }
