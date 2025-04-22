@@ -371,6 +371,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int  legalCount = 0;
   int  qCount = 0;
   int  cCount = 0;
+  int  movesSeen = 0;
   Move ttMove = Move(0);
   Move bestMove;
   pV   thisPV = pV();
@@ -550,6 +551,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       continue;
     }
     bool isQuiet = move.isQuiet();
+    movesSeen++;
 
     // 5. PRE-MOVELOOP PRUNING
 
@@ -559,7 +561,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       // 5.1 LATE MOVE PRUNING
       // If we made many quiet moves in the position already
       // we suppose other moves wont improve our situation
-      if ((qCount > _lmp_Array[depth][(improving || pvNode)])) break;
+      if ((movesSeen > _lmp_Array[depth][(improving || pvNode)])) break;
 
       // 5.2. SEE pruning of quiet moves
       // At shallow depth prune highlyish -negative SEE-moves
