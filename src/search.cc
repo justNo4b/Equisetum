@@ -89,13 +89,13 @@ void Search::init_LMR_array(SearchParms sp){
     LMP_MULTIPL_BASE = sp.lmp_multipl_base;
     LMP_MULTIPL_IMPR = sp.lmp_multipl_impr;
 
-    int HIST_BONUS_MAX = sp.hist_bonus_max;
-    int HIST_BONUS_A = sp.hist_bonus_a;
-    int HIST_BONUS_B = sp.hist_bonus_b;
+    HIST_BONUS_MAX = sp.hist_bonus_max;
+    HIST_BONUS_A = sp.hist_bonus_a;
+    HIST_BONUS_B = sp.hist_bonus_b;
 
-    int HIST_PENAL_MAX = sp.hist_penal_max;
-    int HIST_PENAL_A = sp.hist_penal_a;
-    int HIST_PENAL_B = sp.hist_penal_b;
+    HIST_PENAL_MAX = sp.hist_penal_max;
+    HIST_PENAL_A = sp.hist_penal_a;
+    HIST_PENAL_B = sp.hist_penal_b;
 
   // 1. Initialization of the LMR_array.
   // Original formula, came up after plotting  Weiss formula and trying to came up with
