@@ -89,23 +89,13 @@ void Search::init_LMR_array(SearchParms sp){
     LMP_MULTIPL_BASE = sp.lmp_multipl_base;
     LMP_MULTIPL_IMPR = sp.lmp_multipl_impr;
 
-   HB_MULTP = sp.hb_multp;
-   HB_BASE  = sp.hb_base;
-   HP_MULTP = sp.hp_multp;
-   HP_BASE  = sp.hp_base;
+    int HIST_BONUS_MAX = sp.hist_bonus_max;
+    int HIST_BONUS_A = sp.hist_bonus_a;
+    int HIST_BONUS_B = sp.hist_bonus_b;
 
-   CHB_MULTP = sp.chb_multp;
-   CHB_BASE = sp.chb_base;
-   CHP_MULTP = sp.chp_multp;
-   CHP_BASE = sp.chp_base;
-
-   CMHB_MULTP = sp.cmhb_multp;
-   CMHB_BASE = sp.cmhb_base;
-   CMHP_MULTP = sp.cmhp_multp;
-   CMHP_BASE = sp.cmhp_base;
-   CMHP_MT_2 = sp.cmhp_mt_2;
-
-
+    int HIST_PENAL_MAX = sp.hist_penal_max;
+    int HIST_PENAL_A = sp.hist_penal_a;
+    int HIST_PENAL_B = sp.hist_penal_b;
 
   // 1. Initialization of the LMR_array.
   // Original formula, came up after plotting  Weiss formula and trying to came up with
@@ -310,40 +300,10 @@ bool Search::_checkLimits() {
 }
 
 
-inline int Search::_getHistoryBonus(int dBonus){
-    int bonus = HB_MULTP * dBonus * dBonus + HB_BASE;
-    return bonus;
-}
-
-inline int Search::_getHistoryPenalty(int dBonus){
-    int penalty = -1 * HP_MULTP * dBonus * (dBonus - 1) + HP_BASE;
-    return penalty;
-}
-
-inline int Search::_getCapBonus(int dBonus){
-  int bonus   = CHB_MULTP * dBonus * dBonus + CHB_BASE;
-  return bonus;
-}
-
-inline int Search::_getCapPenalty(int dBonus){
-  int penalty   = -1 * CHP_MULTP * dBonus * dBonus + CHP_BASE;
-  return penalty;
-}
-
-inline int Search::_getCmhBonus(int dBonus, int multiplier){
-    int bonus   = CMHB_MULTP * multiplier * dBonus * dBonus + CMHB_BASE;
-    return bonus;
-}
-
-inline int Search::_getCmhPenalty(int dBonus){
-    int penalty   = -1 * CMHP_MULTP * dBonus * dBonus + CMHP_BASE;
-    return penalty;
-}
-
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth, int qMoves[], int qCount, int cMoves[], int cCount){
 	// best move is quiet, update all quiet heuristics (bonuses and penalties)
-    int16_t bonus = std::min(2100, 350 * depth - 350);
-    int16_t penalty = -1 * std::min(2100, 350 * depth - 350);
+    int16_t bonus = std::min(HIST_BONUS_MAX, HIST_BONUS_A * depth - HIST_BONUS_B);
+    int16_t penalty = -1 * std::min(HIST_PENAL_MAX, HIST_PENAL_A * depth - HIST_PENAL_B);
 
     if (isQuiet) {
         // bonuses for best move

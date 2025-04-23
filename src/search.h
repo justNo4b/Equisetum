@@ -86,21 +86,13 @@ struct SearchParms {
    double lmp_multipl_base = 1.71;
    double lmp_multipl_impr = 1.73;
 
-   int hb_multp = 32;
-   int hb_base  = 0;
-   int hp_multp = 32;
-   int hp_base  = 0;
+   int hist_bonus_max = 2100;
+   int hist_bonus_a = 350;
+   int hist_bonus_b = 350;
 
-   int chb_multp = 32;
-   int chb_base = 0;
-   int chp_multp = 32;
-   int chp_base = 0;
-
-   int cmhb_multp = 32;
-   int cmhb_base = 0;
-   int cmhp_multp = 32;
-   int cmhp_base = 0;
-   int cmhp_mt_2 = 4;
+   int hist_penal_max = 2100;
+   int hist_penal_a = 350;
+   int hist_penal_b = 350;
 
 };
 
@@ -222,22 +214,6 @@ class Search {
    int CM_HIST_LMR_DIV = 8192;
    int PM_HIST_MALUS_FACTOR = -8192;
 
-   int HB_MULTP = 32;
-   int HB_BASE  = 0;
-   int HP_MULTP = 32;
-   int HP_BASE  = 0;
-
-   int CHB_MULTP = 32;
-   int CHB_BASE = 0;
-   int CHP_MULTP = 32;
-   int CHP_BASE = 0;
-
-   int CMHB_MULTP = 32;
-   int CMHB_BASE = 0;
-   int CMHP_MULTP = 32;
-   int CMHP_BASE = 0;
-   int CMHP_MT_2 = 4;
-
    double LMR_INIT_A = 0.57;
    double LMR_INIT_DIV = 2.49;
    double LMR_DEPTH_POW = 0.10;
@@ -253,6 +229,13 @@ class Search {
    double LMP_MULTIPL_BASE = 1.71;
    double LMP_MULTIPL_IMPR = 1.73;
 
+   int HIST_BONUS_MAX = 2100;
+   int HIST_BONUS_A = 350;
+   int HIST_BONUS_B = 350;
+
+   int HIST_PENAL_MAX = 2100;
+   int HIST_PENAL_A = 350;
+   int HIST_PENAL_B = 350;
 
 
   //
@@ -344,18 +327,6 @@ class Search {
   inline bool _isRepetitionDraw(U64, int);
 
   inline int _makeDrawScore();
-
-  inline int _getHistoryBonus(int dBonus);
-
-    inline int _getHistoryPenalty(int dBonus);
-
-    inline int _getCapBonus(int dBonus);
-
-    inline int _getCapPenalty(int dBonus);
-
-    inline int _getCmhBonus(int dBonus, int multiplier);
-
-    inline int _getCmhPenalty(int dBonus);
 
 
   /**
