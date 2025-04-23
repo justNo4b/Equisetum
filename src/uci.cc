@@ -145,22 +145,6 @@ void loadCosts(){
 
     ourSearchParams.ppe_depth_limit = atoi(optionsMap["ppe_depth_limit"].getValue().c_str());
 
-   ourSearchParams.hb_multp = atoi(optionsMap["hb_multp"].getValue().c_str());
-   ourSearchParams.hb_base  = atoi(optionsMap["hb_base"].getValue().c_str()) - 1000;
-   ourSearchParams.hp_multp = atoi(optionsMap["hp_multp"].getValue().c_str());
-   ourSearchParams.hp_base  = atoi(optionsMap["hp_base"].getValue().c_str()) - 1000;
-
-   ourSearchParams.chb_multp = atoi(optionsMap["chb_multp"].getValue().c_str());
-   ourSearchParams.chb_base = atoi(optionsMap["chb_base"].getValue().c_str()) - 1000;
-   ourSearchParams.chp_multp = atoi(optionsMap["chp_multp"].getValue().c_str());
-   ourSearchParams.chp_base = atoi(optionsMap["chp_base"].getValue().c_str()) - 1000;
-
-   ourSearchParams.cmhb_multp = atoi(optionsMap["cmhb_multp"].getValue().c_str());
-   ourSearchParams.cmhb_base = atoi(optionsMap["cmhb_base"].getValue().c_str()) - 1000;
-   ourSearchParams.cmhp_multp = atoi(optionsMap["cmhp_multp"].getValue().c_str());
-   ourSearchParams.cmhp_base = atoi(optionsMap["cmhp_base"].getValue().c_str()) - 1000;
-   ourSearchParams.cmhp_mt_2 = atoi(optionsMap["cmhp_mt_2"].getValue().c_str());
-
 
     ourSearchParams.lmp_start_base = atoi(optionsMap["lmp_start_base"].getValue().c_str()) / 100;
     ourSearchParams.lmp_start_impr = atoi(optionsMap["lmp_start_impr"].getValue().c_str()) / 100;
@@ -175,6 +159,16 @@ void loadCosts(){
    ourSearchParams.cm_hist_lmr_div = atoi(optionsMap["cm_hist_lmr_div"].getValue().c_str());
    ourSearchParams.pm_hist_malus_factor = -1 * atoi(optionsMap["pm_hist_malus_factor"].getValue().c_str());
    ourSearchParams.cmh_pruning_depth = atoi(optionsMap["cmh_pruning_depth"].getValue().c_str());
+
+   ourSearchParams.hist_bonus_max = atoi( optionsMap["hist_bonus_max"].getValue().c_str());
+   ourSearchParams.hist_penal_max = atoi( optionsMap["hist_penal_max"].getValue().c_str());
+
+   ourSearchParams.hist_bonus_a = atoi( optionsMap["hist_bonus_a"].getValue().c_str());
+   ourSearchParams.hist_penal_a = atoi( optionsMap["hist_penal_a"].getValue().c_str());
+
+   ourSearchParams.hist_bonus_b = atoi( optionsMap["hist_bonus_b"].getValue().c_str());
+   ourSearchParams.hist_penal_b = atoi( optionsMap["hist_penal_b"].getValue().c_str());
+
 }
 
 
@@ -268,21 +262,15 @@ void initOptions() {
 
   optionsMap["ppe_depth_limit"] =     Option(8, 4, 12, &loadCosts);
 
-  optionsMap["hb_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["hb_base"] =     Option(1000, 0, 2000, &loadCosts);
-  optionsMap["hp_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["hp_base"] =     Option(1000, 0, 2000, &loadCosts);
 
-  optionsMap["chb_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["chb_base"] =     Option(1000, 0, 2000, &loadCosts);
-  optionsMap["chp_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["chp_base"] =     Option(1000, 0, 2000, &loadCosts);
+  optionsMap["hist_bonus_max"] = Option(2100, 200, 6000, &loadCosts);
+  optionsMap["hist_penal_max"] = Option(2100, 200, 6000, &loadCosts);
 
-  optionsMap["cmhb_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["cmhb_base"] =     Option(1000, 0, 2000, &loadCosts);
-  optionsMap["cmhp_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["cmhp_base"] =     Option(1000, 0, 2000, &loadCosts);
-  optionsMap["cmhp_mt_2"] =     Option(4, 1, 8, &loadCosts);
+  optionsMap["hist_bonus_a"] = Option(350, 50, 700, &loadCosts);
+  optionsMap["hist_bonus_b"] = Option(350, 50, 700, &loadCosts);
+
+  optionsMap["hist_penal_a"] = Option(350, 50, 700, &loadCosts);
+  optionsMap["hist_penal_b"] = Option(350, 50, 700, &loadCosts);
 }
 
 void uciNewGame() {
