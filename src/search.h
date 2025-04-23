@@ -62,8 +62,8 @@ struct SearchParms {
    int see_q_depth = -68;
 
 
-   int cmh_depth = -4096;
-   int cmh_base  = 4096;
+   int cmh_depth = -2048;
+   int cmh_base  = 0;
    int lmp_hist_limit = 0;
    int pm_hist_reduction_limit = -8192;
    int m_hist_lmr_div = 8192;

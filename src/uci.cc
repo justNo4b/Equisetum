@@ -223,8 +223,8 @@ void initOptions() {
 */
 
 
-  optionsMap["cmh_depth"] =     Option(4096, 0, 10000, &loadCosts); // member to go negative
-  optionsMap["cmh_base"] =     Option(4096, 0, 10000, &loadCosts);
+  optionsMap["cmh_depth"] =     Option(2048, 0, 10000, &loadCosts); // member to go negative
+  optionsMap["cmh_base"] =     Option(0, 0, 10000, &loadCosts);
   optionsMap["lmp_hist_limit"] =     Option(4096, 0, 16000, &loadCosts); // ????
   optionsMap["pm_hist_reduction_limit"] =     Option(8192, 4000, 16000, &loadCosts);// member to go negative
   optionsMap["m_hist_lmr_div"] =     Option(8192, 4000, 16000, &loadCosts);
