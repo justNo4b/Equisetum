@@ -309,6 +309,9 @@ class Board {
 
   void performUpdate();
 
+  // check if the move is pseudo-legal on the given board
+  bool moveIsPseudoLegal(Move) const;
+
  private:
   /**
    * @name Attack bitboard generation functions.
@@ -333,12 +336,12 @@ class Board {
   U64 _getRookMobilityForSquare(int, U64, U64) const;
   U64 _getQueenMobilityForSquare(int, U64, U64) const;
 
-  void _scheduleUpdateMove(Color, PieceType, unsigned int, unsigned int);
-  void _scheduleUpdatePromote(Color, PieceType, unsigned int, unsigned int);
-  void _scheduleUpdateCapprom(Color, PieceType, PieceType, unsigned int, unsigned int);
-  void _scheduleUpdateCapture(Color, PieceType, PieceType, unsigned int, unsigned int);
-  void _scheduleUpdateCastle(Color, unsigned int, unsigned int, unsigned int, unsigned int);
-  void _scheduleUpdateEnpass(Color, unsigned int, unsigned int);
+  void _scheduleUpdateMove(const Board &board, Color, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdatePromote(const Board &board, Color, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdateCapprom(const Board &board, Color, PieceType, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdateCapture(const Board &board, Color, PieceType, PieceType, unsigned int, unsigned int);
+  void _scheduleUpdateCastle(const Board &board, Color, unsigned int, unsigned int, unsigned int, unsigned int);
+  void _scheduleUpdateEnpass(const Board &board, Color, unsigned int, unsigned int);
   void _scheduleUpdateEmpty();
 
   /**
