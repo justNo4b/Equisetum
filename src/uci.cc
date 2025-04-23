@@ -152,7 +152,7 @@ void loadCosts(){
     ourSearchParams.lmp_multipl_impr = atoi(optionsMap["lmp_multipl_impr"].getValue().c_str()) / 100;
 
    ourSearchParams.cmh_depth = -1 * atoi(optionsMap["cmh_depth"].getValue().c_str());
-   ourSearchParams.cmh_base  = atoi(optionsMap["cmh_base"].getValue().c_str());
+   ourSearchParams.cmh_base  = atoi(optionsMap["cmh_base"].getValue().c_str()) - 5000;
    ourSearchParams.lmp_hist_limit = atoi(optionsMap["lmp_hist_limit"].getValue().c_str()) - 4096;
    ourSearchParams.pm_hist_reduction_limit = -1 * atoi(optionsMap["pm_hist_reduction_limit"].getValue().c_str());
    ourSearchParams.m_hist_lmr_div = atoi(optionsMap["m_hist_lmr_div"].getValue().c_str());
@@ -224,7 +224,7 @@ void initOptions() {
 
 
   optionsMap["cmh_depth"] =     Option(2048, 0, 10000, &loadCosts); // member to go negative
-  optionsMap["cmh_base"] =     Option(0, 0, 10000, &loadCosts);
+  optionsMap["cmh_base"] =     Option(5000, 0, 10000, &loadCosts);
   optionsMap["lmp_hist_limit"] =     Option(4096, 0, 16000, &loadCosts); // ????
   optionsMap["pm_hist_reduction_limit"] =     Option(8192, 4000, 16000, &loadCosts);// member to go negative
   optionsMap["m_hist_lmr_div"] =     Option(8192, 4000, 16000, &loadCosts);
