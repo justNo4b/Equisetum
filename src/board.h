@@ -35,31 +35,6 @@ struct BoardParams{
     int qSee = 1000;
 };
 
-enum UpdateType{
-    NN_MOVE,
-    NN_PROMO,
-    NN_CAPTURE,
-    NN_CAPPROMO,
-    NN_CASTLE,
-    NN_ENPASS
-};
-
-struct UpdData{
-    UpdateType type;
-
-    Color color;
-    PieceType movingPiece;
-    PieceType capturedPiece;
-    PieceType promotedPiece;
-
-    unsigned int from;
-    unsigned int to;
-
-    unsigned int fromRook;
-    unsigned int toRook;
-    // init
-};
-
 /**
  * @brief Represents a chess board.
  *
