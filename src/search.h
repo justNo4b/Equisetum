@@ -205,8 +205,8 @@ class Search {
 
    int RAZORING_MARGIN = 945;
 
-   int CMH_DEPTH = -4096;
-   int CMH_BASE  = 4096;
+   int CMH_DEPTH = -2048;
+   int CMH_BASE  = 0;
    int CMH_PRUNING_DEPTH = 3;
    int LMP_HIST_LIMIT = 0;
    int PM_HIST_REDUCTION_LIMIT = -8192;
