@@ -240,11 +240,14 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
     int16_t penalty = -1 * std::min(2922, 592 * depth - 312);
 
     if (isQuiet) {
-        // bonuses for best move
-        _orderingInfo.updateKillers(ply, move);
-        _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), bonus);
-        _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
-        _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), bonus);
+        if (depth > 1){
+            // bonuses for best move
+            _orderingInfo.updateKillers(ply, move);
+            _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), bonus);
+            _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
+            _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), bonus);
+        }
+
 
         // penalty for failed moves
         for (int i = 0; i < qCount; i++){
@@ -258,7 +261,7 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
         }
   }
 
-  if (!isQuiet){
+  if (!isQuiet && depth > 1){
     _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), bonus);
   }
 
