@@ -147,6 +147,10 @@ inline int _horizontal_mir(int square){
   return square ^ 7;
 }
 
+inline int _clamp(int low, int x, int high){
+    return std::min(high, std::max(x, low));
+}
+
 inline U64 _sqBB(int square){
     return (ONE << square);
 }
