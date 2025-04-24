@@ -728,7 +728,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         _sStack.Remove();
         // Beta cutoff
         if (score >= beta) {
-          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, depth, qMoves, qPlayed, cMoves, cPlayed);
+          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, depth + (nodeEval < alpha), qMoves, qPlayed, cMoves, cPlayed);
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
