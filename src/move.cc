@@ -27,7 +27,7 @@ const std::string Move::NULL_MOVE_NOTATION = "(none)";
 extern U64 PASSED_PAWN_MASKS[2][64];
 
 Move::Move() {
-  _move = ((NULL_MOVE & 0x7f) << 21);
+  _move = 0;
   _value = 0;
 }
 
