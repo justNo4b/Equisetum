@@ -677,7 +677,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // reduce less for a position where singular move exists
           reduction -= singNode;
 
-          reduction -= _clamp(-3, moveHistory / 4265, 3);
+          reduction -= _clamp(-2, moveHistory / 4265, 2);
 
           // reduce less when move is a Queen promotion
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
