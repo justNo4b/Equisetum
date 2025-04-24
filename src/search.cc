@@ -236,8 +236,8 @@ bool Search::_checkLimits() {
 
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ppMove, int ply, int depth, int qMoves[], int qCount, int cMoves[], int cCount){
 	// best move is quiet, update all quiet heuristics (bonuses and penalties)
-    int16_t bonus = std::min(2100, 350 * depth - 350);
-    int16_t penalty = -1 * std::min(2100, 350 * depth - 350);
+    int16_t bonus = std::min(2657, 286 * depth - 280);
+    int16_t penalty = -1 * std::min(2922, 592 * depth - 312);
 
     if (isQuiet) {
         // bonuses for best move
@@ -373,8 +373,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int alphaOrig = alpha;
   int nodeEval = NOSCORE;
   int  legalCount = 0;
-  int  qCount = 0;
-  int  cCount = 0;
+  int  qPlayed = 0;
+  int  cPlayed = 0;
+  int  qSeen  = 0;
   Move ttMove = Move(0);
   Move bestMove;
   pV   thisPV = pV();
@@ -556,6 +557,14 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       continue;
     }
     bool isQuiet = move.isQuiet();
+    qSeen += isQuiet;
+
+
+    int  moveHistory  = isQuiet ?
+                        _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) +
+                        _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, ppMoveIndx, move.getPieceType(), move.getTo()):
+                        _orderingInfo.getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
+    int cmHistory =  isQuiet ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, ppMoveIndx, move.getPieceType(), move.getTo()) : 0;
 
     // 5. PRE-MOVELOOP PRUNING
 
@@ -565,7 +574,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       // 5.1 LATE MOVE PRUNING
       // If we made many quiet moves in the position already
       // we suppose other moves wont improve our situation
-      if ((qCount > _lmp_Array[depth][(improving || pvNode)])) break;
+      if ((qSeen > _lmp_Array[depth][(improving || pvNode)])) break;
 
       // 5.2. SEE pruning of quiet moves
       // At shallow depth prune highlyish -negative SEE-moves
@@ -573,7 +582,10 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           && isQuiet
           && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
           //&& board.Calculate_SEE(move) < ) continue;
-    }
+
+      if (depth <= 3 && isQuiet && cmHistory <= -3254 * depth -1952) continue;
+
+}
 
 
         int tDepth = depth;
@@ -631,11 +643,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         int score;
 
         bool giveCheck = movedBoard.colorIsInCheck(movedBoard.getActivePlayer());
-        int  moveHistory  = isQuiet ?
-                        _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) +
-                        _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, ppMoveIndx, move.getPieceType(), move.getTo()):
-                        _orderingInfo.getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
-
 
         _posHist.Add(board.getZKey().getValue());
         _sStack.AddMove(move);
@@ -667,10 +674,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Reduce more in the cut-nodes - used by SF/Komodo/etc
           reduction += cutNode;
 
-          // Reduce less if move on the previous ply was bad
-          // Ie hystorycally bad quiet, see- capture or underpromotion
-          reduction -= pMoveScore < -HALFMAX_HISTORY_SCORE;
-
           // if we are improving, reduce a bit less (from Weiss)
           reduction -= improving;
 
@@ -680,7 +683,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // reduce less for a position where singular move exists
           reduction -= singNode;
 
-          reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
+          reduction -= moveHistory / 4265;
 
           // reduce less when move is a Queen promotion
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
@@ -731,7 +734,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         _sStack.Remove();
         // Beta cutoff
         if (score >= beta) {
-          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ppMove, ply, depth, qMoves, qCount, cMoves, cCount);
+          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ppMove, ply, depth, qMoves, qPlayed, cMoves, cPlayed);
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
@@ -764,14 +767,14 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
     // save seen move to punish them later/
     // this is needed to pnish moves ONLY if we have new best move
-    if (isQuiet && qCount < 32){
-        qMoves[qCount] = move.getMoveINT();
-        qCount++;
+    if (isQuiet && qPlayed < 32){
+        qMoves[qPlayed] = move.getMoveINT();
+        qPlayed++;
     }
 
-     if (!isQuiet && cCount < 32){
-        cMoves[cCount] = move.getMoveINT();
-        cCount++;
+     if (!isQuiet && cPlayed < 32){
+        cMoves[cPlayed] = move.getMoveINT();
+        cPlayed++;
      }
 
 
