@@ -92,7 +92,7 @@ class MovePicker {
   static const int KILLER2_BONUS      = 150000;
   static const int COUNTERMOVE_BONUS  = 50000;
   static const int QUIET_BONUS        = 0;
-  static const int BAD_CAPTURE        =-16384;
+  static const int BAD_CAPTURE        =-16384 * 2;
   /**@}*/
 
   /**
