@@ -490,7 +490,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   //
   // Equisetum dont do this reduction after NullMove, because we already reduced a lot,
   // and reducing further may reduce quality of the NM_Search
-  if (depth >= 5 && !ttNode && pMove != 0 && !singSearch)
+  if (depth >= 5 && !ttNode && !singSearch)
     depth--;
 
 
