@@ -419,7 +419,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         return hashScore;
       }
       if (ttEntry.Flag == BETA && hashScore >= beta){
-        int bonus = std::min(2100, 350 * depth - 350);
+        int bonus =  std::min(2657, 286 * depth - 280);
         if (qttNode){
             _orderingInfo.updateKillers(ply, ttMove);
             _orderingInfo.incrementHistory(board.getActivePlayer(), ttMove.getFrom(), ttMove.getTo(), bonus);
