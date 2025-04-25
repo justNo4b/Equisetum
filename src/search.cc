@@ -421,10 +421,10 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       if (ttEntry.Flag == BETA && hashScore >= beta){
         int bonus = std::min(2100, 350 * depth - 350);
         if (qttNode){
-            //_orderingInfo.updateKillers(ply, ttMove);
+            _orderingInfo.updateKillers(ply, ttMove);
             _orderingInfo.incrementHistory(board.getActivePlayer(), ttMove.getFrom(), ttMove.getTo(), bonus);
-            //_orderingInfo.updateCounterMove(board.getActivePlayer(), pMove, ttMove.getMoveINT());
-            //_orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, ttMove.getPieceType(), ttMove.getTo(), bonus);
+            _orderingInfo.updateCounterMove(board.getActivePlayer(), pMove, ttMove.getMoveINT());
+            _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, ttMove.getPieceType(), ttMove.getTo(), bonus);
         }
         return beta;
       }
