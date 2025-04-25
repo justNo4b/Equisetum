@@ -234,10 +234,10 @@ bool Search::_checkLimits() {
   return _timer.checkLimits(_nodes);
 }
 
-inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth, int qMoves[], int qCount, int cMoves[], int cCount){
+inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depthB, int depthP, int qMoves[], int qCount, int cMoves[], int cCount){
 	// best move is quiet, update all quiet heuristics (bonuses and penalties)
-    int16_t bonus = std::min(2657, 286 * depth - 280);
-    int16_t penalty = -1 * std::min(2922, 592 * depth - 312);
+    int16_t bonus = std::min(2657, 286 * depthB - 280);
+    int16_t penalty = -1 * std::min(2922, 592 * depthP - 312);
 
     if (isQuiet) {
         // bonuses for best move
@@ -728,7 +728,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         _sStack.Remove();
         // Beta cutoff
         if (score >= beta) {
-          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, depth + (nodeEval < alpha), qMoves, qPlayed, cMoves, cPlayed);
+          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, depth + (nodeEval < alpha), depth, qMoves, qPlayed, cMoves, cPlayed);
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
