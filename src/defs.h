@@ -228,6 +228,12 @@ enum UpdateType{
     NN_ENPASS
 };
 
+enum MpStage{
+    MP_TT,
+    MP_GENERATE,
+    MP_NORMAL
+};
+
 struct UpdData{
     UpdateType type;
 
