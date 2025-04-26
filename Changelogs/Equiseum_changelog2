@@ -201,3 +201,9 @@ http://chess.grantnet.us/test/38991/
 
 Seems to be stable.
 ------------------------------------------------------------------
+18. Fix move on search stack being not exactly null moves (1.18)
+------------------------------------------------------------------
+Elo   | 1.07 +- 2.35 (95%)
+SPRT  | 40.0+0.40s Threads=1 Hash=64MB
+LLR   | 2.96 (-2.94, 2.94) [-4.00, 0.00]
+Games | N: 21782 W: 5470 L: 5403 D: 10909
