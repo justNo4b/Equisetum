@@ -498,18 +498,13 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
        alpha < WON_IN_X){
         int pcBeta = beta + 218 - 100 * improving;
 
-        MovePicker pcPicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), MAX_PLY, 0);
+        MovePicker pcPicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
         while (pcPicker.hasNext()){
             Move move = pcPicker.getNext();
 
             // exit when there is no more good captures
             if (move.getValue() <= 300000){
                 break;
-            }
-
-            // skip quiet TT moves
-            if (move == ttEntry.move && move.isQuiet()){
-                continue;
             }
 
             // make a move
