@@ -279,6 +279,9 @@ class Board {
 
   void performUpdate();
 
+  // check if the move is pseudo-legal on the given board
+  bool moveIsPseudoLegal(Move) const;
+
  private:
   /**
    * @name Attack bitboard generation functions.

@@ -42,7 +42,7 @@ struct SEARCH_Data
     };
 
     void AddNullMove(Color sB){
-        moves[ply] = Move();
+        moves[ply] = Move(0);
         ply++;
         sideBehind = sB;
         nmpTree = true;
