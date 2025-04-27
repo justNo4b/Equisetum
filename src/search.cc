@@ -373,7 +373,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   up_pV->length = 0;
   Color behindColor = _sStack.sideBehind;
 
-  bool isPmQuietCounter = (pMoveScore >= 50000 && pMoveScore <= 200000);
+  bool isPmQuietCounter = _sStack.moves[ply - 1].isQuiet() && pMoveScore >= 50000;
 
   _nodes++;
   // Check if we are out of time
