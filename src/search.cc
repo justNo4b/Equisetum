@@ -552,8 +552,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     // 5. PRE-MOVELOOP PRUNING
 
     if (alpha < WON_IN_X
-        && legalCount >= 1
-        && !giveCheck){
+        && legalCount >= 1){
 
       // 5.1 LATE MOVE PRUNING
       // If we made many quiet moves in the position already
@@ -564,6 +563,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       // At shallow depth prune highlyish -negative SEE-moves
       if (depth <= 10
           && isQuiet
+          && !giveCheck
           && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
           //&& board.Calculate_SEE(move) < ) continue;
 
