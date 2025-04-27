@@ -643,7 +643,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // We generally want to guess if the move will not improve alpha and guess right to do no re-searches
 
           // if move is quiet, reduce a bit more (from Weiss)
-          reduction += isQuiet;
+          reduction += isQuiet && !giveCheck;
 
           //reduce more when side to move is in check
           reduction += incheckNode;
@@ -664,9 +664,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
           // if we are improving, reduce a bit less (from Weiss)
           reduction -= improving;
-
-          // reduce less when a move is giving check
-          reduction -= giveCheck;
 
           // reduce less for a position where singular move exists
           reduction -= singNode;
