@@ -419,7 +419,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         return hashScore;
       }
       if (ttEntry.Flag == BETA && hashScore >= beta){
-        _updateBeta(qttNode, ttMove, board.getActivePlayer(), pMove, ply, depth);
+        _updateBeta(qttNode, ttMove, board.getActivePlayer(), pMove, ply, 32 * depth * depth);
         return beta;
       }
 
