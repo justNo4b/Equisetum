@@ -234,6 +234,10 @@ bool Search::_checkLimits() {
   return _timer.checkLimits(_nodes);
 }
 
+inline int Search::_makeCmhBonus(int bonus){
+    return std::min(MAX_HISTORY_SCORE, bonus * 4);
+}
+
 inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
     // initial bonus is depth
     int bonus = depth;
@@ -263,7 +267,7 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
     _orderingInfo.updateKillers(ply, move);
     _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), bonus);
     _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
-    _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), std::min(MAX_HISTORY_SCORE, 4 * bonus));
+    _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), std::min(MAX_HISTORY_SCORE, _makeCmhBonus(bonus)));
   }else{
     _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), bonus);
   }
@@ -729,7 +733,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           int bonus = _getHistoryBonus(depth, nodeEval, alpha);
           _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, bonus);
           // Award counter-move history additionally if we refuted special quite previous move
-          if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), 4 * bonus);
+          if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
