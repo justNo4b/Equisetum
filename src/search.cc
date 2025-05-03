@@ -263,7 +263,7 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
     _orderingInfo.updateKillers(ply, move);
     _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), bonus);
     _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
-    _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), 4 * bonus);
+    _orderingInfo.incrementCounterHistory(color, pMove, move.getPieceType(), move.getTo(), std::min(MAX_HISTORY_SCORE, 4 * bonus));
   }else{
     _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), bonus);
   }
