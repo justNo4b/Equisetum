@@ -150,15 +150,6 @@ void loadCosts(){
    ourSearchParams.hp_multp = atoi(optionsMap["hp_multp"].getValue().c_str());
    ourSearchParams.hp_base  = atoi(optionsMap["hp_base"].getValue().c_str()) - 1000;
 
-   ourSearchParams.chb_multp = atoi(optionsMap["chb_multp"].getValue().c_str());
-   ourSearchParams.chb_base = atoi(optionsMap["chb_base"].getValue().c_str()) - 1000;
-   ourSearchParams.chp_multp = atoi(optionsMap["chp_multp"].getValue().c_str());
-   ourSearchParams.chp_base = atoi(optionsMap["chp_base"].getValue().c_str()) - 1000;
-
-   ourSearchParams.cmhb_multp = atoi(optionsMap["cmhb_multp"].getValue().c_str());
-   ourSearchParams.cmhb_base = atoi(optionsMap["cmhb_base"].getValue().c_str()) - 1000;
-   ourSearchParams.cmhp_multp = atoi(optionsMap["cmhp_multp"].getValue().c_str());
-   ourSearchParams.cmhp_base = atoi(optionsMap["cmhp_base"].getValue().c_str()) - 1000;
    ourSearchParams.cmhp_mt_2 = atoi(optionsMap["cmhp_mt_2"].getValue().c_str());
 
 
@@ -174,7 +165,6 @@ void loadCosts(){
    ourSearchParams.m_hist_lmr_div = atoi(optionsMap["m_hist_lmr_div"].getValue().c_str());
    ourSearchParams.cm_hist_lmr_div = atoi(optionsMap["cm_hist_lmr_div"].getValue().c_str());
    ourSearchParams.pm_hist_malus_factor = -1 * atoi(optionsMap["pm_hist_malus_factor"].getValue().c_str());
-   ourSearchParams.cmh_pruning_depth = atoi(optionsMap["cmh_pruning_depth"].getValue().c_str());
 }
 
 
@@ -273,16 +263,7 @@ void initOptions() {
   optionsMap["hp_multp"] =     Option(32, 1, 64, &loadCosts);
   optionsMap["hp_base"] =     Option(1000, 0, 2000, &loadCosts);
 
-  optionsMap["chb_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["chb_base"] =     Option(1000, 0, 2000, &loadCosts);
-  optionsMap["chp_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["chp_base"] =     Option(1000, 0, 2000, &loadCosts);
-
-  optionsMap["cmhb_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["cmhb_base"] =     Option(1000, 0, 2000, &loadCosts);
-  optionsMap["cmhp_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["cmhp_base"] =     Option(1000, 0, 2000, &loadCosts);
-  optionsMap["cmhp_mt_2"] =     Option(4, 1, 8, &loadCosts);
+  optionsMap["cmhp_mt_2"] =     Option(512, 1, 2048, &loadCosts);
 }
 
 void uciNewGame() {

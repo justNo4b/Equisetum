@@ -72,7 +72,7 @@ void Search::init_LMR_array(SearchParms sp){
     M_HIST_LMR_DIV = sp.m_hist_lmr_div;
     CM_HIST_LMR_DIV = sp.cm_hist_lmr_div;
     PM_HIST_MALUS_FACTOR = sp.pm_hist_malus_factor;
-    CMH_PRUNING_DEPTH = sp.cmh_pruning_depth;
+
 
     LMR_INIT_A = sp.lmr_init_a;
     LMR_INIT_DIV = sp.lmr_init_div;
@@ -94,15 +94,6 @@ void Search::init_LMR_array(SearchParms sp){
    HP_MULTP = sp.hp_multp;
    HP_BASE  = sp.hp_base;
 
-   CHB_MULTP = sp.chb_multp;
-   CHB_BASE = sp.chb_base;
-   CHP_MULTP = sp.chp_multp;
-   CHP_BASE = sp.chp_base;
-
-   CMHB_MULTP = sp.cmhb_multp;
-   CMHB_BASE = sp.cmhb_base;
-   CMHP_MULTP = sp.cmhp_multp;
-   CMHP_BASE = sp.cmhp_base;
    CMHP_MT_2 = sp.cmhp_mt_2;
 
 
@@ -310,7 +301,7 @@ bool Search::_checkLimits() {
 }
 
 inline int Search::_makeCmhBonus(int bonus){
-    return std::min(MAX_HISTORY_SCORE, bonus * 4);
+    return std::min(MAX_HISTORY_SCORE, bonus * CMHP_MT_2 / 128);
 }
 
 inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
@@ -319,7 +310,7 @@ inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
 
     //modify
     bonus += 2 * (eval < alpha);
-    return std::min(MAX_HISTORY_SCORE, 32 * bonus * bonus);
+    return std::min(MAX_HISTORY_SCORE, HB_MULTP * bonus * bonus + HB_BASE);
 }
 
 int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool ttNode, bool cutNode, CutOffState ttCut){
@@ -334,7 +325,7 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     penalty += cutNode;
 
     penalty = std::max(0, penalty);
-    return std::max(-MAX_HISTORY_SCORE, -32 * penalty * (penalty - 1));
+    return std::max(-MAX_HISTORY_SCORE, -HP_MULTP * penalty * (penalty - 1) + HP_BASE);
 }
 
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int bonus){
@@ -647,7 +638,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
       // Prune quiet moves with poor CMH on the tips of the tree
-      if (depth <= CMH_PRUNING_DEPTH && isQuiet && cmHistory <= ( CMH_DEPTH * depth + CMH_BASE)) continue;
+      if (depth <= 3 && isQuiet && cmHistory <= ( CMH_DEPTH * depth + CMH_BASE)) continue;
     }
 
 
@@ -752,8 +743,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           reduction -= singNode;
 
           // reduce more/less based on the hitory
-          reduction -= moveHistory / M_HIST_LMR_DIV;
-          reduction -= cmHistory  / CM_HIST_LMR_DIV;
+          reduction -= _clamp(-2, moveHistory / M_HIST_LMR_DIV, 2);
+          reduction -= _clamp(-2, cmHistory  / CM_HIST_LMR_DIV, 2);
 
           // reduce less when move is a Queen promotion
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);

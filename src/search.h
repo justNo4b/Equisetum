@@ -69,7 +69,6 @@ struct SearchParms {
    int m_hist_lmr_div = 8192;
    int cm_hist_lmr_div = 8192;
    int pm_hist_malus_factor = -8192;
-   int cmh_pruning_depth = 3;
 
    double lmr_init_a = 0.57;
    double lmr_init_div = 2.49;
@@ -91,16 +90,7 @@ struct SearchParms {
    int hp_multp = 32;
    int hp_base  = 0;
 
-   int chb_multp = 32;
-   int chb_base = 0;
-   int chp_multp = 32;
-   int chp_base = 0;
-
-   int cmhb_multp = 32;
-   int cmhb_base = 0;
-   int cmhp_multp = 32;
-   int cmhp_base = 0;
-   int cmhp_mt_2 = 4;
+   int cmhp_mt_2 = 512;
 
 };
 
@@ -215,7 +205,6 @@ class Search {
 
    int CMH_DEPTH = -4096;
    int CMH_BASE  = 4096;
-   int CMH_PRUNING_DEPTH = 3;
    int LMP_HIST_LIMIT = 0;
    int PM_HIST_REDUCTION_LIMIT = -8192;
    int M_HIST_LMR_DIV = 8192;
@@ -227,16 +216,7 @@ class Search {
    int HP_MULTP = 32;
    int HP_BASE  = 0;
 
-   int CHB_MULTP = 32;
-   int CHB_BASE = 0;
-   int CHP_MULTP = 32;
-   int CHP_BASE = 0;
-
-   int CMHB_MULTP = 32;
-   int CMHB_BASE = 0;
-   int CMHP_MULTP = 32;
-   int CMHP_BASE = 0;
-   int CMHP_MT_2 = 4;
+   int CMHP_MT_2 = 512;
 
    double LMR_INIT_A = 0.57;
    double LMR_INIT_DIV = 2.49;
