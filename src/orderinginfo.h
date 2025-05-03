@@ -63,24 +63,9 @@ class OrderingInfo {
    */
   void incrementHistory(Color, int, int, int);
 
-  /**
-   * @brief Lower history heuristic value of the board for
-   * the given color, from square, to square and depth.
-   *
-   * @param color Color to increment history for
-   * @param from From square to increment history for
-   * @param to To square to increment history for
-   * @param depth Depth of move that caused this increment
-   */
-  void decrementHistory(Color, int, int, int);
-
   void incrementCapHistory(PieceType, PieceType, int, int);
 
-  void decrementCapHistory(PieceType, PieceType, int, int);
-
   void incrementCounterHistory(Color, int, PieceType, int, int);
-
-  void decrementCounterHistory(Color, int, PieceType, int, int);
 
   /**
    * @brief Update countermove.
