@@ -56,32 +56,17 @@ int OrderingInfo::getCounterMoveINT(Color color, int pMove) const{
 // currently use formula clamps history between (-16384 and 16384)
 void OrderingInfo::incrementHistory(Color color, int from, int to, int bonus) {
   int16_t current = _history[color][from][to];
-  _history[color][from][to] += bonus - current * abs(bonus) / 16384;
-}
-
-void OrderingInfo::decrementHistory(Color color, int from, int to, int bonus) {
-  int16_t current = _history[color][from][to];
-  _history[color][from][to] += bonus - current * abs(bonus) / 16384;
+  _history[color][from][to] += bonus - current * abs(bonus) / MAX_HISTORY_SCORE;
 }
 
 void OrderingInfo::incrementCapHistory(PieceType capturingPiece, PieceType capturedPiece, int to, int bonus){
   int16_t current = _captureHistory[capturingPiece][capturedPiece][to];
-  _captureHistory[capturingPiece][capturedPiece][to] += bonus - current * abs(bonus) / 16384;
-}
-
-void OrderingInfo::decrementCapHistory(PieceType capturingPiece, PieceType capturedPiece, int to, int bonus){
-  int16_t current = _captureHistory[capturingPiece][capturedPiece][to];
-  _captureHistory[capturingPiece][capturedPiece][to] += bonus - current * abs(bonus) / 16384;
+  _captureHistory[capturingPiece][capturedPiece][to] += bonus - current * abs(bonus) / MAX_HISTORY_SCORE;
 }
 
 void OrderingInfo::incrementCounterHistory(Color color, int pMove, PieceType pType, int to, int bonus){
   int16_t current = _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to];
-  _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to] += bonus - current * abs(bonus) / 16384;
-}
-
-void OrderingInfo::decrementCounterHistory(Color color, int pMoveIndx, PieceType pType, int to, int bonus){
-  int16_t current = _counterMoveHistory[color][pMoveIndx][pType][to];
-  _counterMoveHistory[color][pMoveIndx][pType][to] += bonus - current * abs(bonus) / 16384;
+  _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to] += bonus - current * abs(bonus) / MAX_HISTORY_SCORE;
 }
 
 int OrderingInfo::getHistory(Color color, int from, int to) const {

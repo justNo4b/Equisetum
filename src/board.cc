@@ -708,7 +708,7 @@ bool Board::doMove(Move move) {
     _movePiece(_activePlayer, move.getPieceType(), from, to);
     // Check if we are in check after moving
     if (colorIsInCheck(_activePlayer)) return false;
-    _scheduleUpdateMove(_activePlayer, move.getPieceType(), from, to);
+    _scheduleUpdateMove(*this, _activePlayer, move.getPieceType(), from, to);
   } else if ((flags & Move::CAPTURE) && (flags & Move::PROMOTION)) { // Capture promotion special case
     // Remove captured Piece
     PieceType capturedPieceType = move.getCapturedPieceType();
@@ -721,7 +721,7 @@ bool Board::doMove(Move move) {
     PieceType promotionPieceType = move.getPromotionPieceType();
     _addPiece(_activePlayer, promotionPieceType, to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _scheduleUpdateCapprom(getActivePlayer(), capturedPieceType, promotionPieceType, from, to);
+    _scheduleUpdateCapprom(*this, getActivePlayer(), capturedPieceType, promotionPieceType, from, to);
   } else if (flags & Move::CAPTURE) {
     // Remove captured Piece
     PieceType capturedPieceType = move.getCapturedPieceType();
@@ -730,19 +730,19 @@ bool Board::doMove(Move move) {
     // Move capturing piece
     _movePiece(_activePlayer, move.getPieceType(), from, to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _scheduleUpdateCapture(_activePlayer, move.getPieceType(), move.getCapturedPieceType(), from, to);
+    _scheduleUpdateCapture(*this,_activePlayer, move.getPieceType(), move.getCapturedPieceType(), from, to);
   } else if (flags & Move::KSIDE_CASTLE) {
     // Move the correct rook
     if (_activePlayer == WHITE) {
       _movePiece(_activePlayer, KING, from, g1);
       _movePiece(WHITE, ROOK, to, f1);
       if (colorIsInCheck(_activePlayer)) return false;
-       _scheduleUpdateCastle(_activePlayer, from, g1, to, f1);
+        _scheduleUpdateCastle(*this, _activePlayer, from, g1, to, f1);
     } else {
       _movePiece(_activePlayer, KING, from, g8);
       _movePiece(BLACK, ROOK, to, f8);
       if (colorIsInCheck(_activePlayer)) return false;
-       _scheduleUpdateCastle(_activePlayer, from, g8, to, f8);
+       _scheduleUpdateCastle(*this, _activePlayer, from, g8, to, f8);
     }
   } else if (flags & Move::QSIDE_CASTLE) {
     // Move the correct rook
@@ -750,12 +750,12 @@ bool Board::doMove(Move move) {
       _movePiece(_activePlayer, KING, from, c1);
       _movePiece(WHITE, ROOK, to, d1);
       if (colorIsInCheck(_activePlayer)) return false;
-       _scheduleUpdateCastle(_activePlayer, from, c1, to, d1);
+       _scheduleUpdateCastle(*this, _activePlayer, from, c1, to, d1);
     } else {
       _movePiece(_activePlayer, KING, from, c8);
       _movePiece(BLACK, ROOK, to, d8);
       if (colorIsInCheck(_activePlayer)) return false;
-       _scheduleUpdateCastle(_activePlayer, from, c8, to, d8);
+       _scheduleUpdateCastle(*this, _activePlayer, from, c8, to, d8);
     }
   } else if (flags & Move::EN_PASSANT) {
     // Remove the correct pawn
@@ -768,7 +768,7 @@ bool Board::doMove(Move move) {
     // Move the capturing pawn
     _movePiece(_activePlayer, move.getPieceType(), from, to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _scheduleUpdateEnpass(_activePlayer, from, to);
+    _scheduleUpdateEnpass(*this, _activePlayer, from, to);
   } else if (flags & Move::PROMOTION) {
     // Remove promoted pawn
     _removePiece(_activePlayer, PAWN, from);
@@ -776,11 +776,11 @@ bool Board::doMove(Move move) {
     // Add promoted piece
     _addPiece(_activePlayer, move.getPromotionPieceType(), to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _scheduleUpdatePromote(getActivePlayer(), move.getPromotionPieceType(), from, to);
+    _scheduleUpdatePromote(*this, getActivePlayer(), move.getPromotionPieceType(), from, to);
   } else if (flags & Move::DOUBLE_PAWN_PUSH) {
     _movePiece(_activePlayer, move.getPieceType(), from, to);
     if (colorIsInCheck(_activePlayer)) return false;
-    _scheduleUpdateMove(_activePlayer, move.getPieceType(), from, to);
+    _scheduleUpdateMove(*this, _activePlayer, move.getPieceType(), from, to);
 
     // Set square behind pawn as _enPassant
     unsigned int enPasIndex = _activePlayer == WHITE ? to - 8 : to + 8;
@@ -895,6 +895,201 @@ void Board::_updateCastlingRightsForMove(Move move) {
   _zKey.updateCastlingRights(oldCastlingRights ,_castlingRights);
 }
 
+bool Board::moveIsPseudoLegal(Move m) const{
+    Color color = getActivePlayer();
+    Color other = getOppositeColor(color);
+    int from = m.getFrom();
+    int to = m.getTo();
+    PieceType pt = m.getPieceType();
+    PieceType captured = m.getCapturedPieceType();
+    PieceType promo = m.getPromotionPieceType();
+
+    U64 attackable = getAttackable(other);
+    U64 fromBit = (ONE << from);
+    U64 toBit = (ONE << to);
+
+    // Handle move depending on what type of move it is
+    unsigned int flags = m.getFlags();
+
+    // First bits of the move should be 0
+    if (m.getMoveINT() & 0xF0000000){
+        return false;
+    }
+
+
+    // basci test - piece actually exists
+    // and moving type == type at square
+    PieceType moving;
+    if (fromBit & _allPieces[color]){
+        moving = getPieceAtSquare(color, from);
+        if (moving != pt) return false;
+    }else{
+        return false;
+    }
+
+  // basic checks are done, now check if the move is okay in details
+  // we start with castling stuff
+    if (flags == Move::KSIDE_CASTLE || flags == Move::QSIDE_CASTLE) {
+        // reproduce movegen and see if move is ok
+        // return if we under check
+        if (colorIsInCheck(color)) return false;
+
+        Move trueCastling;
+        int kingIndex = _bitscanForward(getPieces(color, KING));
+
+        // Add Castlings
+        U64 castlingRights = getCastlingRightsColored(color);
+
+        while(castlingRights){
+            int rookSquare  = _popLsb(castlingRights);
+            // no suitable castling found
+            if ((rookSquare <= kingIndex && flags == Move::KSIDE_CASTLE) || (rookSquare > kingIndex && flags == Move::QSIDE_CASTLE)) continue;
+
+            int toCastle    = color == WHITE ? rookSquare > kingIndex ? g1 : c1
+                                            : rookSquare > kingIndex ? g8 : c8;
+            int toRook      = color == WHITE ? rookSquare > kingIndex ? f1 : d1
+                                            : rookSquare > kingIndex ? f8 : d8;
+            U64 rookToKing  = Eval::detail::IN_BETWEEN[kingIndex][rookSquare];
+            U64 kingJumpSq  = Eval::detail::IN_BETWEEN[kingIndex][toCastle] | (ONE << toCastle);
+
+            // both rookToKing AND king Jump AND Rook landing must be free !!!!
+            U64 toBeFree = rookToKing | kingJumpSq | (ONE << toRook);
+            toBeFree = toBeFree & ~(ONE << kingIndex);
+            toBeFree = toBeFree & ~(ONE << rookSquare);
+            if (toBeFree & getOccupied()) return false;
+            bool pathAttacked = false;
+
+            while (kingJumpSq)
+            {
+                int sq = _popLsb(kingJumpSq);
+                if (squareUnderAttack(getOppositeColor(color), sq)){
+                    pathAttacked = true;
+                    break;
+                    }
+            }
+            Move::Flag flag = rookSquare > kingIndex ? Move::KSIDE_CASTLE : Move::QSIDE_CASTLE;
+            if (!pathAttacked) trueCastling = Move(kingIndex, rookSquare, KING, flag);
+        }
+        if (m.getMoveINT() == trueCastling.getMoveINT()) return true; else return false;
+
+    }
+  else if (moving == PAWN){
+    // single pawn moves
+    // not promotions
+    if ((!flags || flags == Move::DOUBLE_PAWN_PUSH) && captured == 0 && promo == 0){
+          U64 movedPawn = color == WHITE ? fromBit << 8 : fromBit >> 8;
+          movedPawn &= getNotOccupied();
+          movedPawn &= ~PROMOTION_RANK[color];
+
+          if (flags == Move::DOUBLE_PAWN_PUSH){
+            movedPawn = color == WHITE ? movedPawn << 8 : movedPawn >> 8;
+            movedPawn &= getNotOccupied();
+            movedPawn &= DOUBLE_PUSH_RANK[color];
+          }
+
+          if (movedPawn & toBit){
+                return true;
+            }
+
+    }else if(flags == Move::PROMOTION && captured == 0){
+         if ((promo < 1 || promo > 4)) return false;
+
+          U64 movedPawn = color == WHITE ? fromBit << 8 : fromBit >> 8;
+          movedPawn &= getNotOccupied();
+          movedPawn &= PROMOTION_RANK[color];
+
+          if (movedPawn & toBit){
+                return true;
+            }
+
+    }else if (flags == Move::CAPTURE || flags == (Move::CAPTURE | Move::PROMOTION)){
+        // this handles both captures and capture-promotions
+        U64 moves = 0;
+        moves |= color == WHITE ? (fromBit << 7) & ~FILE_H : (fromBit >> 9) & ~FILE_H;
+        moves |= color == WHITE ? (fromBit << 9) & ~FILE_A : (fromBit >> 7) & ~FILE_A;
+
+        // captured piece exists
+        moves &= attackable;
+
+        // not a promotion
+        if (flags & Move::PROMOTION){
+          if ((promo < 1 || promo > 4)) return false;
+          moves &= PROMOTION_RANK[color];
+        }else{
+          if (promo != 0) return false;
+          moves &= ~PROMOTION_RANK[color];
+        }
+
+        // see if captured exists and proper
+        if (toBit & _allPieces[other]){
+            if (captured != getPieceAtSquare(other, to)){
+                return false;
+            }
+        }
+
+        if (moves & toBit){
+            return true;
+        }
+
+    }else if (flags == Move::EN_PASSANT && promo == 0 && captured == PAWN){
+        U64 moves = 0;
+        moves |= color == WHITE ? (fromBit << 7) & ~FILE_H : (fromBit >> 9) & ~FILE_H;
+        moves |= color == WHITE ? (fromBit << 9) & ~FILE_A : (fromBit >> 7) & ~FILE_A;
+
+        moves &= getEnPassant();
+
+        // see if captured exists and proper
+        if (toBit & _allPieces[other]){
+            if (captured != getPieceAtSquare(other, to)){
+                return false;
+            }
+        }
+
+        if (moves & toBit){
+            return true;
+        }
+
+    }
+  }
+  else if (moving != PAWN){
+
+    // normal move by non-pawn
+    if (!flags && captured == 0 && promo == 0) {
+        // No flags set, not a special move
+        // additionally no capture or promotion piece type is set
+        // NOTE - potential bug - since by default 0 is a PAWN
+            U64 moves = getAttacksForSquare(moving, color, from);
+            // to square is empty
+
+            // not a capture
+            moves =  moves & ~attackable;
+
+            if (moves & toBit){
+                return true;
+            }
+
+    // normal moves - captures
+    }else
+    if(flags == Move::CAPTURE && promo == 0){
+        U64 moves = getAttacksForSquare(moving, color, from);
+
+        // see if captured exists and proper
+        if (toBit & _allPieces[other]){
+            if (captured != getPieceAtSquare(other, to)){
+                return false;
+            }
+        }
+
+        moves = moves & attackable;
+        if (moves & toBit){
+            return true;
+        }
+    }
+  }
+
+  return false;
+}
+
 void Board::setToStartPos() {
   setToFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", false);
 }
@@ -963,29 +1158,78 @@ int Board::getPhase() const{
     // mark as updated, copy nnue and perform an update
     _updDone = true;
 
-    // copy accumulator
+    // Check if full reset is needed - when we change bucket or a side.
+    bool isResetNeeded = _nnue->resetNeeded(_updSchedule.movingPiece, _updSchedule.from, _updSchedule.to, _updSchedule.color);
+
+    // Reset is needed
+    if(isResetNeeded){
+        // good color - > color of the accumulator that does not need to be updated
+        Color goodcolor = getOppositeColor(_updSchedule.color);
+
+        // Copy "good" part of accumulator to a new shit
+        int16_t * goodhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
+        _nnue = _nnue + 1;
+        int16_t * newhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
+        std::memcpy(newhalf, goodhalf, sizeof(int16_t) * NNUE_HIDDEN);
+
+        // incrementally update good part by using half update functions
+        switch (_updSchedule.type)
+        {
+        case NN_MOVE:
+            _nnue->movePieceHalf(_updSchedule, goodcolor);
+            break;
+        case NN_PROMO:
+            _nnue->promotePieceHalf(_updSchedule, goodcolor);
+            break;
+        case NN_CAPTURE:
+            _nnue->capturePieceHalf(_updSchedule, goodcolor);
+            break;
+        case NN_CAPPROMO:
+            _nnue->cappromPieceHalf(_updSchedule, goodcolor);
+            break;
+        case NN_CASTLE:
+            //_nnue->fullReset(*this);
+            _nnue->castleMoveHalf(_updSchedule, goodcolor);
+            break;
+        case NN_ENPASS:
+            _nnue->enpassMoveHalf(_updSchedule, goodcolor);
+            break;
+        default:
+            break;
+        }
+
+        // half reset "bad" part
+        _nnue->halfReset(*this, _updSchedule.color);
+
+      return;
+    }
+
+    // Fll reset is not needed
+    // copy accumulator and proceed
     *(_nnue + 1) = *_nnue;
     _nnue = _nnue + 1;
 
     switch (_updSchedule.type)
     {
     case NN_MOVE:
-        _nnue->movePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.from, _updSchedule.to);
+        _nnue->movePiece(_updSchedule);
         break;
     case NN_PROMO:
-        _nnue->promotePiece(_updSchedule.color, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        _nnue->promotePiece(_updSchedule);
         break;
     case NN_CAPTURE:
-        _nnue->capturePiece(_updSchedule.color, _updSchedule.movingPiece, _updSchedule.capturedPiece, _updSchedule.from, _updSchedule.to);
+        _nnue->capturePiece(_updSchedule);
         break;
     case NN_CAPPROMO:
-        _nnue->cappromPiece(_updSchedule.color, _updSchedule.capturedPiece, _updSchedule.promotedPiece, _updSchedule.from, _updSchedule.to);
+        _nnue->cappromPiece(_updSchedule);
         break;
     case NN_CASTLE:
-        _nnue->castleMove(_updSchedule.color, _updSchedule.from, _updSchedule.to, _updSchedule.fromRook, _updSchedule.toRook);
+        // this should never happens, but do a full reset just in case
+        _nnue->fullReset(*this);
+        //_nnue->castleMove(_updSchedule.color, _updSchedule.from, _updSchedule.to, _updSchedule.fromRook, _updSchedule.toRook);
         break;
     case NN_ENPASS:
-        _nnue->enpassMove(_updSchedule.color, _updSchedule.from, _updSchedule.to);
+        _nnue->enpassMove(_updSchedule);
         break;
     default:
         break;
@@ -994,41 +1238,49 @@ int Board::getPhase() const{
 }
 
 
-void Board::_scheduleUpdateMove(Color c, PieceType moving, unsigned int from, unsigned int to){
+void Board::_scheduleUpdateMove(const Board &board, Color c, PieceType moving, unsigned int from, unsigned int to){
 
     _updSchedule.type = NN_MOVE;
     _updSchedule.color = c;
     _updSchedule.movingPiece = moving;
     _updSchedule.from = from;
     _updSchedule.to = to;
+    _updSchedule.wKing = _bitscanForward(board.getPieces(WHITE, KING));
+    _updSchedule.bKing = _bitscanForward(board.getPieces(BLACK, KING));
 
     _updDone = false;
 }
 
-void Board::_scheduleUpdatePromote(Color c, PieceType promoted, unsigned int from, unsigned int to){
+void Board::_scheduleUpdatePromote(const Board &board, Color c, PieceType promoted, unsigned int from, unsigned int to){
 
     _updSchedule.type = NN_PROMO;
+    _updSchedule.movingPiece = PAWN;
     _updSchedule.color = c;
     _updSchedule.promotedPiece = promoted;
     _updSchedule.from = from;
     _updSchedule.to = to;
+    _updSchedule.wKing = _bitscanForward(board.getPieces(WHITE, KING));
+    _updSchedule.bKing = _bitscanForward(board.getPieces(BLACK, KING));
 
     _updDone = false;
 }
 
-void Board::_scheduleUpdateCapprom(Color c, PieceType captured, PieceType promoted, unsigned int from, unsigned int to){
+void Board::_scheduleUpdateCapprom(const Board &board, Color c, PieceType captured, PieceType promoted, unsigned int from, unsigned int to){
 
     _updSchedule.type = NN_CAPPROMO;
+    _updSchedule.movingPiece = PAWN;
     _updSchedule.color = c;
     _updSchedule.capturedPiece = captured;
     _updSchedule.promotedPiece = promoted;
     _updSchedule.from = from;
     _updSchedule.to = to;
+    _updSchedule.wKing = _bitscanForward(board.getPieces(WHITE, KING));
+    _updSchedule.bKing = _bitscanForward(board.getPieces(BLACK, KING));
 
     _updDone = false;
 }
 
-void Board::_scheduleUpdateCapture(Color c, PieceType moving, PieceType captured, unsigned int from, unsigned int to){
+void Board::_scheduleUpdateCapture(const Board &board, Color c, PieceType moving, PieceType captured, unsigned int from, unsigned int to){
 
     _updSchedule.type = NN_CAPTURE;
     _updSchedule.color = c;
@@ -1036,28 +1288,40 @@ void Board::_scheduleUpdateCapture(Color c, PieceType moving, PieceType captured
     _updSchedule.capturedPiece = captured;
     _updSchedule.from = from;
     _updSchedule.to = to;
+    _updSchedule.wKing = _bitscanForward(board.getPieces(WHITE, KING));
+    _updSchedule.bKing = _bitscanForward(board.getPieces(BLACK, KING));
 
     _updDone = false;
 }
 
-void Board::_scheduleUpdateCastle(Color c, unsigned int from, unsigned int to, unsigned int fromR, unsigned int toR){
+
+void Board::_scheduleUpdateCastle(const Board &board, Color c, unsigned int from, unsigned int to, unsigned int fromR, unsigned int toR){
 
     _updSchedule.type = NN_CASTLE;
+    _updSchedule.movingPiece = KING;
     _updSchedule.color = c;
     _updSchedule.from = from;
     _updSchedule.to = to;
     _updSchedule.fromRook = fromR;
     _updSchedule.toRook = toR;
 
+    _updSchedule.wKing = _bitscanForward(board.getPieces(WHITE, KING));
+    _updSchedule.bKing = _bitscanForward(board.getPieces(BLACK, KING));
+
     _updDone = false;
 }
 
-void Board::_scheduleUpdateEnpass(Color c, unsigned int from, unsigned int to){
+
+
+void Board::_scheduleUpdateEnpass(const Board &board, Color c, unsigned int from, unsigned int to){
 
     _updSchedule.type = NN_ENPASS;
+    _updSchedule.movingPiece = PAWN;
     _updSchedule.color = c;
     _updSchedule.from = from;
     _updSchedule.to = to;
+    _updSchedule.wKing = _bitscanForward(board.getPieces(WHITE, KING));
+    _updSchedule.bKing = _bitscanForward(board.getPieces(BLACK, KING));
 
     _updDone = false;
 }
@@ -1065,3 +1329,4 @@ void Board::_scheduleUpdateEnpass(Color c, unsigned int from, unsigned int to){
 void Board::_scheduleUpdateEmpty(){
     _updDone = false;
 }
+

@@ -338,24 +338,17 @@ class Search {
    * @param ply   search ply
    * @param depth search depth
    */
-  inline void _updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth);
+
+  inline int _getHistoryBonus(int, int, int);
+  inline int _getHistoryPenalty(int, int, int, int, bool, bool, CutOffState);
+
+  inline void _updateBeta(bool, const Move, Color, int, int, int);
 
   inline bool _isRepetitionDraw(U64, int);
 
   inline int _makeDrawScore();
 
-  inline int _getHistoryBonus(int dBonus);
-
-    inline int _getHistoryPenalty(int dBonus);
-
-    inline int _getCapBonus(int dBonus);
-
-    inline int _getCapPenalty(int dBonus);
-
-    inline int _getCmhBonus(int dBonus, int multiplier);
-
-    inline int _getCmhPenalty(int dBonus);
-
+  inline int _makeCmhBonus(int);
 
   /**
    * @brief Root negamax function.
