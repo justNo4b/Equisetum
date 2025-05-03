@@ -240,7 +240,7 @@ inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
 
     //modify
     bonus += 2 * (eval < alpha);
-    return 32 * bonus * bonus;
+    return std::min(MAX_HISTORY_SCORE, 32 * bonus * bonus);
 }
 
 int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool ttNode, bool cutNode, CutOffState ttCut){
@@ -255,7 +255,7 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     penalty += cutNode;
 
     penalty = std::max(0, penalty);
-    return -32 * penalty * (penalty - 1);
+    return std::max(-MAX_HISTORY_SCORE, -32 * penalty * (penalty - 1));
 }
 
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int bonus){
