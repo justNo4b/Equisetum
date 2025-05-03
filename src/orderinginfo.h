@@ -24,6 +24,8 @@
 #include "move.h"
 
 #define cmhCalculateIndex(moveInt) (((moveInt & 0x7) + ((moveInt >> 15) & 0x3f) * 6))
+#define  MAX_HISTORY_SCORE      (16384)
+#define  HALFMAX_HISTORY_SCORE  (8192)
 
 /**
  * @brief Contains information related to a search in progress
@@ -63,24 +65,9 @@ class OrderingInfo {
    */
   void incrementHistory(Color, int, int, int);
 
-  /**
-   * @brief Lower history heuristic value of the board for
-   * the given color, from square, to square and depth.
-   *
-   * @param color Color to increment history for
-   * @param from From square to increment history for
-   * @param to To square to increment history for
-   * @param depth Depth of move that caused this increment
-   */
-  void decrementHistory(Color, int, int, int);
-
   void incrementCapHistory(PieceType, PieceType, int, int);
 
-  void decrementCapHistory(PieceType, PieceType, int, int);
-
   void incrementCounterHistory(Color, int, PieceType, int, int);
-
-  void decrementCounterHistory(Color, int, PieceType, int, int);
 
   /**
    * @brief Update countermove.
