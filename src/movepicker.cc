@@ -47,7 +47,8 @@ void MovePicker::_scoreMoves() {
   bool isQsearch  = _ply == MAX_PLY;
   _moves = MoveList();
   _moves.reserve(isQsearch ? MOVELIST_RESERVE_SIZE_CAPS : MOVELIST_RESERVE_SIZE);
-   MoveGen(_board,isQsearch, &_moves);
+
+  MoveGen(_board,isQsearch, &_moves);
 
   int i = -1;
   int ttIndx = -1;
