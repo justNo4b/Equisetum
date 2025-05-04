@@ -243,6 +243,40 @@ void setOption(std::istringstream &is) {
   }
 }
 
+U64 perft(const Board &board, int depth){
+    U64 count = 0;
+
+    if (depth == 0){
+        return 1;
+    }
+
+    MoveList moves = MoveList();
+    MoveGen(&board,false, &moves);
+
+    for (size_t i = 0; i < moves.size(); i++) {
+        Move move = moves[i];
+        Board movedBoard = board;
+        bool isLegal = movedBoard.doMove(move);
+
+        if (isLegal){
+            count += perft(movedBoard, depth - 1);
+        }
+    }
+
+    return count;
+}
+
+void perft_starter(std::istringstream &is){
+    int depth;
+    is >> depth;
+    std::cout << "Perft starts to depth " << depth << std::endl;
+    Board board = Board();
+
+    U64 count = perft(board, depth);
+
+    std::cout << "Perft end with value: "<< count << std::endl;
+}
+
 void loop() {
   std::cout << "Equisetum " << VER_MAJ << "." << VER_MIN << "." << VER_PATCH;
   std::cout << " by Rhys Rustad-Elliott and Litov Alexander";
@@ -286,6 +320,8 @@ void loop() {
         std::cout << move.getNotation(board.getFrcMode()) << " ";
       }
       std::cout << std::endl;
+    } else if (token == "perft"){
+        perft_starter(is);
     } else {
       std::cout << "what?" << std::endl;
     }
