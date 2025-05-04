@@ -124,10 +124,10 @@ bool Timer::finishOnThisDepth(int * elapsedTime, U64 totalNodes, U64 bestNodes){
     double nodesConfidance = bestNodes * 100.0 / totalNodes;
     // clamp coeff between 25 and 75
     // we assume that standart case is about ~50% of nodes go in bestMove
-    nodesConfidance = std::max(21.0, nodesConfidance);
+    nodesConfidance = std::max(22.0, nodesConfidance);
     nodesConfidance = std::min(89.0, nodesConfidance);
 
-    double nodesCoeff = 1.18 + (50.0 - nodesConfidance) / 53.0;
+    double nodesCoeff = 1.19 + (50.0 - nodesConfidance) / 53.0;
 
 
 
