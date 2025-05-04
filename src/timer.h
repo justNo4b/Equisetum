@@ -107,9 +107,9 @@
      *
      * @{
      */
-      const int INCR_T_WIDTH_A = 322;
-      const int INCR_T_WIDTH   = 188;
-      const int INCR_T_MOVE    = 22;
+      const int INCR_T_WIDTH_A = 328;
+      const int INCR_T_WIDTH   = 176;
+      const int INCR_T_MOVE    = 23;
       const int INCR_CRIT_MOVE = 26;
 
       const int CYCL_T_WIDTH_A = 750;
