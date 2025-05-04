@@ -28,12 +28,13 @@ MoveGen::MoveGen(const Board *board, bool isCaptureGenerated, MoveList * ml) {
 MoveGen::MoveGen(MoveList * ml) {
     _moves = ml;
     Board b = Board();
-  setBoard(&b, false);
+    setBoard(&b, false);
 }
 
 void MoveGen::setBoard(const Board *board, bool isCaptureGenerated) {
   if (!isCaptureGenerated){
      _genMoves(board);
+    _genCaptures(board);
   } else{
     _genCaptures(board);
   }
@@ -44,8 +45,7 @@ void MoveGen::_genMoves(const Board *board) {
     Color otherColor = getOppositeColor(color);
 
     _genPawnMoves(board, color);
-    _genPawnAttacks(board, color);
-        _genRookMoves(board, board->getPieces(color, ROOK), board->getAttackable(otherColor));
+    _genRookMoves(board, board->getPieces(color, ROOK), board->getAttackable(otherColor));
     _genKnightMoves(board, board->getPieces(color, KNIGHT), board->getAttackable(otherColor));
     _genBishopMoves(board, board->getPieces(color, BISHOP), board->getAttackable(otherColor));
     _genKingMoves(board, color, board->getPieces(color, KING), board->getAttackable(otherColor));
@@ -70,10 +70,6 @@ inline void MoveGen::_genPawnPromotions(unsigned int from, unsigned int to, unsi
   if (flags & Move::CAPTURE) {
     promotionBase.setCapturedPieceType(capturedPieceType);
   }
-
-  Move queenPromotion = promotionBase;
-  queenPromotion.setPromotionPieceType(QUEEN);
-  _moves->push_back(queenPromotion);
 
   Move rookPromotion = promotionBase;
   rookPromotion.setPromotionPieceType(ROOK);
@@ -335,17 +331,6 @@ inline void MoveGen::_addMoves(const Board *board, int from, PieceType pieceType
   while (nonAttacks) {
     int to = _popLsb(nonAttacks);
     _moves->push_back(Move(from, to, pieceType));
-  }
-
-  // Generate attacks
-  U64 attacks = moves & attackable;
-  while (attacks) {
-    int to = _popLsb(attacks);
-
-    Move move(from, to, pieceType, Move::CAPTURE);
-    move.setCapturedPieceType(board->getPieceAtSquare(board->getInactivePlayer(), to));
-
-    _moves->push_back(move);
   }
 }
 
