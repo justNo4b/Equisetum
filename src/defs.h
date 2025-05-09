@@ -230,8 +230,11 @@ enum UpdateType{
 
 enum MpStage{
     MP_TT,
-    MP_GENERATE,
-    MP_NORMAL
+    MP_GENERATE_CAPTURES,
+    MP_CAPTURES,
+    MP_GENERATE_QUIET,
+    MP_QUIETS,
+    MP_BAD_CAPTURES
 };
 
 struct UpdData{

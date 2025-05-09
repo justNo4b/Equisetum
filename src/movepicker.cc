@@ -25,7 +25,9 @@ MovePicker::MovePicker(const OrderingInfo *orderingInfo, const Board *board, int
   _color = color;
   _ply = ply;
   _pMove = pMove;
-  _currHead = 0;
+  _currHeadQ = 0;
+  _currHeadC = 0;
+  _goodCapCount = 0;
   _board = board;
   _checkHashMove(hMove);
 }
@@ -38,16 +40,71 @@ void MovePicker::_checkHashMove(int hMoveInt){
         _hashMove = m;
     }else{
         _hashMove = Move(0);
-        _stage = MP_GENERATE;
+        _stage = MP_GENERATE_CAPTURES;
     }
 
 }
 
-void MovePicker::_scoreMoves() {
-  bool isQsearch  = _ply == MAX_PLY;
-  _moves = MoveList();
-  _moves.reserve(isQsearch ? MOVELIST_RESERVE_SIZE_CAPS : MOVELIST_RESERVE_SIZE);
-   MoveGen(_board,isQsearch, &_moves);
+
+void MovePicker::_scoreCaptures() {
+    _captures = MoveList();
+    _captures.reserve(MOVELIST_RESERVE_SIZE_CAPS);
+     MoveGen(_board, true, &_captures);
+
+    int i = -1;
+    int ttIndx = -1;
+
+    for (auto &move : _captures) {
+      i++;
+      int moveINT = move.getMoveINT();
+      if (_hashMove.getMoveINT() != 0 && moveINT == _hashMove.getMoveINT()) {
+        move.setValue(INF);
+        ttIndx = i;
+        // set ttmove first so it can be skipped
+        _goodCapCount++;
+      // Sort promotions first so that capture-promotions were here
+      } else if (move.getFlags() & Move::PROMOTION) {
+          // history
+          int value = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
+          // general values
+          value += opS(Eval::MATERIAL_VALUES[move.getPromotionPieceType()])
+                 - opS(Eval::MATERIAL_VALUES[PAWN]);
+          // for SEE+ Q promotions use good capture bonus, otherwise treat as bad captures
+          if (move.getPromotionPieceType() == QUEEN && _board->SEE_GreaterOrEqual(move, 0)){
+              value += CAPTURE_BONUS;
+              _goodCapCount++;
+          }else{
+              value += BAD_CAPTURE;
+          }
+          // for capture-promotions add victim value
+          if (move.getFlags() & Move::CAPTURE){
+              value += opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]);
+          }
+        move.setValue(value);
+      } else if (move.getFlags() & Move::CAPTURE) {
+        int hist  = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
+        int value = opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]) + hist;
+        int th = -((hist / 8192) * 100);
+        if (_board->SEE_GreaterOrEqual(move, th)){
+            value += CAPTURE_BONUS;
+            _goodCapCount++;
+        }else{
+            value += BAD_CAPTURE;
+        }
+        move.setValue(value);
+      }
+    }
+    // swap ttMove first
+    if (ttIndx >= 0){
+      _currHeadC++;
+      std::swap(_captures.at(0), _captures.at(ttIndx));
+    }
+  }
+
+void MovePicker::_scoreQuiets() {
+  _quiets = MoveList();
+  _quiets.reserve(MOVELIST_RESERVE_SIZE);
+   MoveGen(_board, false, &_quiets);
 
   int i = -1;
   int ttIndx = -1;
@@ -57,7 +114,7 @@ void MovePicker::_scoreMoves() {
   int Counter  = _orderingInfo->getCounterMoveINT(_color, _pMove);
   int pMoveInx = (_pMove & 0x7) + ((_pMove >> 15) & 0x3f) * 6;
 
-  for (auto &move : _moves) {
+  for (auto &move : _quiets) {
     i++;
     int moveINT = move.getMoveINT();
     if (_hashMove.getMoveINT() != 0 && moveINT == _hashMove.getMoveINT()) {
@@ -83,12 +140,6 @@ void MovePicker::_scoreMoves() {
             value += opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]);
         }
       move.setValue(value);
-    } else if (move.getFlags() & Move::CAPTURE) {
-      int hist  = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
-      int value = opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]) + hist;
-      int th = -((hist / 8192) * 100);
-      value +=  _board->SEE_GreaterOrEqual(move, th)  ? CAPTURE_BONUS : BAD_CAPTURE;
-      move.setValue(value);
     } else if (moveINT == Killer1) {
       move.setValue(KILLER1_BONUS);
     } else if (moveINT == Killer2) {
@@ -102,8 +153,8 @@ void MovePicker::_scoreMoves() {
   }
   // swap ttMove first
   if (ttIndx >= 0){
-    _currHead++;
-    std::swap(_moves.at(0), _moves.at(ttIndx));
+    _currHeadQ++;
+    std::swap(_quiets.at(0), _quiets.at(ttIndx));
   }
 }
 
@@ -111,12 +162,31 @@ void MovePicker::_scoreMoves() {
 bool MovePicker::hasNext(){
     if (_stage == MP_TT){
         return true;
-    }else if (_stage == MP_GENERATE){
-        _stage = MP_NORMAL;
-        _scoreMoves();
     }
 
-    return _currHead < _moves.size();
+    if (_stage == MP_GENERATE_CAPTURES){
+        _stage = MP_CAPTURES;
+        _scoreCaptures();
+    }
+
+    if (_stage == MP_CAPTURES){
+        if (_currHeadC < _goodCapCount && _currHeadC < _captures.size()){
+            return true;
+        }else if (_ply != MAX_PLY){
+            _stage = MP_QUIETS;
+            _scoreQuiets();
+        }else{
+            return false;
+        }
+    }
+
+    if (_stage == MP_QUIETS && _currHeadQ < _quiets.size()){
+        return true;
+    }else{
+        _stage = MP_BAD_CAPTURES;
+    }
+
+    return _currHeadC < _captures.size();
 }
 
 Move MovePicker::getNext() {
@@ -124,30 +194,33 @@ Move MovePicker::getNext() {
   int bestScore = -INF;
 
   if (_stage == MP_TT){
-    _stage = MP_GENERATE;
+    _stage = MP_GENERATE_CAPTURES;
     return _hashMove;
   }
 
-  for (size_t i = _currHead; i < _moves.size(); i++) {
-    if (_moves.at(i).getValue() > bestScore) {
-      bestScore = _moves.at(i).getValue();
+  if (_stage == MP_CAPTURES || _stage == MP_BAD_CAPTURES){
+    for (size_t i = _currHeadC; i < _captures.size(); i++) {
+        if (_captures.at(i).getValue() > bestScore) {
+          bestScore = _captures.at(i).getValue();
+          bestIndex = i;
+        }
+      }
+    std::swap(_captures.at(_currHeadC), _captures.at(bestIndex));
+    return _captures.at(_currHeadC++);
+  }
+
+  // else quiets
+  for (size_t i = _currHeadQ; i < _quiets.size(); i++) {
+    if (_quiets.at(i).getValue() > bestScore) {
+      bestScore = _quiets.at(i).getValue();
       bestIndex = i;
     }
   }
 
-  std::swap(_moves.at(_currHead), _moves.at(bestIndex));
-  return _moves.at(_currHead++);
+  std::swap(_quiets.at(_currHeadQ), _quiets.at(bestIndex));
+  return _quiets.at(_currHeadQ++);
 }
 
-void MovePicker::refreshPicker(){
-  _currHead = 0;
-}
-
-bool MovePicker::moveExists(int moveint){
-    for(size_t j = 0; j < _moves.size(); j++){
-        if (_moves[j].getMoveINT() == moveint){
-            return true;
-        }
-    }
-    return false;
+MpStage MovePicker::getStage(){
+    return _stage;
 }

@@ -54,20 +54,14 @@ class MovePicker {
    * @return true if there are more moves to be picked from this MovePicker's MoveList, false otherwise.
    */
   bool hasNext();
+  MpStage getStage();
 
-  /**
-   * @brief Refresh movepicker to the first entry to start picking moves from the beginning
-   *
-   * Used in the probcut implementation to avoid double-move-generation
-   */
-  void refreshPicker();
-
-  bool moveExists(int);
    private:
   /**
    * @brief List of moves this MovePicker picks from
    */
-  MoveList _moves;
+  MoveList _captures;
+  MoveList _quiets;
 
   /**
    * @brief Size of _moves to pre-reserve before generating moves.
@@ -96,7 +90,8 @@ class MovePicker {
    * @brief Assigns a value to each move in this GeneralMovePicker's MoveList representing desirability
    * in a negamax search.
    */
-  void _scoreMoves();
+  void _scoreCaptures();
+  void _scoreQuiets();
 
   void _checkHashMove(int);
 
@@ -105,7 +100,9 @@ class MovePicker {
   /**
    * @brief Position of the first unpicked move in this GeneralMovePicker's MoveList
    */
-  size_t _currHead;
+  size_t _currHeadC;
+  size_t _currHeadQ;
+  size_t _goodCapCount;
 
   /**
    * @brief OrderingInfo object containing search related information used by this GeneralMovePicker

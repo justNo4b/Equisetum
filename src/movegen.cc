@@ -34,7 +34,6 @@ MoveGen::MoveGen(MoveList * ml) {
 void MoveGen::setBoard(const Board *board, bool isCaptureGenerated) {
   if (!isCaptureGenerated){
      _genMoves(board);
-     _genCaptures(board);
   } else{
     _genCaptures(board);
   }
