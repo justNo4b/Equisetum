@@ -254,6 +254,7 @@ U64 perft(const Board &board, int depth){
 
     MoveList moves = MoveList();
     MoveGen(&board,false, &moves);
+    MoveGen(&board, true, &moves);
 
     for (size_t i = 0; i < moves.size(); i++) {
         Move move = moves[i];
@@ -273,6 +274,7 @@ void perft_starter(std::istringstream &is){
     is >> depth;
     std::cout << "Perft starts to depth " << depth << std::endl;
     Board board = Board();
+    //board.setToFen("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8", false);
 
     U64 count = perft(board, depth);
 
