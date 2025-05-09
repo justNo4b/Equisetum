@@ -567,7 +567,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       // At shallow depth prune highlyish -negative SEE-moves
       if (depth <= 10
           && isQuiet
-          && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48 + moveHistory / 256))) continue;
+          && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48 - moveHistory / 256))) continue;
           //&& board.Calculate_SEE(move) < ) continue;
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
