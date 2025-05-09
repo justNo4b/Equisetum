@@ -362,6 +362,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   bool nmpTree = _sStack.nmpTree;
   bool pvNode = alpha != beta - 1;
   bool endgameNode = board.isEndGamePosition();
+  bool skipQuiet = false;
   int score;
   int ply = _sStack.ply;
   int pMove = _sStack.moves[ply - 1].getMoveINT();
@@ -561,7 +562,12 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       // 5.1 LATE MOVE PRUNING
       // If we made many quiet moves in the position already
       // we suppose other moves wont improve our situation
-      if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= 0)) break;
+      if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= 0))
+        skipQuiet = true;
+
+      if (skipQuiet && isQuiet){
+        continue;
+      }
 
       // 5.2. SEE pruning of quiet moves
       // At shallow depth prune highlyish -negative SEE-moves
