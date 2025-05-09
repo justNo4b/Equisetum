@@ -105,7 +105,8 @@ class MoveGen {
    * @param flags             Extra move flags (if applicable)
    * @param capturedPieceType Captured piece type (if applicable)
    */
-  void _genPawnPromotions(unsigned int, unsigned int, unsigned int= 0, PieceType= PAWN);
+  void _genPawnBNRPromotions(unsigned int, unsigned int, unsigned int= 0, PieceType= PAWN);
+  void _genPawnQPromotions(unsigned int, unsigned int, unsigned int= 0, PieceType= PAWN);
 
   /**
    * @name White pawn pseudo-legal move generation functions

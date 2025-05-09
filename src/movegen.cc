@@ -64,24 +64,35 @@ void MoveGen::_genCaptures(const Board *board) {
     _genQueenCaps(board, board->getPieces(color, QUEEN), board->getAttackable(otherColor));
 }
 
-inline void MoveGen::_genPawnPromotions(unsigned int from, unsigned int to, unsigned int flags, PieceType capturedPieceType) {
+inline void MoveGen::_genPawnQPromotions(unsigned int from, unsigned int to, unsigned int flags, PieceType capturedPieceType) {
   Move promotionBase = Move(from, to, PAWN, flags | Move::PROMOTION);
   if (flags & Move::CAPTURE) {
     promotionBase.setCapturedPieceType(capturedPieceType);
   }
 
-  Move rookPromotion = promotionBase;
-  rookPromotion.setPromotionPieceType(ROOK);
-  _moves->push_back(rookPromotion);
-
-  Move bishopPromotion = promotionBase;
-  bishopPromotion.setPromotionPieceType(BISHOP);
-  _moves->push_back(bishopPromotion);
-
-  Move knightPromotion = promotionBase;
-  knightPromotion.setPromotionPieceType(KNIGHT);
-  _moves->push_back(knightPromotion);
+  Move queenPromotion = promotionBase;
+  queenPromotion.setPromotionPieceType(QUEEN);
+  _moves->push_back(queenPromotion);
 }
+
+inline void MoveGen::_genPawnBNRPromotions(unsigned int from, unsigned int to, unsigned int flags, PieceType capturedPieceType) {
+    Move promotionBase = Move(from, to, PAWN, flags | Move::PROMOTION);
+    if (flags & Move::CAPTURE) {
+      promotionBase.setCapturedPieceType(capturedPieceType);
+    }
+
+    Move rookPromotion = promotionBase;
+    rookPromotion.setPromotionPieceType(ROOK);
+    _moves->push_back(rookPromotion);
+
+    Move bishopPromotion = promotionBase;
+    bishopPromotion.setPromotionPieceType(BISHOP);
+    _moves->push_back(bishopPromotion);
+
+    Move knightPromotion = promotionBase;
+    knightPromotion.setPromotionPieceType(KNIGHT);
+    _moves->push_back(knightPromotion);
+  }
 
 void MoveGen::_genPawnMoves(const Board *board, Color color) {
   U64 movedPawns = color == WHITE ? board->getPieces(color, PAWN) << 8
@@ -103,7 +114,7 @@ void MoveGen::_genPawnMoves(const Board *board, Color color) {
   // Generate promotions
   while (promotions) {
     int to = _popLsb(promotions);
-    _genPawnPromotions(to + fromAdj, to);
+    _genPawnBNRPromotions(to + fromAdj, to);
   }
 
   while (doublePushes) {
@@ -152,7 +163,8 @@ inline void MoveGen::_genPawnAttacks(const Board *board, Color color) {
   // Add promotion attacks
   while (leftAttackPromotions) {
     int to = _popLsb(leftAttackPromotions);
-    _genPawnPromotions(to + fromAdj, to, Move::CAPTURE, board->getPieceAtSquare(otherColor, to));
+    _genPawnQPromotions(to + fromAdj, to, Move::CAPTURE, board->getPieceAtSquare(otherColor, to));
+    _genPawnBNRPromotions(to + fromAdj, to, Move::CAPTURE, board->getPieceAtSquare(otherColor, to));
   }
 
   // Add en passant attacks
@@ -184,7 +196,8 @@ inline void MoveGen::_genPawnAttacks(const Board *board, Color color) {
   // Add promotion attacks
   while (rightAttackPromotions) {
     int to = _popLsb(rightAttackPromotions);
-    _genPawnPromotions(to + fromAdj, to, Move::CAPTURE, board->getPieceAtSquare(otherColor, to));
+    _genPawnBNRPromotions(to + fromAdj, to, Move::CAPTURE, board->getPieceAtSquare(otherColor, to));
+    _genPawnQPromotions(to + fromAdj, to, Move::CAPTURE, board->getPieceAtSquare(otherColor, to));
   }
 
   // Add en passant attacks
