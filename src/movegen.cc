@@ -44,7 +44,7 @@ void MoveGen::_genMoves(const Board *board) {
     Color otherColor = getOppositeColor(color);
 
     _genPawnMoves(board, color);
-        _genRookMoves(board, board->getPieces(color, ROOK), board->getAttackable(otherColor));
+    _genRookMoves(board, board->getPieces(color, ROOK), board->getAttackable(otherColor));
     _genKnightMoves(board, board->getPieces(color, KNIGHT), board->getAttackable(otherColor));
     _genBishopMoves(board, board->getPieces(color, BISHOP), board->getAttackable(otherColor));
     _genKingMoves(board, color, board->getPieces(color, KING), board->getAttackable(otherColor));

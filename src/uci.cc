@@ -140,7 +140,9 @@ void setPosition(std::istringstream &is) {
     }
 
     MoveList moves = MoveList();
+    // generate quiets and then captures
     MoveGen movegen(&board, false, &moves);
+    movegen.setBoard(&board, true);
     for (auto &move : moves) {
       if (move.getNotation((optionsMap["UCI_Chess960"].getValue() == "true")) == token) {
         board.doMove(move);
