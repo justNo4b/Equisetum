@@ -55,19 +55,12 @@ class MovePicker {
    */
   bool hasNext();
 
-  /**
-   * @brief Refresh movepicker to the first entry to start picking moves from the beginning
-   *
-   * Used in the probcut implementation to avoid double-move-generation
-   */
-  void refreshPicker();
 
-  bool moveExists(int);
    private:
   /**
    * @brief List of moves this MovePicker picks from
    */
-  MoveList _moves;
+  MoveList * _moves;
 
   /**
    * @brief Size of _moves to pre-reserve before generating moves.
@@ -89,7 +82,7 @@ class MovePicker {
   static const int KILLER2_BONUS      = 150000;
   static const int COUNTERMOVE_BONUS  = 50000;
   static const int QUIET_BONUS        = 0;
-  static const int BAD_CAPTURE        =-16384 * 4;
+  static const int BAD_CAPTURE        =-16384;
   /**@}*/
 
   /**

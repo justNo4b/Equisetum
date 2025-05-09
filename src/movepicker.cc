@@ -45,9 +45,9 @@ void MovePicker::_checkHashMove(int hMoveInt){
 
 void MovePicker::_scoreMoves() {
   bool isQsearch  = _ply == MAX_PLY;
-  _moves = MoveList();
-  _moves.reserve(isQsearch ? MOVELIST_RESERVE_SIZE_CAPS : MOVELIST_RESERVE_SIZE);
-   MoveGen(_board,isQsearch, &_moves);
+  _moves = new MoveList();
+  _moves->reserve(isQsearch ? MOVELIST_RESERVE_SIZE_CAPS : MOVELIST_RESERVE_SIZE);
+   MoveGen(_board,isQsearch, _moves);
 
   int i = -1;
   int ttIndx = -1;
@@ -57,8 +57,8 @@ void MovePicker::_scoreMoves() {
   int Counter  = _orderingInfo->getCounterMoveINT(_color, _pMove);
   int pMoveInx = (_pMove & 0x7) + ((_pMove >> 15) & 0x3f) * 6;
 
-  for (auto &move : _moves) {
-    i++;
+  for (i = 0; i < _moves->size(); i++){
+    Move move = _moves->at(i);
     int moveINT = move.getMoveINT();
     if (_hashMove.getMoveINT() != 0 && moveINT == _hashMove.getMoveINT()) {
       move.setValue(INF);
@@ -103,7 +103,7 @@ void MovePicker::_scoreMoves() {
   // swap ttMove first
   if (ttIndx >= 0){
     _currHead++;
-    std::swap(_moves.at(0), _moves.at(ttIndx));
+    std::swap(_moves->at(0), _moves->at(ttIndx));
   }
 }
 
@@ -116,7 +116,7 @@ bool MovePicker::hasNext(){
         _scoreMoves();
     }
 
-    return _currHead < _moves.size();
+    return _currHead < _moves->size();
 }
 
 Move MovePicker::getNext() {
@@ -128,26 +128,13 @@ Move MovePicker::getNext() {
     return _hashMove;
   }
 
-  for (size_t i = _currHead; i < _moves.size(); i++) {
-    if (_moves.at(i).getValue() > bestScore) {
-      bestScore = _moves.at(i).getValue();
+  for (size_t i = _currHead; i < _moves->size(); i++) {
+    if (_moves->at(i).getValue() > bestScore) {
+      bestScore = _moves->at(i).getValue();
       bestIndex = i;
     }
   }
 
-  std::swap(_moves.at(_currHead), _moves.at(bestIndex));
-  return _moves.at(_currHead++);
-}
-
-void MovePicker::refreshPicker(){
-  _currHead = 0;
-}
-
-bool MovePicker::moveExists(int moveint){
-    for(size_t j = 0; j < _moves.size(); j++){
-        if (_moves[j].getMoveINT() == moveint){
-            return true;
-        }
-    }
-    return false;
+  std::swap(_moves->at(_currHead), _moves->at(bestIndex));
+  return _moves->at(_currHead++);
 }
