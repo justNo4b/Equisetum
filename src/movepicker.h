@@ -60,8 +60,7 @@ class MovePicker {
   /**
    * @brief List of moves this MovePicker picks from
    */
-  MoveList _captures;
-  MoveList _quiets;
+  MoveList _moves;
 
   /**
    * @brief Size of _moves to pre-reserve before generating moves.
@@ -100,8 +99,7 @@ class MovePicker {
   /**
    * @brief Position of the first unpicked move in this GeneralMovePicker's MoveList
    */
-  size_t _currHeadC;
-  size_t _currHeadQ;
+  size_t _currHead;
   size_t _goodCapCount;
 
   /**

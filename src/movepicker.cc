@@ -25,8 +25,7 @@ MovePicker::MovePicker(const OrderingInfo *orderingInfo, const Board *board, int
   _color = color;
   _ply = ply;
   _pMove = pMove;
-  _currHeadQ = 0;
-  _currHeadC = 0;
+  _currHead = 0;
   _goodCapCount = 0;
   _board = board;
   _checkHashMove(hMove);
@@ -47,14 +46,14 @@ void MovePicker::_checkHashMove(int hMoveInt){
 
 
 void MovePicker::_scoreCaptures() {
-    _captures = MoveList();
-    _captures.reserve(MOVELIST_RESERVE_SIZE_CAPS);
-     MoveGen(_board, true, &_captures);
+    _moves = MoveList();
+    _moves.reserve(MOVELIST_RESERVE_SIZE_CAPS);
+     MoveGen(_board, true, &_moves);
 
     int i = -1;
     int ttIndx = -1;
 
-    for (auto &move : _captures) {
+    for (auto &move : _moves) {
       i++;
       int moveINT = move.getMoveINT();
       if (_hashMove.getMoveINT() != 0 && moveINT == _hashMove.getMoveINT()) {
@@ -96,15 +95,13 @@ void MovePicker::_scoreCaptures() {
     }
     // swap ttMove first
     if (ttIndx >= 0){
-      _currHeadC++;
-      std::swap(_captures.at(0), _captures.at(ttIndx));
+      _currHead++;
+      std::swap(_moves.at(0), _moves.at(ttIndx));
     }
   }
 
 void MovePicker::_scoreQuiets() {
-  _quiets = MoveList();
-  _quiets.reserve(MOVELIST_RESERVE_SIZE);
-   MoveGen(_board, false, &_quiets);
+   MoveGen(_board, false, &_moves);
 
   int i = -1;
   int ttIndx = -1;
@@ -114,8 +111,11 @@ void MovePicker::_scoreQuiets() {
   int Counter  = _orderingInfo->getCounterMoveINT(_color, _pMove);
   int pMoveInx = (_pMove & 0x7) + ((_pMove >> 15) & 0x3f) * 6;
 
-  for (auto &move : _quiets) {
+  for (auto &move : _moves) {
     i++;
+    if (move.getValue() != 0){
+        continue;
+    }
     int moveINT = move.getMoveINT();
     if (_hashMove.getMoveINT() != 0 && moveINT == _hashMove.getMoveINT()) {
       move.setValue(INF);
@@ -153,8 +153,8 @@ void MovePicker::_scoreQuiets() {
   }
   // swap ttMove first
   if (ttIndx >= 0){
-    _currHeadQ++;
-    std::swap(_quiets.at(0), _quiets.at(ttIndx));
+    _currHead++;
+    std::swap(_moves.at(0), _moves.at(ttIndx));
   }
 }
 
@@ -170,7 +170,7 @@ bool MovePicker::hasNext(){
     }
 
     if (_stage == MP_CAPTURES){
-        if (_currHeadC < _goodCapCount && _currHeadC < _captures.size()){
+        if (_currHead < _goodCapCount && _currHead < _moves.size()){
             return true;
         }else if (_ply != MAX_PLY){
             _stage = MP_QUIETS;
@@ -180,13 +180,13 @@ bool MovePicker::hasNext(){
         }
     }
 
-    if (_stage == MP_QUIETS && _currHeadQ < _quiets.size()){
+    if (_stage == MP_QUIETS && _currHead < _moves.size()){
         return true;
     }else{
         _stage = MP_BAD_CAPTURES;
     }
 
-    return _currHeadC < _captures.size();
+    return _currHead < _moves.size();
 }
 
 Move MovePicker::getNext() {
@@ -199,26 +199,26 @@ Move MovePicker::getNext() {
   }
 
   if (_stage == MP_CAPTURES || _stage == MP_BAD_CAPTURES){
-    for (size_t i = _currHeadC; i < _captures.size(); i++) {
-        if (_captures.at(i).getValue() > bestScore) {
-          bestScore = _captures.at(i).getValue();
+    for (size_t i = _currHead; i < _moves.size(); i++) {
+        if (_moves.at(i).getValue() > bestScore) {
+          bestScore = _moves.at(i).getValue();
           bestIndex = i;
         }
       }
-    std::swap(_captures.at(_currHeadC), _captures.at(bestIndex));
-    return _captures.at(_currHeadC++);
+    std::swap(_moves.at(_currHead), _moves.at(bestIndex));
+    return _moves.at(_currHead++);
   }
 
   // else quiets
-  for (size_t i = _currHeadQ; i < _quiets.size(); i++) {
-    if (_quiets.at(i).getValue() > bestScore) {
-      bestScore = _quiets.at(i).getValue();
+  for (size_t i = _currHead; i < _moves.size(); i++) {
+    if (_moves.at(i).getValue() > bestScore) {
+      bestScore = _moves.at(i).getValue();
       bestIndex = i;
     }
   }
 
-  std::swap(_quiets.at(_currHeadQ), _quiets.at(bestIndex));
-  return _quiets.at(_currHeadQ++);
+  std::swap(_moves.at(_currHead), _moves.at(bestIndex));
+  return _moves.at(_currHead++);
 }
 
 MpStage MovePicker::getStage(){
