@@ -46,8 +46,7 @@ void MovePicker::_checkHashMove(int hMoveInt){
 
 
 void MovePicker::_scoreCaptures() {
-    _moves = MoveList();
-    _moves.reserve(MOVELIST_RESERVE_SIZE_CAPS);
+    _moves.reserve(MOVELIST_RESERVE_SIZE);
      MoveGen(_board, true, &_moves);
 
     int i = -1;
@@ -196,17 +195,6 @@ Move MovePicker::getNext() {
   if (_stage == MP_TT){
     _stage = MP_GENERATE_CAPTURES;
     return _hashMove;
-  }
-
-  if (_stage == MP_CAPTURES || _stage == MP_BAD_CAPTURES){
-    for (size_t i = _currHead; i < _moves.size(); i++) {
-        if (_moves.at(i).getValue() > bestScore) {
-          bestScore = _moves.at(i).getValue();
-          bestIndex = i;
-        }
-      }
-    std::swap(_moves.at(_currHead), _moves.at(bestIndex));
-    return _moves.at(_currHead++);
   }
 
   // else quiets
