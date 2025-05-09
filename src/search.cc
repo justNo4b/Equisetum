@@ -554,6 +554,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                         _orderingInfo.getCaptureHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo());
     int cmHistory     = isQuiet ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()) : 0;
 
+    bool giveCheck = board.moveGivesCheck(move);
     // 5. PRE-MOVELOOP PRUNING
 
     if (alpha < WON_IN_X
@@ -565,7 +566,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= 0))
         skipQuiet = true;
 
-      if (skipQuiet && isQuiet){
+      if (skipQuiet && isQuiet && !giveCheck){
         continue;
       }
 
@@ -638,8 +639,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         bool doLMR = false;
         legalCount++;
         int score;
-
-        bool giveCheck = board.moveGivesCheck(move);
 
         _posHist.Add(board.getZKey().getValue());
         _sStack.AddMove(move);
