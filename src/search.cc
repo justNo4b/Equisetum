@@ -632,6 +632,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         bool doLMR = false;
         legalCount++;
         int score;
+        int fDepth = tDepth - 1;
 
         bool giveCheck = movedBoard.colorIsInCheck(movedBoard.getActivePlayer());
 
@@ -697,7 +698,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
           reduction = std::max(minReduction, reduction);
           //Avoid to reduce so much that we go to QSearch right away
-          int fDepth = std::max(1, tDepth - 1 - reduction);
+          fDepth = std::max(1, tDepth - 1 - reduction);
 
           //Search with reduced depth around alpha in assumtion
           // that alpha would not be beaten here
@@ -713,10 +714,10 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // So for both of this cases we do limited window search.
         if (doLMR){
           if (score > alpha){
-            score = -_negaMax(movedBoard, &thisPV, tDepth - 1, -alpha - 1, -alpha, false, !cutNode);
+            score = -_negaMax(movedBoard, &thisPV, fDepth, -alpha - 1, -alpha, false, !cutNode);
           }
         } else if (!pvNode || legalCount > 1){
-          score = -_negaMax(movedBoard, &thisPV, tDepth - 1, -alpha - 1, -alpha, false, !cutNode);
+          score = -_negaMax(movedBoard, &thisPV, fDepth, -alpha - 1, -alpha, false, !cutNode);
         }
 
         // If we are in the PV
@@ -724,7 +725,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // or if score improved alpha during the current round of search.
         if  (pvNode) {
           if ((legalCount == 1) || (score > alpha && score < beta)){
-            score = -_negaMax(movedBoard, &thisPV, tDepth - 1, -beta, -alpha, false, false);
+            score = -_negaMax(movedBoard, &thisPV, fDepth, -beta, -alpha, false, false);
           }
         }
 
