@@ -86,7 +86,7 @@ void MovePicker::_scoreMoves() {
     } else if (move.getFlags() & Move::CAPTURE) {
       int hist  = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
       int value = opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]) + hist;
-      int th = -((hist / 8192) * 100);
+      int th = isQsearch ? 0 : -((hist / 8192) * 100);
       value +=  _board->SEE_GreaterOrEqual(move, th)  ? CAPTURE_BONUS : BAD_CAPTURE;
       move.setValue(value);
     } else if (moveINT == Killer1) {
