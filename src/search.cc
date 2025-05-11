@@ -664,7 +664,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           reduction += isQuiet && nmpTree && board.getActivePlayer() == behindColor;
 
           // Reduce more in the cut-nodes - used by SF/Komodo/etc
-          reduction += cutNode;
+          reduction += 2 * cutNode;
 
           // Reduce less if move on the previous ply was bad
           // Ie hystorycally bad quiet, see- capture or underpromotion
