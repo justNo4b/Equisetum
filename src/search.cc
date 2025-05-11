@@ -856,8 +856,11 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
       break;
     }
 
+    int seeFutility = alpha - standPat - DELTA_MOVE_CONST;
+    seeFutility = seeFutility < 0 ? 0 : seeFutility;
+
     // Use Halogen futility variation
-    if (!(move.getFlags() & Move::PROMOTION) && !board.SEE_GreaterOrEqual(move, (alpha - standPat - DELTA_MOVE_CONST)))
+    if (!(move.getFlags() & Move::PROMOTION) && !board.SEE_GreaterOrEqual(move, seeFutility))
       continue;
 
     Board movedBoard = board;
