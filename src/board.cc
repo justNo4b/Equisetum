@@ -1196,7 +1196,7 @@ int Board::getPhase() const{
       return;
     }
 
-    // Fll reset is not needed
+    // Full reset is not needed
     // copy accumulator and proceed
     *(_nnue + 1) = *_nnue;
     _nnue = _nnue + 1;
