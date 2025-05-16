@@ -444,7 +444,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Do the Evaluation, unless we are in check or prev move was NULL
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
-  board.performUpdate();
+  board.performUpdate(&_finnyTable);
   nodeEval = Eval::evaluate(board, board.getActivePlayer());
   _sStack.AddEval(nodeEval);
 
@@ -818,7 +818,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     return 0;
   }
 
-  board.performUpdate();
+  board.performUpdate(&_finnyTable);
   nodeEval = Eval::evaluate(board, board.getActivePlayer());
   standPat = nodeEval;
 

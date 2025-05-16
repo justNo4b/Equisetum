@@ -1142,7 +1142,7 @@ int Board::getPhase() const{
     return _frc;
  }
 
- void Board::performUpdate(){
+ void Board::performUpdate(FinnyEntry (*entry)[2][NNUE_BUCKETS]){
 
     // already updated
     if (_updDone) return;

@@ -22,15 +22,14 @@
 // Base idea is from Koivisto, implementation is mine (probably better to look in original)
 
 #include "nnue.h"
-#include "board.h"
 
 struct FinnyEntry
 {
-    NNueEvaluation evaluator;
-    Board board;
+    int16_t _halfHidden[NNUE_HIDDEN];
+    U64 _pieces[2][6];
     bool isReady;
 
-    FinnyEntry() : evaluator(NNueEvaluation()), board(Board()), isReady(false) {};
+    FinnyEntry() : _halfHidden {0}, _pieces{0}, isReady(false) {};
 };
 
 
