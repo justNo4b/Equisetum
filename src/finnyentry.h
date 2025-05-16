@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef FINNYTABLE_H
-#define FINNYTABLE_H
+#ifndef FINNYENTRY_H
+#define FINNYENTRY_H
 
 // Finny Table for super efficient accumulator updates.
 // Base idea is from Koivisto, implementation is mine (probably better to look in original)
@@ -24,18 +24,14 @@
 #include "nnue.h"
 #include "board.h"
 
-class FinnyTable
+struct FinnyEntry
 {
-private:
-    NNueEvaluation _accumulator;
-    Board _board;
+    NNueEvaluation evaluator;
+    Board board;
+    bool isReady;
 
-public:
-
-
+    FinnyEntry() : evaluator(NNueEvaluation()), board(Board()), isReady(false) {};
 };
-
-
 
 
 #endif
