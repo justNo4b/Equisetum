@@ -294,7 +294,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   pV rootPV = pV();
   Move bestMove;
   bool fullWindow = true;
-  bool ttNode;
+  bool ttNode = false;
 
   // Load TT
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
