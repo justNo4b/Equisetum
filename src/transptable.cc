@@ -94,7 +94,7 @@ void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, int score, int 
 
 HASH_Entry  HASH::HASH_Get(U64 posKey){
   U64 index = posKey & TableMask;
-  if (hashTable[index].posKey == posKey){
+  if (hashTable[index].posKey == (uint32_t)posKey){
     return  hashTable[index];
   }
   return HASH_Entry();
