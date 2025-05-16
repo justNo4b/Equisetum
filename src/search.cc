@@ -288,16 +288,22 @@ inline int Search::_makeDrawScore(){
 
 int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   _nodes++;
-  int nodeEval = Eval::evaluate(board, board.getActivePlayer());
+  int nodeEval = NOSCORE;
   int hashMove = 0;
   int currScore;
   pV rootPV = pV();
   Move bestMove;
   bool fullWindow = true;
+  bool ttNode;
 
   // Load TT
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
-  hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
+    if (ttEntry.Flag != NONE){
+        hashMove = ttEntry.move;
+        ttNode = true;
+    }
+
+  nodeEval = (ttNode && ttEntry.eval != NOSCORE) ? ttEntry.eval : Eval::evaluate(board, board.getActivePlayer());
 
   _sStack.AddEval(nodeEval);
 
@@ -801,6 +807,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 int Search::_qSearch(Board &board, int alpha, int beta) {
    _nodes++;
    bool pvNode = alpha != beta - 1;
+   bool ttNode = false;
    int nodeEval = NOSCORE;
    int standPat = NOSCORE;
 
@@ -809,24 +816,11 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     return 0;
   }
 
-  board.performUpdate();
-  nodeEval = Eval::evaluate(board, board.getActivePlayer());
-  standPat = nodeEval;
-
-  if (standPat >= beta) {
-    if (!pvNode) return beta;
-
-    standPat = std::min((alpha + beta) / 2, beta - 1);
-  }
-
-  if (alpha < standPat) {
-    alpha = standPat;
-  }
-
   // Check transposition table cache
   // If TT is causing a cuttoff, we update move ordering stuff
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
   if (ttEntry.Flag != NONE){
+    ttNode = true;
     if (!pvNode){
       int hashScore = ttEntry.score;
 
@@ -844,6 +838,24 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
       }
     }
   }
+
+
+  board.performUpdate();
+
+  nodeEval = (ttNode && ttEntry.eval != NOSCORE) ? ttEntry.eval : Eval::evaluate(board, board.getActivePlayer());
+  standPat = nodeEval;
+
+  if (standPat >= beta) {
+    if (!pvNode) return beta;
+
+    standPat = std::min((alpha + beta) / 2, beta - 1);
+  }
+
+  if (alpha < standPat) {
+    alpha = standPat;
+  }
+
+
 
   MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
 
