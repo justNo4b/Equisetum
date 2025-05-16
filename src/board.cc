@@ -1155,6 +1155,7 @@ int Board::getPhase() const{
 
     // Reset is needed
     if(isResetNeeded){
+        int curbucket = 0;
         // good color - > color of the accumulator that does not need to be updated
         Color goodcolor = getOppositeColor(_updSchedule.color);
 
@@ -1192,6 +1193,11 @@ int Board::getPhase() const{
 
         // half reset "bad" part
         _nnue->halfReset(*this, _updSchedule.color);
+
+        // save to finny table
+        entry[_updSchedule.color][curbucket]->isReady = true;
+        memcpy(entry[_updSchedule.color][curbucket]->_halfHidden, _nnue->getHalfAccumulatorPtr(_updSchedule.color), sizeof(int16_t) * NNUE_HIDDEN);
+        memcpy(entry[_updSchedule.color][curbucket]->_pieces, this->_pieces, sizeof(this->_pieces));
 
       return;
     }
