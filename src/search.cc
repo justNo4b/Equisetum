@@ -551,7 +551,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     int  moveHistory  = isQuiet ?
                         _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) :
                         _orderingInfo.getCaptureHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo());
-    int cmHistory     = isQuiet ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()) : 0;
+    int cmHistory     = (isQuiet && pMove != 0) ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()) : 0;
 
     // 5. PRE-MOVELOOP PRUNING
 
