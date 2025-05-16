@@ -76,6 +76,7 @@ void Search::iterDeep() {
   _selDepth = 0;
   std::memset(_rootNodesSpent, 0, sizeof(_rootNodesSpent));
   _timer.startIteration();
+  _populateFinnyTable();
   int maxDepthSearched = 0;
 
   int targetDepth = _timer.getSearchDepth();
