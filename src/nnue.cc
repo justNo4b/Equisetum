@@ -175,6 +175,10 @@ bool NNueEvaluation::resetNeeded(PieceType pt, int from, int to, Color view){
     return false;
 }
 
+int NNueEvaluation::getCurrentBucket(int to, Color view){
+    return BUCKETS[view == WHITE ? to    : _mir(to)];
+}
+
 int NNueEvaluation::evaluate(const Color color){
     int32_t s = NNUE_OUTPUT_BIAS[0];
     Color oppColor = getOppositeColor(color);

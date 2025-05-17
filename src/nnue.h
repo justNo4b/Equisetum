@@ -70,6 +70,7 @@ public:
     void halfReset(const Board &, Color);
 
     bool resetNeeded(PieceType, int, int, Color);
+    int  getCurrentBucket(int, Color);
 
     int16_t * getHalfAccumulatorPtr(Color);
 

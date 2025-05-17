@@ -1155,7 +1155,7 @@ int Board::getPhase() const{
 
     // Reset is needed
     if(isResetNeeded){
-        int curbucket = 0;
+        int curbucket = _nnue->getCurrentBucket(_updSchedule.to, _updSchedule.color);
         // good color - > color of the accumulator that does not need to be updated
         Color goodcolor = getOppositeColor(_updSchedule.color);
 
