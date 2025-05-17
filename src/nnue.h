@@ -68,6 +68,7 @@ public:
 
     void fullReset(const Board &board);
     void halfReset(const Board &, Color);
+    void addSubDifference(Color, int *, int, int *, int);
 
     bool resetNeeded(PieceType, int, int, Color);
     int  getCurrentBucket(int, Color);

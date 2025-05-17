@@ -161,6 +161,20 @@ void NNueEvaluation::halfReset(const Board &board, Color half){
     }
 }
 
+void NNueEvaluation::addSubDifference(Color half, int * add, int addCount, int * sub, int subCount){
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        for (int j = 0; j < addCount; j++){
+            _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[add[j]][i];
+        }
+        for (int j = 0; j < subCount; j++){
+            _hiddenScore[half][i] -= NNUE_HIDDEN_WEIGHT[sub[j]][i];
+        }
+        //_hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[_getPieceIndex(sq, pt, color, half, hKing)][i];
+
+    }
+}
+
 bool NNueEvaluation::resetNeeded(PieceType pt, int from, int to, Color view){
     int bucket_to   = BUCKETS[view == WHITE ? to    : _mir(to)];
     int bucket_from = BUCKETS[view == WHITE ? from  : _mir(from)];

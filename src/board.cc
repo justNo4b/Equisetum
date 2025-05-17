@@ -1142,6 +1142,11 @@ int Board::getPhase() const{
     return _frc;
  }
 
+ void Board::calculateBoardDifference(Board &otherBoard, int * add, int * addCount, int * sub, int * subCount){
+
+ }
+
+
  void Board::performUpdate(FinnyEntry (*entry)[2][NNUE_BUCKETS]){
 
     // already updated
@@ -1292,7 +1297,6 @@ void Board::_scheduleUpdateCapture(const Board &board, Color c, PieceType moving
     _updDone = false;
 }
 
-
 void Board::_scheduleUpdateCastle(const Board &board, Color c, unsigned int from, unsigned int to, unsigned int fromR, unsigned int toR){
 
     _updSchedule.type = NN_CASTLE;
@@ -1308,8 +1312,6 @@ void Board::_scheduleUpdateCastle(const Board &board, Color c, unsigned int from
 
     _updDone = false;
 }
-
-
 
 void Board::_scheduleUpdateEnpass(const Board &board, Color c, unsigned int from, unsigned int to){
 
