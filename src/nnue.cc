@@ -365,7 +365,6 @@ void NNueEvaluation::capturePieceHalf(UpdData ud, Color half){
 
 }
 
-
 void NNueEvaluation::castleMoveHalf(UpdData ud, Color half){
     Color color = ud.color;
     int fromSquareKing = ud.from;
@@ -387,9 +386,6 @@ void NNueEvaluation::castleMoveHalf(UpdData ud, Color half){
     }
 
 }
-
-
-
 
 void NNueEvaluation::enpassMove(UpdData ud){
     Color color = ud.color;
