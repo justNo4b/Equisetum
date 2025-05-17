@@ -1142,8 +1142,8 @@ int Board::getPhase() const{
     return _frc;
  }
 
- void Board::calculateBoardDifference(Board &otherBoard, int * add, int * addCount, int * sub, int * subCount){
-
+ bool Board::calculateBoardDifference(U64 (* otherPieces)[2][6], int (* add)[32], int * addCount, int (* sub)[32], int * subCount){
+    return false;
  }
 
 
@@ -1196,8 +1196,21 @@ int Board::getPhase() const{
             break;
         }
 
-        // half reset "bad" part
-        _nnue->halfReset(*this, _updSchedule.color);
+        int add[32];
+        int sub[32];
+        int addCount = 0;
+        int subCount = 0;
+        // if finny acc is ready and have reasonable amount of changes, copy and refresh
+        // otherwise do half reset
+        if ((*entry)[_updSchedule.color][curbucket].isReady == true &&
+            calculateBoardDifference(&(* entry)[_updSchedule.color][curbucket]._pieces, &add, &addCount, &sub, &subCount)){
+            memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), (*entry)[_updSchedule.color][curbucket]._halfHidden, sizeof(int16_t) * NNUE_HIDDEN);
+            _nnue->addSubDifference(_updSchedule.color, &add, addCount, &sub, subCount);
+        }else{
+            // half reset "bad" part
+            _nnue->halfReset(*this, _updSchedule.color);
+        }
+
 
         // save to finny table
         (*entry)[_updSchedule.color][curbucket].isReady = true;
