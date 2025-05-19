@@ -609,6 +609,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // passers that are near the middle of the board
         // Extend more if null move failed
         if (depth <= 8 &&
+            !singNode &&
             endgameNode &&
             move.isItPasserPush(board) &&
             ttEntry.move != move.getMoveINT()){
