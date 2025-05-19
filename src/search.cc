@@ -599,7 +599,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                 singNode = true;
               }else if(!incheckNode && depth > 5 && ttEntry.score >= beta){
                 tDepth -= 2;
-              }else if (!incheckNode && depth > 5){
+              }else if (!incheckNode && depth > 5 && cutNode){
                 tDepth -= 1;
               }
             }
