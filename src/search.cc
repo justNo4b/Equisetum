@@ -619,6 +619,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // In the endgame positions we extend any non-pawn captures
         // It seems benefitial as we calculate resulting endgame more accurately
         if (!isQuiet &&
+            !singNode &&
             endgameNode &&
             move.getCapturedPieceType() != PAWN &&
             ttEntry.move != move.getMoveINT()){
