@@ -201,6 +201,8 @@ class Search {
 
   inline int _makeDrawScore();
 
+  inline int _makeCmhBonus(int);
+
   /**
    * @brief Root negamax function.
    *
