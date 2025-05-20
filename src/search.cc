@@ -499,6 +499,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
   // Probcut
   if (!pvNode &&
+      !singSearch &&
        depth >= 4 &&
        alpha < WON_IN_X){
         int pcBeta = beta + 218 - 100 * improving;
