@@ -1145,6 +1145,7 @@ int Board::getPhase() const{
  bool Board::calculateBoardDifference(Color half, U64 (* otherPieces)[2][6], int (* add)[32], int * addCount, int (* sub)[32], int * subCount){
     U64 king = half == WHITE ? getPieces(WHITE, KING) : getPieces(BLACK, KING);
     int hKing = _bitscanForward(king);
+    int maxSubs = _popCount(_occupied);
     int aC = 0;
     int sC = 0;
     for (auto color : { WHITE, BLACK }){
@@ -1158,14 +1159,14 @@ int Board::getPhase() const{
                     // exists in current board, absent in past -> add index
                     (*add)[aC] = index;
                     aC++;
-                    if (aC > 31){
+                    if (aC > 31 || (aC + sC) > maxSubs){
                         return false;
                     }
                 }else{
                     // absent in current, thus present in the past -> remove index
                     (*sub)[sC] = index;
                     sC++;
-                    if (sC > 31){
+                    if (sC > 31 || (aC + sC) > maxSubs){
                         return false;
                     }
                 }
@@ -1184,8 +1185,6 @@ int Board::getPhase() const{
 
     // already updated
     if (_updDone) return;
-    int curbucket = _nnue->getCurrentBucket(_updSchedule.to, _updSchedule.color);
-    int curside = (_col(_updSchedule.to) > 3);
 
     // mark as updated, copy nnue and perform an update
     _updDone = true;
@@ -1196,6 +1195,8 @@ int Board::getPhase() const{
     if(isResetNeeded){
         // good color - > color of the accumulator that does not need to be updated
         Color goodcolor = getOppositeColor(_updSchedule.color);
+        int curbucket = _nnue->getCurrentBucket(_updSchedule.to, _updSchedule.color);
+        int curside = (_col(_updSchedule.to) > 3);
 
         // Copy "good" part of accumulator to a new shit
         int16_t * goodhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
@@ -1245,6 +1246,11 @@ int Board::getPhase() const{
             // half reset "bad" part
             _nnue->halfReset(*this, _updSchedule.color);
         }
+
+            // save to finny table
+            (*entry)[curside][_updSchedule.color][curbucket].isReady = true;
+            memcpy((*entry)[curside][_updSchedule.color][curbucket]._halfHidden, _nnue->getHalfAccumulatorPtr(_updSchedule.color), sizeof(int16_t) * NNUE_HIDDEN);
+            memcpy((*entry)[curside][_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
 
       return;
     }
