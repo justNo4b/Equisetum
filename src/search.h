@@ -120,7 +120,7 @@ class Search {
 
   SEARCH_Data _sStack;
 
-  FinnyEntry _finnyTable[2][NNUE_BUCKETS];
+  FinnyEntry _finnyTable[2][2][NNUE_BUCKETS];
 
   NNueEvaluation _nnStack[MAX_PLY * 2];
 

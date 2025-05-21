@@ -209,7 +209,8 @@ void Search::_logUciInfo(const MoveList &pv, int depth, int bestScore, U64 nodes
 void Search::_populateFinnyTable(){
     for (auto color : {WHITE, BLACK}){
         for (int i = 0; i < NNUE_BUCKETS; i++){
-            _finnyTable[color][i] = FinnyEntry();
+            _finnyTable[0][color][i] = FinnyEntry();
+            _finnyTable[1][color][i] = FinnyEntry();
         }
     }
 }

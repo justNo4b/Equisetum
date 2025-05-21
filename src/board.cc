@@ -1175,24 +1175,25 @@ int Board::getPhase() const{
     *addCount = aC;
     *subCount = sC;
     // we dont overflow sub/add, everything is ok
+
     return true;
  }
 
 
- void Board::performUpdate(FinnyEntry (*entry)[2][NNUE_BUCKETS]){
+ void Board::performUpdate(FinnyEntry (*entry)[2][2][NNUE_BUCKETS]){
 
     // already updated
     if (_updDone) return;
+    int curbucket = _nnue->getCurrentBucket(_updSchedule.to, _updSchedule.color);
+    int curside = (_col(_updSchedule.to) > 3);
 
     // mark as updated, copy nnue and perform an update
     _updDone = true;
 
     // Check if full reset is needed - when we change bucket or a side.
     bool isResetNeeded = _nnue->resetNeeded(_updSchedule.movingPiece, _updSchedule.from, _updSchedule.to, _updSchedule.color);
-
     // Reset is needed
     if(isResetNeeded){
-        int curbucket = _nnue->getCurrentBucket(_updSchedule.to, _updSchedule.color);
         // good color - > color of the accumulator that does not need to be updated
         Color goodcolor = getOppositeColor(_updSchedule.color);
 
@@ -1234,21 +1235,16 @@ int Board::getPhase() const{
         int subCount = 0;
         // if finny acc is ready and have reasonable amount of changes, copy and refresh
         // otherwise do half reset
-        if ((*entry)[_updSchedule.color][curbucket].isReady == true &&
-            calculateBoardDifference(_updSchedule.color, &(* entry)[_updSchedule.color][curbucket]._pieces, &add, &addCount, &sub, &subCount)){
-            memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), (*entry)[_updSchedule.color][curbucket]._halfHidden, sizeof(int16_t) * NNUE_HIDDEN);
+
+       if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true &&
+            calculateBoardDifference(_updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces, &add, &addCount, &sub, &subCount)){
+            memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), (*entry)[curside][_updSchedule.color][curbucket]._halfHidden, sizeof(int16_t) * NNUE_HIDDEN);
             _nnue->addSubDifference(_updSchedule.color, &add, addCount, &sub, subCount);
 
         }else{
             // half reset "bad" part
             _nnue->halfReset(*this, _updSchedule.color);
         }
-
-
-        // save to finny table
-        (*entry)[_updSchedule.color][curbucket].isReady = true;
-        memcpy((*entry)[_updSchedule.color][curbucket]._halfHidden, _nnue->getHalfAccumulatorPtr(_updSchedule.color), sizeof(int16_t) * NNUE_HIDDEN);
-        memcpy((*entry)[_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
 
       return;
     }
@@ -1257,6 +1253,31 @@ int Board::getPhase() const{
     // copy accumulator and proceed
     *(_nnue + 1) = *_nnue;
     _nnue = _nnue + 1;
+
+    /*
+        int add[32];
+        int sub[32];
+        int addCount = 0;
+        int subCount = 0;
+        if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true &&
+            calculateBoardDifference(_updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces, &add, &addCount, &sub, &subCount)){
+                std::cout << "Move type is" <<_updSchedule.type << std::endl;
+                std::cout << addCount << " " << subCount << std::endl<< std::endl;
+                if (addCount > 5 && subCount > 5){
+                    std::cout << getStringRep() <<std::endl;
+
+                    for (auto color : { WHITE, BLACK }){
+                            for (auto piece :{PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
+                                _pieces[color][piece] = (* entry)[curside][_updSchedule.color][curbucket]._pieces[color][piece];
+                            }
+                        }
+                    std::cout << getStringRep() <<std::endl;
+                    exit(0);
+                }
+
+            }
+
+    */
 
     switch (_updSchedule.type)
     {
