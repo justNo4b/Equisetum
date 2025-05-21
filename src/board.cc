@@ -1142,8 +1142,40 @@ int Board::getPhase() const{
     return _frc;
  }
 
- bool Board::calculateBoardDifference(U64 (* otherPieces)[2][6], int (* add)[32], int * addCount, int (* sub)[32], int * subCount){
-    return false;
+ bool Board::calculateBoardDifference(Color half, U64 (* otherPieces)[2][6], int (* add)[32], int * addCount, int (* sub)[32], int * subCount){
+    U64 king = half == WHITE ? getPieces(WHITE, KING) : getPieces(BLACK, KING);
+    int hKing = _bitscanForward(king);
+    int aC = 0;
+    int sC = 0;
+    for (auto color : { WHITE, BLACK }){
+        for (auto piece :{PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
+            U64 difference = (*otherPieces)[color][piece] ^ _pieces[color][piece];
+            while (difference) {
+                int square = _popLsb(difference);
+                U64 bb = ONE << square;
+                int index = _nnue->getIndex(square, piece, color, half, hKing);
+                if (bb & _pieces[color][piece]){
+                    // exists in current board, absent in past -> add index
+                    (*add)[aC] = index;
+                    aC++;
+                    if (aC > 31){
+                        return false;
+                    }
+                }else{
+                    // absent in current, thus present in the past -> remove index
+                    (*sub)[sC] = index;
+                    sC++;
+                    if (sC > 31){
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    *addCount = aC;
+    *subCount = sC;
+    // we dont overflow sub/add, everything is ok
+    return true;
  }
 
 
@@ -1203,9 +1235,10 @@ int Board::getPhase() const{
         // if finny acc is ready and have reasonable amount of changes, copy and refresh
         // otherwise do half reset
         if ((*entry)[_updSchedule.color][curbucket].isReady == true &&
-            calculateBoardDifference(&(* entry)[_updSchedule.color][curbucket]._pieces, &add, &addCount, &sub, &subCount)){
+            calculateBoardDifference(_updSchedule.color, &(* entry)[_updSchedule.color][curbucket]._pieces, &add, &addCount, &sub, &subCount)){
             memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), (*entry)[_updSchedule.color][curbucket]._halfHidden, sizeof(int16_t) * NNUE_HIDDEN);
             _nnue->addSubDifference(_updSchedule.color, &add, addCount, &sub, subCount);
+
         }else{
             // half reset "bad" part
             _nnue->halfReset(*this, _updSchedule.color);
