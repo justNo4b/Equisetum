@@ -1239,18 +1239,19 @@ int Board::getPhase() const{
 
        if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true &&
             calculateBoardDifference(_updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces, &add, &addCount, &sub, &subCount)){
+            //_nnue->addSubDifference(_updSchedule.color, &add, addCount, &sub, subCount);
+            _nnue->addSubDifferenceExternal(&(* entry)[curside][_updSchedule.color][curbucket]._halfHidden, &add, addCount, &sub, subCount);
             memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), (*entry)[curside][_updSchedule.color][curbucket]._halfHidden, sizeof(int16_t) * NNUE_HIDDEN);
-            _nnue->addSubDifference(_updSchedule.color, &add, addCount, &sub, subCount);
+            memcpy((*entry)[curside][_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
 
         }else{
             // half reset "bad" part
             _nnue->halfReset(*this, _updSchedule.color);
-        }
-
             // save to finny table
             (*entry)[curside][_updSchedule.color][curbucket].isReady = true;
             memcpy((*entry)[curside][_updSchedule.color][curbucket]._halfHidden, _nnue->getHalfAccumulatorPtr(_updSchedule.color), sizeof(int16_t) * NNUE_HIDDEN);
             memcpy((*entry)[curside][_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
+        }
 
       return;
     }
