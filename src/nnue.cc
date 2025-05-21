@@ -171,7 +171,7 @@ void NNueEvaluation::addSubDifference(Color half, int (* add)[32], int addCount,
 
     for (int i = 0; i < NNUE_HIDDEN; i++){
         for (int j = 0; j < subCount; j++){
-                _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[(*sub)[j]][i];
+                _hiddenScore[half][i] -= NNUE_HIDDEN_WEIGHT[(*sub)[j]][i];
             }
     }
 
