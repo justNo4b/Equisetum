@@ -1254,31 +1254,6 @@ int Board::getPhase() const{
     *(_nnue + 1) = *_nnue;
     _nnue = _nnue + 1;
 
-    /*
-        int add[32];
-        int sub[32];
-        int addCount = 0;
-        int subCount = 0;
-        if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true &&
-            calculateBoardDifference(_updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces, &add, &addCount, &sub, &subCount)){
-                std::cout << "Move type is" <<_updSchedule.type << std::endl;
-                std::cout << addCount << " " << subCount << std::endl<< std::endl;
-                if (addCount > 5 && subCount > 5){
-                    std::cout << getStringRep() <<std::endl;
-
-                    for (auto color : { WHITE, BLACK }){
-                            for (auto piece :{PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
-                                _pieces[color][piece] = (* entry)[curside][_updSchedule.color][curbucket]._pieces[color][piece];
-                            }
-                        }
-                    std::cout << getStringRep() <<std::endl;
-                    exit(0);
-                }
-
-            }
-
-    */
-
     switch (_updSchedule.type)
     {
     case NN_MOVE:
