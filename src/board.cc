@@ -1142,33 +1142,35 @@ int Board::getPhase() const{
     return _frc;
  }
 
- bool Board::calculateBoardDifference(Color half, U64 (* otherPieces)[2][6], int (* add)[32], int * addCount, int (* sub)[32], int * subCount){
-    U64 king = half == WHITE ? getPieces(WHITE, KING) : getPieces(BLACK, KING);
-    int hKing = _bitscanForward(king);
+inline bool Board::calculateBoardDifference(Color half, U64 (* otherPieces)[2][6], int (* add)[32], int * addCount, int (* sub)[32], int * subCount){
+    int hKing = half == WHITE ? _bitscanForward(getPieces(WHITE, KING)) : _bitscanForward(getPieces(BLACK, KING));
     int maxSubs = _popCount(_occupied);
     int aC = 0;
     int sC = 0;
     for (auto color : { WHITE, BLACK }){
         for (auto piece :{PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
-            U64 difference = (*otherPieces)[color][piece] ^ _pieces[color][piece];
-            while (difference) {
-                int square = _popLsb(difference);
-                U64 bb = ONE << square;
+            U64 toremove = (*otherPieces)[color][piece] & ~_pieces[color][piece];
+            U64 toadd = _pieces[color][piece] & ~(*otherPieces)[color][piece];
+
+            (*otherPieces)[color][piece] = _pieces[color][piece];
+            // exists in current board, absent in past -> add index
+            while (toadd){
+                int square = _popLsb(toadd);
                 int index = _nnue->getIndex(square, piece, color, half, hKing);
-                if (bb & _pieces[color][piece]){
-                    // exists in current board, absent in past -> add index
-                    (*add)[aC] = index;
-                    aC++;
-                    if (aC > 31 || (aC + sC) > maxSubs){
-                        return false;
-                    }
-                }else{
-                    // absent in current, thus present in the past -> remove index
-                    (*sub)[sC] = index;
-                    sC++;
-                    if (sC > 31 || (aC + sC) > maxSubs){
-                        return false;
-                    }
+                (*add)[aC] = index;
+                aC++;
+                if (aC > 31 || (aC + sC) > maxSubs){
+                    return false;
+                }
+            }
+            // absent in current, thus present in the past -> remove index
+            while(toremove){
+                int square = _popLsb(toadd);
+                int index = _nnue->getIndex(square, piece, color, half, hKing);
+                (*sub)[sC] = index;
+                sC++;
+                if (sC > 31 || (aC + sC) > maxSubs){
+                    return false;
                 }
             }
         }
@@ -1234,15 +1236,13 @@ int Board::getPhase() const{
         int sub[32];
         int addCount = 0;
         int subCount = 0;
+        bool notManyDiffs = calculateBoardDifference(_updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces, &add, &addCount, &sub, &subCount);
         // if finny acc is ready and have reasonable amount of changes, copy and refresh
         // otherwise do half reset
+       if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true && notManyDiffs){
 
-       if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true &&
-            calculateBoardDifference(_updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces, &add, &addCount, &sub, &subCount)){
-            //_nnue->addSubDifference(_updSchedule.color, &add, addCount, &sub, subCount);
             _nnue->addSubDifferenceExternal(&(* entry)[curside][_updSchedule.color][curbucket]._halfHidden, &add, addCount, &sub, subCount);
             memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), (*entry)[curside][_updSchedule.color][curbucket]._halfHidden, sizeof(int16_t) * NNUE_HIDDEN);
-            memcpy((*entry)[curside][_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
 
         }else{
             // half reset "bad" part
