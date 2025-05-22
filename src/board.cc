@@ -1152,7 +1152,6 @@ inline bool Board::calculateBoardDifference(Color half, U64 (* otherPieces)[2][6
             U64 toremove = (*otherPieces)[color][piece] & ~_pieces[color][piece];
             U64 toadd = _pieces[color][piece] & ~(*otherPieces)[color][piece];
 
-            (*otherPieces)[color][piece] = _pieces[color][piece];
             // exists in current board, absent in past -> add index
             while (toadd){
                 int square = _popLsb(toadd);
@@ -1237,6 +1236,7 @@ inline bool Board::calculateBoardDifference(Color half, U64 (* otherPieces)[2][6
         int addCount = 0;
         int subCount = 0;
         bool notManyDiffs = calculateBoardDifference(_updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces, &add, &addCount, &sub, &subCount);
+        memcpy((*entry)[curside][_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
         // if finny acc is ready and have reasonable amount of changes, copy and refresh
         // otherwise do half reset
        if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true && notManyDiffs){
@@ -1250,7 +1250,6 @@ inline bool Board::calculateBoardDifference(Color half, U64 (* otherPieces)[2][6
             // save to finny table
             (*entry)[curside][_updSchedule.color][curbucket].isReady = true;
             memcpy((*entry)[curside][_updSchedule.color][curbucket]._halfHidden, _nnue->getHalfAccumulatorPtr(_updSchedule.color), sizeof(int16_t) * NNUE_HIDDEN);
-            memcpy((*entry)[curside][_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
         }
 
       return;
