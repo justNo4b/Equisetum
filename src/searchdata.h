@@ -20,12 +20,14 @@
 
 #include "defs.h"
 #include "move.h"
+#include "orderinginfo.h"
 #include <cstdint>
 
 struct SEARCH_Data
 {
     int     statEval  [MAX_INT_PLY];
     Move    moves     [MAX_INT_PLY];
+    int     moveIndx  [MAX_INT_PLY];
     int8_t  ply;
     Color   sideBehind;
     bool    nmpTree;
@@ -38,11 +40,13 @@ struct SEARCH_Data
 
     void AddMove(Move m){
         moves[ply] = m;
+        moveIndx[ply] = cmhCalculateIndex(m.getMoveINT());
         ply++;
     };
 
     void AddNullMove(Color sB){
         moves[ply] = Move(0);
+        moveIndx[ply] = cmhCalculateIndex(0);
         ply++;
         sideBehind = sB;
         nmpTree = true;

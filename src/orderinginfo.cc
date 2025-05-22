@@ -64,9 +64,9 @@ void OrderingInfo::incrementCapHistory(PieceType capturingPiece, PieceType captu
   _captureHistory[capturingPiece][capturedPiece][to] += bonus - current * abs(bonus) / MAX_HISTORY_SCORE;
 }
 
-void OrderingInfo::incrementCounterHistory(Color color, int pMove, PieceType pType, int to, int bonus){
-  int16_t current = _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to];
-  _counterMoveHistory[color][cmhCalculateIndex(pMove)][pType][to] += bonus - current * abs(bonus) / MAX_HISTORY_SCORE;
+void OrderingInfo::incrementCounterHistory(Color color, int pMoveIndx, PieceType pType, int to, int bonus){
+  int16_t current = _counterMoveHistory[color][pMoveIndx][pType][to];
+  _counterMoveHistory[color][pMoveIndx][pType][to] += bonus - current * abs(bonus) / MAX_HISTORY_SCORE;
 }
 
 int OrderingInfo::getHistory(Color color, int from, int to) const {

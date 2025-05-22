@@ -20,11 +20,12 @@
 #include "defs.h"
 
 
-MovePicker::MovePicker(const OrderingInfo *orderingInfo, const Board *board, int hMove, Color color, int ply, int pMove){
+MovePicker::MovePicker(const OrderingInfo *orderingInfo, const Board *board, int hMove, Color color, int ply, int pMove, int pMoveIndx){
   _orderingInfo = orderingInfo;
   _color = color;
   _ply = ply;
   _pMove = pMove;
+  _pIndx = pMoveIndx;
   _currHead = 0;
   _board = board;
   _checkHashMove(hMove);
