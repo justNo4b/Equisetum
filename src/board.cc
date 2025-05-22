@@ -1158,19 +1158,13 @@ inline bool Board::calculateBoardDifference(Color half, U64 (* otherPieces)[2][6
                 int index = _nnue->getIndex(square, piece, color, half, hKing);
                 (*add)[aC] = index;
                 aC++;
-                if (aC > 31){
-                    return false;
-                }
             }
             // absent in current, thus present in the past -> remove index
             while(toremove){
-                int square = _popLsb(toadd);
+                int square = _popLsb(toremove);
                 int index = _nnue->getIndex(square, piece, color, half, hKing);
                 (*sub)[sC] = index;
                 sC++;
-                if (sC > 31){
-                    return false;
-                }
             }
             if ((aC + sC) >= maxSubs){
                 return false;
