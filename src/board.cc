@@ -1159,14 +1159,14 @@ int Board::getPhase() const{
                     // exists in current board, absent in past -> add index
                     (*add)[aC] = index;
                     aC++;
-                    if (aC > 31 || (aC + sC) > maxSubs){
+                    if (aC > 31 || (aC + sC) >= maxSubs){
                         return false;
                     }
                 }else{
                     // absent in current, thus present in the past -> remove index
                     (*sub)[sC] = index;
                     sC++;
-                    if (sC > 31 || (aC + sC) > maxSubs){
+                    if (sC > 31 || (aC + sC) >= maxSubs){
                         return false;
                     }
                 }
