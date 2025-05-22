@@ -203,6 +203,8 @@ class Search {
 
   inline int _makeCmhBonus(int);
 
+  inline int _scaleEval(int, int);
+
   /**
    * @brief Root negamax function.
    *

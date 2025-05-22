@@ -238,6 +238,11 @@ inline int Search::_makeCmhBonus(int bonus){
     return std::min(MAX_HISTORY_SCORE, bonus * 4);
 }
 
+inline int Search::_scaleEval(int eval, int mr_count){
+        // scale results based on the 50 mr counter
+    return  eval * (128  - mr_count) / 128;
+}
+
 inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
     // initial bonus is depth
     int bonus = depth;
@@ -289,6 +294,7 @@ inline int Search::_makeDrawScore(){
 int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   _nodes++;
   int nodeEval = NOSCORE;
+  int rawEval = NOSCORE;
   int hashMove = 0;
   int currScore;
   pV rootPV = pV();
@@ -303,7 +309,9 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
         ttNode = true;
     }
 
-  nodeEval = (ttNode && ttEntry.eval != NOSCORE) ? ttEntry.eval : Eval::evaluate(board, board.getActivePlayer());
+
+  rawEval = (ttNode && ttEntry.eval != NOSCORE) ? ttEntry.eval : Eval::evaluate(board, board.getActivePlayer());
+  nodeEval = _scaleEval(rawEval, board.getHalfmoveClock());
 
   _sStack.AddEval(nodeEval);
 
@@ -350,7 +358,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   }
 
   if (!_stop && !(bestMove.getFlags() & Move::NULL_MOVE)) {
-    myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, nodeEval, depth, 0);
+    myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, rawEval, depth, 0);
     _bestMove = bestMove;
     _bestScore = alpha;
   }
@@ -375,6 +383,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int pMoveIndx = cmhCalculateIndex(pMove);
   int alphaOrig = alpha;
   int nodeEval = NOSCORE;
+  int rawEval = NOSCORE;
   int  legalCount = 0;
   int  qCount = 0;
   Move ttMove = Move(0);
@@ -442,7 +451,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
   board.performUpdate();
-  nodeEval = (ttNode && ttEntry.eval != NOSCORE) ? ttEntry.eval : Eval::evaluate(board, board.getActivePlayer());
+  rawEval = (ttNode && ttEntry.eval != NOSCORE) ? ttEntry.eval : Eval::evaluate(board, board.getActivePlayer());
+  nodeEval = _scaleEval(rawEval, board.getHalfmoveClock());
   _sStack.AddEval(nodeEval);
 
 
@@ -745,7 +755,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
-            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, nodeEval, depth, ply);
+            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, rawEval, depth, ply);
           }
           // we updated beta and in the pVNode so we should update our pV
           if (pvNode && !_stop){
@@ -795,9 +805,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (!_stop && !singSearch){
       if (alpha <= alphaOrig) {
         int saveMove = ttMove.getMoveINT() != 0 ? ttMove.getMoveINT() : 0;
-        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, alpha, nodeEval, depth, ply);
+        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, alpha, rawEval, depth, ply);
       } else {
-        myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, nodeEval, depth, ply);
+        myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, rawEval, depth, ply);
       }
   }
 
@@ -809,6 +819,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
    bool pvNode = alpha != beta - 1;
    bool ttNode = false;
    int nodeEval = NOSCORE;
+   int rawEval = NOSCORE;
    int standPat = NOSCORE;
 
   if (_stop || _checkLimits()) {
@@ -842,7 +853,8 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
 
   board.performUpdate();
 
-  nodeEval = (ttNode && ttEntry.eval != NOSCORE) ? ttEntry.eval : Eval::evaluate(board, board.getActivePlayer());
+  rawEval = (ttNode && ttEntry.eval != NOSCORE) ? ttEntry.eval : Eval::evaluate(board, board.getActivePlayer());
+  nodeEval = _scaleEval(rawEval, board.getHalfmoveClock());
   standPat = nodeEval;
 
   if (standPat >= beta) {
@@ -882,7 +894,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
           if (score >= beta) {
             // Add a new tt entry for this node
             if (!_stop){
-                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, nodeEval, 0, MAX_PLY);
+                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, rawEval, 0, MAX_PLY);
             }
             return beta;
           }
