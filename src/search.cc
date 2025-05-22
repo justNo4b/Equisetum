@@ -259,7 +259,7 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     penalty += cutNode;
 
     penalty = std::max(0, penalty);
-    return std::max(-MAX_HISTORY_SCORE, -32 * penalty * penalty + 16 * penalty);
+    return std::max(-MAX_HISTORY_SCORE, -32 * penalty * penalty + 48 * penalty);
 }
 
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int bonus){
