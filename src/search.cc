@@ -669,7 +669,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           reduction += cutNode;
 
           // more reduction if next ply already have a lot of beta cuts
-          reduction += _sStack.betaCutCnt[ply + 1] > 4;
+          reduction += _sStack.betaCutCnt[ply + 1] > 8;
 
           // Reduce less if move on the previous ply was bad
           // Ie hystorycally bad quiet, see- capture or underpromotion
