@@ -300,6 +300,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
 
   _sStack.AddEval(nodeEval);
+  _sStack.betaCutCnt[2] = 0;
 
   MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0);
 
@@ -449,6 +450,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
   // Clear Killers for the children node
   _orderingInfo.clearChildrenKillers(ply);
+  _sStack.betaCutCnt[ply + 2] = 0;
 
   // Check if we are doing pre-move pruning techniques
   // We do not do them InCheck, in pvNodes and when proving singularity
@@ -666,6 +668,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Reduce more in the cut-nodes - used by SF/Komodo/etc
           reduction += cutNode;
 
+          // more reduction if next ply already have a lot of beta cuts
+          reduction += _sStack.betaCutCnt[ply + 1] > 4;
+
           // Reduce less if move on the previous ply was bad
           // Ie hystorycally bad quiet, see- capture or underpromotion
           reduction -= pMoveScore < -HALFMAX_HISTORY_SCORE;
@@ -748,6 +753,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
             // memcpy - (куда, откуда, длина)
             std::memcpy(up_pV->pVmoves + 1, thisPV.pVmoves, sizeof(int) * thisPV.length);
           }
+
+          // add beta cut stats
+          _sStack.betaCutCnt[ply]++;
 
           return beta;
         }

@@ -26,6 +26,7 @@ struct SEARCH_Data
 {
     int     statEval  [MAX_INT_PLY];
     Move    moves     [MAX_INT_PLY];
+    int     betaCutCnt[MAX_INT_PLY];
     int8_t  ply;
     Color   sideBehind;
     bool    nmpTree;
