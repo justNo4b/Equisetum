@@ -832,24 +832,8 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
   if (ttEntry.Flag != NONE){
     ttNode = true;
-    if (!pvNode){
-      int hashScore = ttEntry.score;
 
-      if (abs(hashScore) > WON_IN_X){
-        hashScore = (hashScore > 0) ? (hashScore - MAX_PLY) :  (hashScore + MAX_PLY);
-      }
-      if (ttEntry.Flag == EXACT){
-        return hashScore;
-      }
-      if (ttEntry.Flag == BETA && hashScore >= beta){
-        return beta;
-      }
-      if (ttEntry.Flag == ALPHA && hashScore <= alpha){
-        return alpha;
-      }
-    }
   }
-
 
   board.performUpdate();
 
@@ -867,8 +851,22 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     alpha = standPat;
   }
 
+    if (!pvNode){
+      int hashScore = ttEntry.score;
 
-
+      if (abs(hashScore) > WON_IN_X){
+        hashScore = (hashScore > 0) ? (hashScore - MAX_PLY) :  (hashScore + MAX_PLY);
+      }
+      if (ttEntry.Flag == EXACT){
+        return hashScore;
+      }
+      if (ttEntry.Flag == BETA && hashScore >= beta){
+        return beta;
+      }
+      if (ttEntry.Flag == ALPHA && hashScore <= alpha){
+        return alpha;
+      }
+    }
   MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
 
   while (movePicker.hasNext()) {
