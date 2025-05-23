@@ -450,8 +450,13 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Do the Evaluation, unless we are in check or prev move was NULL
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
-  board.performUpdate();
-  rawEval = (ttNode && ttEntry.eval != NOSCORE) ? ttEntry.eval : Eval::evaluate(board, board.getActivePlayer());
+
+  if ((ttNode && ttEntry.eval != NOSCORE)){
+    rawEval = ttEntry.eval;
+  }else{
+    board.performUpdate();
+    rawEval = Eval::evaluate(board, board.getActivePlayer());
+  }
   nodeEval = _scaleEval(rawEval, board.getHalfmoveClock());
   _sStack.AddEval(nodeEval);
 
@@ -478,6 +483,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       return beta;
   }
 
+  board.performUpdate();
   // 3. NULL MOVE
   // If we are doing so well, that giving opponent 2 moves wont improve his position we can safely prune this position.
   // No nmp in pvNode, InCheck, when doing singular, or just after Null move was made
@@ -835,9 +841,14 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
 
   }
 
-  board.performUpdate();
 
-  rawEval = (ttNode && ttEntry.eval != NOSCORE) ? ttEntry.eval : Eval::evaluate(board, board.getActivePlayer());
+  if ((ttNode && ttEntry.eval != NOSCORE)){
+    rawEval = ttEntry.eval;
+  }else{
+    board.performUpdate();
+    rawEval = Eval::evaluate(board, board.getActivePlayer());
+  }
+
   nodeEval = _scaleEval(rawEval, board.getHalfmoveClock());
   standPat = nodeEval;
 
@@ -867,6 +878,8 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
         return alpha;
       }
     }
+
+    board.performUpdate();
   MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
 
   while (movePicker.hasNext()) {
