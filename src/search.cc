@@ -648,9 +648,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Reduction tweaks
           // We generally want to guess if the move will not improve alpha and guess right to do no re-searches
 
-          // if move is quiet, reduce a bit more (from Weiss)
-          reduction += isQuiet;
-
           //reduce more when side to move is in check
           reduction += incheckNode;
 
