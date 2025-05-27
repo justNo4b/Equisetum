@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "move.h"
+#include "orderinginfo.h"
 #include <cstdint>
 
 struct SEARCH_Data
@@ -43,6 +44,7 @@ struct SEARCH_Data
 
     void AddNullMove(Color sB){
         moves[ply] = Move(0);
+        moves[ply].setValue(-MAX_HISTORY_SCORE);
         ply++;
         sideBehind = sB;
         nmpTree = true;
