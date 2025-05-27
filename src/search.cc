@@ -592,10 +592,13 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // At high depth if we have the TT move, and we are certain
         // that non other moves are even close to it, extend this move
         // At low depth use statEval instead of search (Kimmys idea)
-        if (ttEntry.Flag != ALPHA &&
-            ttEntry.depth >= depth - 3 &&
-            ttEntry.move == move.getMoveINT() &&
-            abs(ttEntry.score) < WON_IN_X / 4){
+        bool singConditionsMet = ttEntry.Flag != ALPHA
+                                && ttEntry.depth >= depth - 3
+                                && ttEntry.move == move.getMoveINT()
+                                && abs(ttEntry.score) < WON_IN_X / 4;
+        // True singular extention
+        if ( singConditionsMet
+            && depth >= 6){
               int sDepth = depth / 2;
               int sBeta = ttEntry.score - depth;
               int score = depth > 5 ? _negaMax(board, &thisPV, sDepth, sBeta - 1, sBeta, true, cutNode) : nodeEval;
@@ -604,6 +607,15 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                 singNode = true;
               }else if(!incheckNode && depth > 5 && ttEntry.score >= beta){
                 tDepth -= 2;
+              }
+            }
+
+        // statEval one
+        if ( singConditionsMet
+            && depth < 6){
+              int score = nodeEval;
+              if (ttEntry.score - depth > score){
+                tDepth += 1;
               }
             }
 
