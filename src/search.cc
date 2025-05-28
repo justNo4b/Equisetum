@@ -749,7 +749,10 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           int bonus = _getHistoryBonus(depth, nodeEval, alpha);
           _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ppMove, ply, bonus);
           // Award counter-move history additionally if we refuted special quite previous move
-          if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(0, board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
+          if (isPmQuietCounter){
+            _orderingInfo.incrementCounterHistory(0, board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
+            _orderingInfo.incrementCounterHistory(1, board.getActivePlayer(), ppMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
+          }
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
