@@ -273,7 +273,7 @@ class Board {
   U64  getCastlingRightsColored(Color) const;
   U64 getCastlingRights() const;
 
-  void performUpdate(FinnyEntry (*)[2][2][NNUE_BUCKETS]);
+  void performUpdate(FinnyEntry (*)[2][2][NNUE_BUCKETS], NNueEvaluation (*)[2][NNUE_BUCKETS]);
   inline fupdater calculateBoardDifference(Color, U64 (*)[2][6]);
 
   // check if the move is pseudo-legal on the given board

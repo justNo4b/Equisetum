@@ -25,11 +25,10 @@
 
 struct FinnyEntry
 {
-    int16_t _halfHidden[NNUE_HIDDEN];
     U64 _pieces[2][6];
     bool isReady;
 
-    FinnyEntry() : _halfHidden {0}, _pieces{0}, isReady(false) {};
+    FinnyEntry() : _pieces{0}, isReady(false) {};
 };
 
 

@@ -161,6 +161,20 @@ void NNueEvaluation::halfReset(const Board &board, Color half){
     }
 }
 
+void NNueEvaluation::addSubDifference(Color half, int (*add)[32], int addCount, int (*sub)[32], int subCount){
+
+
+    for (int i = 0; i < NNUE_HIDDEN; i++){
+        for (int j = 0; j < addCount; j++){
+            _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[(*add)[j]][i];
+        }
+
+        for (int k = 0; k < subCount; k++){
+            _hiddenScore[half][i] -= NNUE_HIDDEN_WEIGHT[(*sub)[k]][i];
+        }
+    }
+}
+
 void NNueEvaluation::addSubDifferenceExternal(int16_t (*external)[NNUE_HIDDEN], int (* add)[32], int addCount, int (* sub)[32], int subCount){
 
     for (int i = 0; i < NNUE_HIDDEN; i++){

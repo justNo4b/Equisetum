@@ -211,7 +211,6 @@ void Search::_populateFinnyTable(){
         for (int i = 0; i < NNUE_BUCKETS; i++){
             for (int j = 0; j < 2; j++){
             _finnyTable[j][color][i] = FinnyEntry();
-            memset(_finnyTable[j][color][i]._pieces, 0, sizeof(_finnyTable[j][color][i]._pieces));
             }
 
         }
@@ -448,7 +447,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Do the Evaluation, unless we are in check or prev move was NULL
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
-  board.performUpdate(&_finnyTable);
+  board.performUpdate(&_finnyTable, &_nnCache);
   nodeEval = Eval::evaluate(board, board.getActivePlayer());
   _sStack.AddEval(nodeEval);
 
@@ -827,7 +826,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     return 0;
   }
 
-  board.performUpdate(&_finnyTable);
+  board.performUpdate(&_finnyTable, &_nnCache);
   nodeEval = Eval::evaluate(board, board.getActivePlayer());
   standPat = nodeEval;
 

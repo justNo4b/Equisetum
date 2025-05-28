@@ -1180,7 +1180,7 @@ inline fupdater Board::calculateBoardDifference(Color half, U64 (* otherPieces)[
  }
 
 
- void Board::performUpdate(FinnyEntry (*entry)[2][2][NNUE_BUCKETS]){
+ void Board::performUpdate(FinnyEntry (*entry)[2][2][NNUE_BUCKETS], NNueEvaluation (*cache)[2][NNUE_BUCKETS]){
 
     // already updated
     if (_updDone) return;
@@ -1201,6 +1201,7 @@ inline fupdater Board::calculateBoardDifference(Color half, U64 (* otherPieces)[
         int16_t * goodhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
         _nnue = _nnue + 1;
         int16_t * newhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
+        int16_t * nncache = (*cache)[curside][curbucket].getHalfAccumulatorPtr(_updSchedule.color);
         std::memcpy(newhalf, goodhalf, sizeof(int16_t) * NNUE_HIDDEN);
 
         // incrementally update good part by using half update functions
@@ -1236,15 +1237,15 @@ inline fupdater Board::calculateBoardDifference(Color half, U64 (* otherPieces)[
         // otherwise do half reset
        if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true && notManyDiffs.result == true){
 
-            _nnue->addSubDifferenceExternal(&(* entry)[curside][_updSchedule.color][curbucket]._halfHidden, &notManyDiffs.add, notManyDiffs.addCount, &notManyDiffs.sub, notManyDiffs.subCount);
-            memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), (*entry)[curside][_updSchedule.color][curbucket]._halfHidden, sizeof(int16_t) * NNUE_HIDDEN);
+            (*cache)[curside][curbucket].addSubDifference(_updSchedule.color, &notManyDiffs.add, notManyDiffs.addCount, &notManyDiffs.sub, notManyDiffs.subCount);
+            memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), nncache, sizeof(int16_t) * NNUE_HIDDEN);
 
         }else{
             // half reset "bad" part
             _nnue->halfReset(*this, _updSchedule.color);
             // save to finny table
             (*entry)[curside][_updSchedule.color][curbucket].isReady = true;
-            memcpy((*entry)[curside][_updSchedule.color][curbucket]._halfHidden, _nnue->getHalfAccumulatorPtr(_updSchedule.color), sizeof(int16_t) * NNUE_HIDDEN);
+            memcpy(nncache, _nnue->getHalfAccumulatorPtr(_updSchedule.color), sizeof(int16_t) * NNUE_HIDDEN);
         }
 
       return;
