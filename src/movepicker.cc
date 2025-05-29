@@ -101,7 +101,7 @@ void MovePicker::_scoreMoves() {
         int h = _orderingInfo->getHistory(_color, move.getFrom(), move.getTo());
         int ch = _orderingInfo->getCountermoveHistory(_color, pMoveInx, move.getPieceType(), move.getTo());
         int fh = _orderingInfo->getFollowupHistory(_color, ppMoveIndx, move.getPieceType(), move.getTo());
-      move.setValue(h + (ch + fh) / 2);
+      move.setValue(h + ch + fh);
     }
   }
   // swap ttMove first
