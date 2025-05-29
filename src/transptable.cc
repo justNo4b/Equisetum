@@ -82,14 +82,14 @@ void HASH::HASH_Clear(){
     }
 }
 
-void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, int score, int depth, int ply){
+void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, int score, int eval, int depth, int ply){
       if (abs(score) > WON_IN_X){
         score = (score > 0) ? (score - ply) : (score + ply);
       }
 
       U64 index = posKey & TableMask;
       if (posKey !=  hashTable[index].posKey || depth * 2 >=  hashTable[index].depth || bound == EXACT){
-         hashTable[index] = HASH_Entry(posKey, cMove, (int16_t)score, NOSCORE, depth, bound);
+         hashTable[index] = HASH_Entry(posKey, cMove, (int16_t)score, (int16_t)eval, depth, bound);
       }
 }
 

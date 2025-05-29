@@ -102,8 +102,9 @@ int Eval::evaluate(const Board &board, Color color){
     // scale from 1.5 to 1
     nnueEval = (((384 - (board.getPhase() / 2) ) * nnueEval) / 256);
 
+
     // scale results based on the 50 mr counter
-    nnueEval = nnueEval * (128  - board.getHalfmoveClock()) / 128;
+    //nnueEval = nnueEval * (128  - board.getHalfmoveClock()) / 128;
 
     return nnueEval / egResult;
 }
