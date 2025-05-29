@@ -293,17 +293,24 @@ inline int Search::_makeDrawScore(){
 
 int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   _nodes++;
-  int rawEval = Eval::evaluate(board, board.getActivePlayer());
-  int nodeEval = _scaleEval(rawEval, board.getHalfmoveClock());
+  int rawEval = NOSCORE;
+  int nodeEval = NOSCORE;
   int hashMove = 0;
   int currScore;
   pV rootPV = pV();
   Move bestMove;
   bool fullWindow = true;
+  bool ttNode = false;
 
   // Load TT
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
-  hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
+  if (ttEntry.Flag != NONE){
+    hashMove = ttEntry.move;
+    ttNode = true;
+  }
+
+  rawEval = (ttNode && ttEntry.eval != NOSCORE) ? ttEntry.eval : Eval::evaluate(board, board.getActivePlayer());
+  nodeEval = _scaleEval(rawEval, board.getHalfmoveClock());
 
   _sStack.AddEval(nodeEval);
 
@@ -443,7 +450,12 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
   board.performUpdate();
-  rawEval = Eval::evaluate(board, board.getActivePlayer());
+  if ((ttNode && ttEntry.eval != NOSCORE)){
+    rawEval = ttEntry.eval;
+  }else{
+    rawEval = Eval::evaluate(board, board.getActivePlayer());
+  }
+
   nodeEval = _scaleEval(rawEval, board.getHalfmoveClock());
   _sStack.AddEval(nodeEval);
 
@@ -826,7 +838,14 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
   }
 
   board.performUpdate();
-  rawEval = Eval::evaluate(board, board.getActivePlayer());
+  const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
+
+  if (ttEntry.Flag != NONE && ttEntry.eval != NOSCORE){
+    rawEval = ttEntry.eval;
+  }else{
+    rawEval = Eval::evaluate(board, board.getActivePlayer());
+  }
+
   nodeEval = _scaleEval(rawEval, board.getHalfmoveClock());
   standPat = nodeEval;
 
@@ -842,7 +861,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
 
   // Check transposition table cache
   // If TT is causing a cuttoff, we update move ordering stuff
-  const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
+
   if (ttEntry.Flag != NONE){
     if (!pvNode){
       int hashScore = ttEntry.score;
