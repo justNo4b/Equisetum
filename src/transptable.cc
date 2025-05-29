@@ -32,7 +32,6 @@ HASH::HASH(){
   while (TableSize * 2 <= tableSizeMax){
     TableSize *= 2;
   }
-  TableSize = 1048576;
   hashTable = new HASH_Entry [TableSize];
   HASH_Clear();
   TableMask = TableSize - 1;
@@ -65,7 +64,7 @@ void  HASH::HASH_Initalize_MB(const int MB){
   while (TableSize * 2 <= tableSizeMax){
     TableSize *= 2;
   }
-    TableSize = 1048576;
+
   hashTable = new HASH_Entry [TableSize];
   HASH_Clear();
   TableMask = TableSize - 1;
