@@ -247,7 +247,7 @@ inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
     return std::min(MAX_HISTORY_SCORE, 32 * bonus * bonus);
 }
 
-int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool ttNode, bool cutNode, CutOffState ttCut){
+int Search::_getHistoryPenalty(bool isQuiet, int depth, int eval, int alpha, int pmScore, bool ttNode, bool cutNode, CutOffState ttCut, bool fnNode){
     // initial penalty is depth
     int penalty = depth;
 
@@ -257,6 +257,7 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     penalty -= ttCut == ALPHA;
     penalty += (pmScore < -HALFMAX_HISTORY_SCORE);
     penalty += cutNode;
+    penalty += fnNode && !isQuiet;
 
     penalty = std::max(0, penalty);
     return std::max(-MAX_HISTORY_SCORE, -32 * penalty * (penalty - 1));
@@ -773,7 +774,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
         }else{
           // Beta was not beaten and we dont improve alpha in this case we lower our search history values
-          int penalty = _getHistoryPenalty(depth, nodeEval, alpha, pMoveScore, ttNode, cutNode, (CutOffState)ttEntry.Flag);
+          int penalty = _getHistoryPenalty(isQuiet, depth, nodeEval, alpha, pMoveScore, ttNode, cutNode, (CutOffState)ttEntry.Flag, fnNode);
           if (isQuiet){
             _orderingInfo.incrementHistory(board.getActivePlayer(), move.getFrom(), move.getTo(), penalty);
             _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), penalty);
