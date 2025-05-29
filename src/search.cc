@@ -529,6 +529,11 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         while (pcPicker.hasNext()){
             Move move = pcPicker.getNext();
 
+            // when proving singularity, dont try ttmove
+            if (move == ttEntry.move && singSearch){
+                continue;
+            }
+
             // exit when there is no more good captures
             if (move.getValue() <= 300000){
                 break;
@@ -621,6 +626,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                 singNode = true;
               }else if(!incheckNode && depth > 5 && ttEntry.score >= beta){
                 tDepth -= 2;
+              }else if (!incheckNode && depth > 5 && cutNode){
+                tDepth -= 1;
               }
             }
 
