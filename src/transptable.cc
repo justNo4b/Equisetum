@@ -32,7 +32,6 @@ HASH::HASH(){
   while (TableSize * 2 <= tableSizeMax){
     TableSize *= 2;
   }
-    std::cout << TableSize << std::endl;
   hashTable = new HASH_Entry [TableSize];
   HASH_Clear();
   TableMask = TableSize - 1;
