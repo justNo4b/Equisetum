@@ -326,6 +326,23 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
           break;
         }
 
+
+        if (currScore >= beta) {
+          // Add a new tt entry for this node
+          if (!_stop){
+            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, currScore, depth, 0);
+          }
+          // we updated beta and in the pVNode so we should update our pV
+          if (!_stop){
+            _ourPV.length = rootPV.length + 1;
+            _ourPV.pVmoves[0] = move.getMoveINT();
+            // memcpy - (куда, откуда, длина)
+            std::memcpy(_ourPV.pVmoves + 1, rootPV.pVmoves, sizeof(int) * rootPV.length);
+          }
+
+          return beta;
+        }
+
         // If the current score is better than alpha, or this is the first move in the loop
         if (currScore > alpha) {
           fullWindow = false;
