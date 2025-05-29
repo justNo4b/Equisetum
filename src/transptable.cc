@@ -32,6 +32,7 @@ HASH::HASH(){
   while (TableSize * 2 <= tableSizeMax){
     TableSize *= 2;
   }
+  TableSize = 1048576;
   hashTable = new HASH_Entry [TableSize];
   HASH_Clear();
   TableMask = TableSize - 1;
@@ -64,6 +65,7 @@ void  HASH::HASH_Initalize_MB(const int MB){
   while (TableSize * 2 <= tableSizeMax){
     TableSize *= 2;
   }
+    TableSize = 1048576;
   hashTable = new HASH_Entry [TableSize];
   HASH_Clear();
   TableMask = TableSize - 1;
@@ -87,7 +89,7 @@ void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, int score, int 
 
       U64 index = posKey & TableMask;
       if (posKey !=  hashTable[index].posKey || depth * 2 >=  hashTable[index].depth || bound == EXACT){
-         hashTable[index] = HASH_Entry(posKey, cMove, (int16_t)score, depth, bound);
+         hashTable[index] = HASH_Entry(posKey, cMove, (int16_t)score, NOSCORE, depth, bound);
       }
 }
 
