@@ -244,3 +244,26 @@ SPRT  | 40.0+0.40s Threads=1 Hash=64MB
 LLR   | 2.95 (-2.94, 2.94) [0.00, 4.00]
 Games | N: 27648 W: 6905 L: 6695 D: 14048
 ------------------------------------------------------------------
+
+
+Check crash
+
+[Event "?"]
+[Site "?"]
+[Date "2025.05.30"]
+[Round "1"]
+[White "Equisetum-dev"]
+[Black "Equisetum-base"]
+[Result "0-1"]
+[ECO "A20"]
+[GameDuration "00:00:00"]
+[GameEndTime "2025-05-30T16:18:59.871 CST"]
+[GameStartTime "2025-05-30T16:18:59.852 CST"]
+[Opening "English Opening"]
+[PlyCount "16"]
+[Termination "abandoned"]
+[TimeControl "36.29+0.36"]
+
+1. c4 {book} e5 {book} 2. g3 {book} f5 {book} 3. Bg2 {book} Nc6 {book}
+4. Nc3 {book} a6 {book} 5. e3 {book} Nf6 {book} 6. d4 {book} e4 {book}
+7. f3 {book} d6 {book} 8. fxe4 {book} fxe4 {book, White disconnects} 0-1
