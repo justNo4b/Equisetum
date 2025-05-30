@@ -101,7 +101,7 @@ void loadCosts(){
 
     ourSearchParams.asp_window = atoi(optionsMap["asp_window"].getValue().c_str());
     ourSearchParams.asp_delta  = atoi(optionsMap["asp_delta"].getValue().c_str());
-    ourSearchParams.asp_depth  = atoi(optionsMap["asp_depth"].getValue().c_str());
+    ourSearchParams.asp_incr  = atoi(optionsMap["asp_incr"].getValue().c_str());
 
     ourSearchParams.nmp_base = atoi(optionsMap["nmp_base"].getValue().c_str());
     ourSearchParams.nmp_maxreduct = atoi(optionsMap["nmp_maxreduct"].getValue().c_str());
@@ -116,7 +116,6 @@ void loadCosts(){
 
     ourSearchParams.sing_search_start = atoi(optionsMap["sing_search_start"].getValue().c_str());
 
-    ourSearchParams.futil_move_const = atoi(optionsMap["futil_move_const"].getValue().c_str());
     ourSearchParams.revf_move_const = atoi(optionsMap["revf_move_const"].getValue().c_str());
     ourSearchParams.revf_impr_const = atoi(optionsMap["revf_impr_const"].getValue().c_str());
     ourSearchParams.revf_depth = atoi(optionsMap["revf_depth"].getValue().c_str());
@@ -135,6 +134,9 @@ void loadCosts(){
     ourSearchParams.see_q_base = atoi(optionsMap["see_q_base"].getValue().c_str());
     ourSearchParams.see_q_depth = -1 * atoi(optionsMap["see_q_depth"].getValue().c_str());
 
+    ourSearchParams.see_c_base = atoi(optionsMap["see_c_base"].getValue().c_str());
+    ourSearchParams.see_c_depth = -1 * atoi(optionsMap["see_c_depth"].getValue().c_str());
+
 /*
     ourBoardParams.pSee = atoi(optionsMap["pawnSee"].getValue().c_str());
     ourBoardParams.kSee = atoi(optionsMap["knightSee"].getValue().c_str());
@@ -146,9 +148,12 @@ void loadCosts(){
     ourSearchParams.ppe_depth_limit = atoi(optionsMap["ppe_depth_limit"].getValue().c_str());
 
    ourSearchParams.hb_multp = atoi(optionsMap["hb_multp"].getValue().c_str());
-   ourSearchParams.hb_base  = atoi(optionsMap["hb_base"].getValue().c_str()) - 1000;
+   ourSearchParams.hb_base_a  = atoi(optionsMap["hb_base_a"].getValue().c_str()) - 1000;
+   ourSearchParams.hb_base_b  = atoi(optionsMap["hb_base_b"].getValue().c_str()) - 1000;
+
    ourSearchParams.hp_multp = atoi(optionsMap["hp_multp"].getValue().c_str());
-   ourSearchParams.hp_base  = atoi(optionsMap["hp_base"].getValue().c_str()) - 1000;
+   ourSearchParams.hp_base_a  = atoi(optionsMap["hp_base_a"].getValue().c_str()) - 1000;
+   ourSearchParams.hp_base_b  = atoi(optionsMap["hp_base_b"].getValue().c_str()) - 1000;
 
    ourSearchParams.cmhp_mt_2 = atoi(optionsMap["cmhp_mt_2"].getValue().c_str());
 
@@ -186,7 +191,7 @@ void initOptions() {
 
   optionsMap["asp_window"] =   Option(30, 10, 75, &loadCosts);
   optionsMap["asp_delta"] =   Option(48, 10, 100, &loadCosts);
-  optionsMap["asp_depth"] =   Option(7, 3, 12, &loadCosts);
+  optionsMap["asp_incr"] =   Option(200, 50, 400, &loadCosts);
 
   optionsMap["nmp_base"] =     Option(4, 2, 8, &loadCosts);
   optionsMap["nmp_maxreduct"] = Option(5, 2, 10, &loadCosts);
@@ -200,7 +205,6 @@ void initOptions() {
 
   optionsMap["sing_search_start"] =   Option(5, 2, 8, &loadCosts);
 
-  optionsMap["futil_move_const"] =     Option(232, 50, 500, &loadCosts);
   optionsMap["revf_move_const"] =    Option(161, 25, 300, &loadCosts);
   optionsMap["revf_impr_const"] =   Option(142, 25, 300, &loadCosts);
   optionsMap["revf_depth"] =   Option(8, 4, 12, &loadCosts);
@@ -209,6 +213,8 @@ void initOptions() {
   optionsMap["see_q_depth"] =    Option(68, 0, 150, &loadCosts); // member to go negative
   optionsMap["delta_move_const"] =   Option(186, 50, 500, &loadCosts);
 
+  optionsMap["see_c_base"] =     Option(100, 0, 120, &loadCosts);
+  optionsMap["see_c_depth"] =    Option(150, 0, 150, &loadCosts); // member to go negative
 
 /*
   optionsMap["pawnSee"] =    Option(100, 50, 250, &loadCosts);
@@ -259,9 +265,12 @@ void initOptions() {
   optionsMap["ppe_depth_limit"] =     Option(8, 4, 12, &loadCosts);
 
   optionsMap["hb_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["hb_base"] =     Option(1000, 0, 2000, &loadCosts);
+  optionsMap["hb_base_a"] =     Option(1000, 900, 1100, &loadCosts);
+  optionsMap["hb_base_b"] =     Option(1000, 0, 2000, &loadCosts);
+
   optionsMap["hp_multp"] =     Option(32, 1, 64, &loadCosts);
-  optionsMap["hp_base"] =     Option(1000, 0, 2000, &loadCosts);
+  optionsMap["hp_base_a"] =     Option(1032, 900, 1100, &loadCosts);
+  optionsMap["hp_base_b"] =     Option(1000, 0, 2000, &loadCosts);
 
   optionsMap["cmhp_mt_2"] =     Option(512, 1, 2048, &loadCosts);
 }

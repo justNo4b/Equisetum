@@ -32,7 +32,7 @@ struct SearchParms {
 
    int asp_window = 30;
    int asp_delta  = 48;
-   int asp_depth  = 7;
+   int asp_incr = 200;
 
    int nmp_base = 4;
    int nmp_maxreduct = 5;
@@ -48,8 +48,6 @@ struct SearchParms {
    int sing_search_start = 5;
    int ppe_depth_limit = 8;
 
-   int futil_move_const = 232;
-
    int revf_move_const = 161;
    int revf_impr_const = 142;
    int revf_depth = 8;
@@ -60,6 +58,8 @@ struct SearchParms {
    int delta_move_const = 186;
    int see_q_base = 48;
    int see_q_depth = -68;
+   int see_c_base = 150;
+   int see_c_depth = -100;
 
 
    int cmh_depth = -4096;
@@ -86,9 +86,12 @@ struct SearchParms {
    double lmp_multipl_impr = 1.73;
 
    int hb_multp = 32;
-   int hb_base  = 0;
+   int hb_base_a  = 0;
+   int hb_base_b = 0;
+
    int hp_multp = 32;
-   int hp_base  = 0;
+   int hp_base_a  = 32;
+   int hp_base_b = 0;
 
    int cmhp_mt_2 = 512;
 
@@ -154,7 +157,7 @@ class Search {
    * @brief Array of reductions applied to the branch during
    * LATE MOVE REDUCTION during AB-search
    */
-  int _lmr_R_array[2][34][34];
+  int _lmr_R_array[34][34];
 
   /**
    * @brief Array of the pre-calculated move-nums
@@ -175,7 +178,7 @@ class Search {
 
    int ASP_WINDOW = 30;
    int ASP_DELTA  = 48;
-   int ASP_DEPTH  = 7;
+   int ASP_INCR   = 200;
 
    int NMP_BASE = 4;
    int NMP_MAXREDUCT = 5;
@@ -191,11 +194,13 @@ class Search {
    int SEE_Q_BASE = 48;
    int SEE_Q_DEPTH = -68;
 
+   int SEE_C_BASE = 100;
+   int SEE_C_DEPTH = -150;
+
    int SING_SEARCH_START = 5;
    int PPE_DEPTH_LIMIT = 8;
 
    int DELTA_MOVE_CONST = 186;
-   int FUTIL_MOVE_CONST = 232;
 
    int REVF_MOVE_CONST = 161;
    int REVF_IMPR_CONST = 142;
@@ -212,9 +217,12 @@ class Search {
    int PM_HIST_MALUS_FACTOR = -8192;
 
    int HB_MULTP = 32;
-   int HB_BASE  = 0;
+   int HB_BASE_A  = 0;
+   int HB_BASE_B = 0;
+
    int HP_MULTP = 32;
-   int HP_BASE  = 0;
+   int HP_BASE_A  = 32;
+   int HP_BASE_B  = 0;
 
    int CMHP_MT_2 = 512;
 

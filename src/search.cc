@@ -37,7 +37,7 @@ void Search::init_LMR_array(SearchParms sp){
   // Init Tuning Shit
     ASP_WINDOW = sp.asp_window;
     ASP_DELTA  = sp.asp_delta;
-    ASP_DEPTH  = sp.asp_depth;
+    ASP_INCR  = sp.asp_incr;
 
     NMP_BASE = sp.nmp_base;
     NMP_MAXREDUCT = sp.nmp_maxreduct;
@@ -53,9 +53,6 @@ void Search::init_LMR_array(SearchParms sp){
     SING_SEARCH_START = sp.sing_search_start;
     PPE_DEPTH_LIMIT = sp.ppe_depth_limit;
 
-
-    FUTIL_MOVE_CONST = sp.futil_move_const;
-
     REVF_MOVE_CONST = sp.revf_move_const;
     REVF_IMPR_CONST = sp.revf_impr_const;
     REVF_DEPTH = sp.revf_depth;
@@ -64,6 +61,8 @@ void Search::init_LMR_array(SearchParms sp){
     SEE_Q_BASE = sp.see_q_base;
     SEE_Q_DEPTH = sp.see_q_depth;
 
+    SEE_C_BASE = sp.see_c_base;
+    SEE_C_DEPTH = sp.see_c_depth;
 
     CMH_BASE = sp.cmh_base;
     CMH_DEPTH = sp.cmh_depth;
@@ -90,9 +89,13 @@ void Search::init_LMR_array(SearchParms sp){
     LMP_MULTIPL_IMPR = sp.lmp_multipl_impr;
 
    HB_MULTP = sp.hb_multp;
-   HB_BASE  = sp.hb_base;
+   HB_BASE_A  = sp.hb_base_a;
+   HB_BASE_B = sp.hb_base_a;
+
+
    HP_MULTP = sp.hp_multp;
-   HP_BASE  = sp.hp_base;
+   HP_BASE_A  = sp.hp_base_a;
+   HP_BASE_B = sp.hp_base_b;
 
    CMHP_MT_2 = sp.cmhp_mt_2;
 
@@ -105,8 +108,7 @@ void Search::init_LMR_array(SearchParms sp){
   for (int depth = 0; depth < 34; depth++){
     for (int movenum = 0; movenum < 34; movenum++){
       //Quiet
-      _lmr_R_array[0][depth][movenum] = (int) (LMR_INIT_A + (pow(depth, LMR_DEPTH_POW) * pow(movenum, LMR_NUMBER_POW)) / LMR_INIT_DIV);
-      _lmr_R_array[1][depth][movenum] = (int) (LMR_INIT_A_CAP + (pow(depth, LMR_DEPTH_POW_CAP) * pow(movenum, LMR_NUMBER_POW_CAP)) / LMR_INIT_DIV_CAP);
+      _lmr_R_array[depth][movenum] = (int) (LMR_INIT_A + (pow(depth, LMR_DEPTH_POW) * pow(movenum, LMR_NUMBER_POW)) / LMR_INIT_DIV);
     }
   }
   // 2. Initialization of the LMP array.
@@ -154,7 +156,7 @@ void Search::iterDeep() {
 
         int aspAlpha = LOST_SCORE;
         int aspBeta  =-LOST_SCORE;
-        if (currDepth >= ASP_DEPTH){
+        if (currDepth >= 7){
             aspAlpha = _bestScore - aspWindow;
             aspBeta  = _bestScore + aspWindow;
         }
@@ -173,7 +175,7 @@ void Search::iterDeep() {
                 break;
             }
 
-            aspDelta += aspDelta * 2 / 3;
+            aspDelta += aspDelta * ASP_INCR / 300;
         }
 
         // Iteration finished normally
@@ -310,7 +312,7 @@ inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
 
     //modify
     bonus += 2 * (eval < alpha);
-    return std::min(MAX_HISTORY_SCORE, HB_MULTP * bonus * bonus + HB_BASE);
+    return std::min(MAX_HISTORY_SCORE, HB_MULTP * bonus * bonus + HB_BASE_A * bonus + HB_BASE_B);
 }
 
 int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool ttNode, bool cutNode, CutOffState ttCut){
@@ -325,7 +327,7 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     penalty += cutNode;
 
     penalty = std::max(0, penalty);
-    return std::max(-MAX_HISTORY_SCORE, -HP_MULTP * penalty * (penalty - 1) + HP_BASE);
+    return std::max(-MAX_HISTORY_SCORE, -HP_MULTP * penalty * penalty + HP_BASE_A * penalty + HP_BASE_B);
 }
 
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int bonus){
@@ -642,7 +644,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
       if (depth <= 6
           && !isQuiet
-          && !board.SEE_GreaterOrEqual(move, (-150 * depth + 100))) continue;
+          && !board.SEE_GreaterOrEqual(move, (SEE_C_DEPTH * depth + SEE_C_BASE))) continue;
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
       // Prune quiet moves with poor CMH on the tips of the tree
@@ -718,11 +720,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         if (doLMR){
 
           //Basic reduction is done according to the array
-          int reduction = _lmr_R_array[!isQuiet][std::min(33, tDepth)][std::min(33, legalCount)];
-
+          int reduction = _lmr_R_array[std::min(33, tDepth)][std::min(33, legalCount)];
           // Reduction tweaks
           // We generally want to guess if the move will not improve alpha and guess right to do no re-searches
-
           // if move is quiet, reduce a bit more (from Weiss)
           reduction += isQuiet;
 
