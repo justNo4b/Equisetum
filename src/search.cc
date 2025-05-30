@@ -507,6 +507,11 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         while (pcPicker.hasNext()){
             Move move = pcPicker.getNext();
 
+            // when proving singularity, dont try ttmove
+            if (move == ttEntry.move && singSearch){
+                continue;
+            }
+
             // exit when there is no more good captures
             if (move.getValue() <= 300000){
                 break;
@@ -568,7 +573,10 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       if (depth <= 10
           && isQuiet
           && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
-          //&& board.Calculate_SEE(move) < ) continue;
+
+      if (depth <= 6
+          && !isQuiet
+          && !board.SEE_GreaterOrEqual(move, (-150 * depth + 100))) continue;
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
       // Prune quiet moves with poor CMH on the tips of the tree
@@ -596,6 +604,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                 singNode = true;
               }else if(!incheckNode && depth > 5 && ttEntry.score >= beta){
                 tDepth -= 2;
+              }else if (!incheckNode && depth > 5 && cutNode){
+                tDepth -= 1;
               }
             }
 
