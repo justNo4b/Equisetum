@@ -58,8 +58,8 @@ struct SearchParms {
    int delta_move_const = 186;
    int see_q_base = 48;
    int see_q_depth = -68;
-   int see_c_base = 150;
-   int see_c_depth = -100;
+   int see_c_base = 100;
+   int see_c_depth = -150;
 
 
    int cmh_depth = -4096;
