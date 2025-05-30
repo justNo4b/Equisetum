@@ -85,17 +85,16 @@ void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, int score, int 
         score = (score > 0) ? (score - ply) : (score + ply);
       }
 
-      uint32_t key32 = posKey >> 32;
       U64 index = posKey & TableMask;
-      if (key32 !=  hashTable[index].key32 || depth * 2 >=  hashTable[index].depth || bound == EXACT){
-         hashTable[index] = HASH_Entry(key32, cMove, (int16_t)score, (int16_t)eval, depth, bound);
+      if ((int32_t)posKey !=  hashTable[index].key32 || depth * 2 >=  hashTable[index].depth || bound == EXACT){
+         hashTable[index] = HASH_Entry(posKey, cMove, (int16_t)score, (int16_t)eval, depth, bound);
       }
 }
 
 
 HASH_Entry  HASH::HASH_Get(U64 posKey){
   U64 index = posKey & TableMask;
-  if (hashTable[index].key32 == (posKey >> 32)){
+  if (hashTable[index].key32 == (int32_t)posKey){
     return  hashTable[index];
   }
   return HASH_Entry();
