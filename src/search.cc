@@ -113,6 +113,8 @@ void Search::iterDeep() {
         // Iteration finished normally
         // Check and adjust time we should spend, and print UCI info
 
+        // update max depth reached
+        _maxDepthFinished = maxDepthSearched;
         if (_stop) break;
 
         int elapsed = 0;
@@ -129,6 +131,19 @@ void Search::iterDeep() {
   // So update search info one more time
   if (_logUci) _logUciInfo(_getPv(), maxDepthSearched, _bestScore, _nodes, _timer.getElapsed());
 
+  // Ask helper threads for best move if they have better depth
+  if (_logUci){
+    for (int i = 1; i < myTHREADSCOUNT; i++){
+        if (cSearch[i] != nullptr){
+            int helperDepth = cSearch[i]->getMaxDepthReached();
+            if (helperDepth > _maxDepthFinished){
+                _maxDepthFinished = helperDepth;
+                _bestMove = cSearch[i]->getBestMove();
+                _bestScore = cSearch[i]->getBestScore();
+            }
+        }
+    }
+  }
   if (_logUci) std::cout << "bestmove " << getBestMove().getNotation(_initialBoard.getFrcMode()) << std::endl;
 
   if (_logUci){
@@ -219,6 +234,10 @@ int Search::getNodes(){
 
 int Search::getSeldepth(){
   return _selDepth;
+}
+
+int Search::getMaxDepthReached(){
+    return _maxDepthFinished;
 }
 
 int Search::getBestScore(){

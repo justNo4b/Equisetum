@@ -80,6 +80,8 @@ class Search {
    */
   int getSeldepth();
 
+  int getMaxDepthReached();
+
  private:
 
   /**
@@ -181,6 +183,8 @@ class Search {
    * @brief principal variantion we calculated
    */
   pV _ourPV;
+
+  int _maxDepthFinished;
 
   /**
    * @brief updating heuristics when beta cut occured
