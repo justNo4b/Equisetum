@@ -367,6 +367,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int pMove = _sStack.moves[ply - 1].getMoveINT();
   int pMoveScore = _sStack.moves[ply - 1].getValue();
   int pMoveIndx = cmhCalculateIndex(pMove);
+  int ppMove = 0;
   int alphaOrig = alpha;
   int nodeEval = NOSCORE;
   int  legalCount = 0;
@@ -445,6 +446,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
   if (ply >= 2){
     improving = nodeEval > _sStack.statEval[ply - 2];
+    ppMove = _sStack.moves[ply - 1].getMoveINT();
   }
 
   // Clear Killers for the children node
@@ -742,8 +744,13 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Add this move as a new killer move and update history if move is quiet
           int bonus = _getHistoryBonus(depth, nodeEval, alpha);
           _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, bonus);
-          // Award counter-move history additionally if we refuted special quite previous move
-          if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
+
+          if (isPmQuietCounter){
+             // Award counter-move history additionally if we refuted special quite previous move
+            _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
+            // Penalty for refuted special move
+            _orderingInfo.incrementCounterHistory(getOppositeColor(board.getActivePlayer()), ppMove, _sStack.moves[ply - 1].getPieceType(), _sStack.moves[ply - 1].getTo(), bonus);
+          }
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
             myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
