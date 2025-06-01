@@ -300,6 +300,8 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
 
   _sStack.AddEval(nodeEval);
+  _sStack.inCheckNode[0] = board.colorIsInCheck(board.getActivePlayer());
+
 
   MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0);
 
