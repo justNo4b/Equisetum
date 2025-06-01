@@ -394,6 +394,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
   // Check our InCheck status
   incheckNode = board.colorIsInCheck(board.getActivePlayer());
+  _sStack.inCheckNode[ply] = incheckNode;
 
   // Go into the QSearch if depth is 0 and we are not in check
   // Cut out pV and update our seldepth before dropping into qSearch
@@ -443,11 +444,12 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
     // Use static evaluation difference to improve quiet move ordering
     // Stolen from SF (hello Viz)
-    if (pMove != 0 && _sStack.moves[ply - 1].isQuiet())
+    if (pMove != 0 && _sStack.moves[ply - 1].isQuiet() && !_sStack.inCheckNode[ply - 1])
     {
         int bonus = -10 * (_sStack.statEval[ply - 1] + nodeEval);
         bonus = std::max(-1500, bonus);
         bonus = std::min(bonus, 1500);
+        std::cout << bonus << std::endl;
         _orderingInfo.incrementHistory(getOppositeColor(board.getActivePlayer()), _sStack.moves[ply - 1].getFrom(), _sStack.moves[ply - 1].getTo(), bonus);
 
     }
