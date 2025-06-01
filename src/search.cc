@@ -449,7 +449,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         int bonus = -10 * (_sStack.statEval[ply - 1] + nodeEval);
         bonus = std::max(-1500, bonus);
         bonus = std::min(bonus, 1500);
-        std::cout << bonus << std::endl;
         _orderingInfo.incrementHistory(getOppositeColor(board.getActivePlayer()), _sStack.moves[ply - 1].getFrom(), _sStack.moves[ply - 1].getTo(), bonus);
 
     }
