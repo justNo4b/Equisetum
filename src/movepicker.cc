@@ -152,8 +152,8 @@ void MovePicker::_scoreQuiets() {
   }
   // swap ttMove first
   if (ttIndx >= 0){
+    std::swap(_moves.at(_currHead), _moves.at(ttIndx));
     _currHead++;
-    std::swap(_moves.at(0), _moves.at(ttIndx));
   }
 }
 
