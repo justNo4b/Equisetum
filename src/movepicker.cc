@@ -160,7 +160,7 @@ void MovePicker::_createMoveList(bool isQsearch){
 }
 
 void MovePicker::_addQuiets(){
-    MoveGen(_board, false, &_moves)
+    MoveGen(_board, false, &_moves);
 }
 
 MpStage MovePicker::getStage(){
