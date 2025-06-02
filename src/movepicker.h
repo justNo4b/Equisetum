@@ -89,10 +89,13 @@ class MovePicker {
    * @brief Assigns a value to each move in this GeneralMovePicker's MoveList representing desirability
    * in a negamax search.
    */
-  void _scoreCaptures();
-  void _scoreQuiets();
+  void _scoreMoves();
 
   void _checkHashMove(int);
+
+  void _createMoveList(bool);
+
+  void _addQuiets();
 
   MpStage _stage;
 

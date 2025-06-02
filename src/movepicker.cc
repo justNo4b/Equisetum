@@ -44,63 +44,8 @@ void MovePicker::_checkHashMove(int hMoveInt){
 
 }
 
-
-void MovePicker::_scoreCaptures() {
-    _moves.reserve(MOVELIST_RESERVE_SIZE);
-     MoveGen(_board, true, &_moves);
-
-    int i = -1;
-    int ttIndx = -1;
-
-    for (auto &move : _moves) {
-      i++;
-      int moveINT = move.getMoveINT();
-      if (_hashMove.getMoveINT() != 0 && moveINT == _hashMove.getMoveINT()) {
-        move.setValue(INF);
-        ttIndx = i;
-        // set ttmove first so it can be skipped
-        _goodCapCount++;
-      // Sort promotions first so that capture-promotions were here
-      } else if (move.getFlags() & Move::PROMOTION) {
-          // history
-          int value = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
-          // general values
-          value += opS(Eval::MATERIAL_VALUES[move.getPromotionPieceType()])
-                 - opS(Eval::MATERIAL_VALUES[PAWN]);
-          // for SEE+ Q promotions use good capture bonus, otherwise treat as bad captures
-          if (move.getPromotionPieceType() == QUEEN && _board->SEE_GreaterOrEqual(move, 0)){
-              value += CAPTURE_BONUS;
-              _goodCapCount++;
-          }else{
-              value += BAD_CAPTURE;
-          }
-          // for capture-promotions add victim value
-          if (move.getFlags() & Move::CAPTURE){
-              value += opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]);
-          }
-        move.setValue(value);
-      } else if (move.getFlags() & Move::CAPTURE) {
-        int hist  = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
-        int value = opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]) + hist;
-        int th = -((hist / 8192) * 100);
-        if (_board->SEE_GreaterOrEqual(move, th)){
-            value += CAPTURE_BONUS;
-            _goodCapCount++;
-        }else{
-            value += BAD_CAPTURE;
-        }
-        move.setValue(value);
-      }
-    }
-    // swap ttMove first
-    if (ttIndx >= 0){
-      _currHead++;
-      std::swap(_moves.at(0), _moves.at(ttIndx));
-    }
-  }
-
-void MovePicker::_scoreQuiets() {
-   MoveGen(_board, false, &_moves);
+void MovePicker::_scoreMoves() {
+  bool isQsearch  = _ply == MAX_PLY;
 
   int i = -1;
   int ttIndx = -1;
@@ -112,9 +57,6 @@ void MovePicker::_scoreQuiets() {
 
   for (auto &move : _moves) {
     i++;
-    if (move.getValue() != 0){
-        continue;
-    }
     int moveINT = move.getMoveINT();
     if (_hashMove.getMoveINT() != 0 && moveINT == _hashMove.getMoveINT()) {
       move.setValue(INF);
@@ -138,6 +80,12 @@ void MovePicker::_scoreQuiets() {
         if (move.getFlags() & Move::CAPTURE){
             value += opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]);
         }
+      move.setValue(value);
+    } else if (move.getFlags() & Move::CAPTURE) {
+      int hist  = _orderingInfo->getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
+      int value = opS(Eval::MATERIAL_VALUES[move.getCapturedPieceType()]) + hist;
+      int th = -((hist / 8192) * 100);
+      value +=  _board->SEE_GreaterOrEqual(move, th)  ? CAPTURE_BONUS : BAD_CAPTURE;
       move.setValue(value);
     } else if (moveINT == Killer1) {
       move.setValue(KILLER1_BONUS);
@@ -163,9 +111,11 @@ bool MovePicker::hasNext(){
         return true;
     }
 
+    // no ttMove or ttMove didnt help, generate moves
     if (_stage == MP_GENERATE_CAPTURES){
         _stage = MP_CAPTURES;
-        _scoreCaptures();
+        _createMoveList(_ply == MAX_PLY);
+        _scoreMoves();
     }
 
     if (_stage == MP_CAPTURES){
@@ -173,16 +123,10 @@ bool MovePicker::hasNext(){
             return true;
         }else if (_ply != MAX_PLY){
             _stage = MP_QUIETS;
-            _scoreQuiets();
+            _scoreMoves();
         }else{
             return false;
         }
-    }
-
-    if (_stage == MP_QUIETS && _currHead < _moves.size()){
-        return true;
-    }else{
-        _stage = MP_BAD_CAPTURES;
     }
 
     return _currHead < _moves.size();
@@ -197,7 +141,7 @@ Move MovePicker::getNext() {
     return _hashMove;
   }
 
-  // else quiets
+  // else pick from movelist
   for (size_t i = _currHead; i < _moves.size(); i++) {
     if (_moves.at(i).getValue() > bestScore) {
       bestScore = _moves.at(i).getValue();
@@ -207,6 +151,16 @@ Move MovePicker::getNext() {
 
   std::swap(_moves.at(_currHead), _moves.at(bestIndex));
   return _moves.at(_currHead++);
+}
+
+void MovePicker::_createMoveList(bool isQsearch){
+  _moves = MoveList();
+  _moves.reserve(isQsearch ? MOVELIST_RESERVE_SIZE_CAPS : MOVELIST_RESERVE_SIZE);
+  MoveGen(_board,isQsearch, &_moves);
+}
+
+void MovePicker::_addQuiets(){
+    MoveGen(_board, false, &_moves)
 }
 
 MpStage MovePicker::getStage(){
