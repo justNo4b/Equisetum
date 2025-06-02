@@ -102,7 +102,6 @@ void MovePicker::_scoreCaptures() {
 void MovePicker::_scoreQuiets() {
    MoveGen(_board, false, &_moves);
 
-  int i = -1;
   int ttIndx = -1;
 
   int Killer1  = _orderingInfo->getKiller1(_ply);
@@ -110,11 +109,8 @@ void MovePicker::_scoreQuiets() {
   int Counter  = _orderingInfo->getCounterMoveINT(_color, _pMove);
   int pMoveInx = (_pMove & 0x7) + ((_pMove >> 15) & 0x3f) * 6;
 
-  for (auto &move : _moves) {
-    i++;
-    if (move.getValue() != 0){
-        continue;
-    }
+  for (size_t i = _currHead; i < _moves.size(); i++){
+    Move &move = _moves.at(i);
     int moveINT = move.getMoveINT();
     if (_hashMove.getMoveINT() != 0 && moveINT == _hashMove.getMoveINT()) {
       move.setValue(INF);
@@ -177,12 +173,6 @@ bool MovePicker::hasNext(){
         }else{
             return false;
         }
-    }
-
-    if (_stage == MP_QUIETS && _currHead < _moves.size()){
-        return true;
-    }else{
-        _stage = MP_BAD_CAPTURES;
     }
 
     return _currHead < _moves.size();
