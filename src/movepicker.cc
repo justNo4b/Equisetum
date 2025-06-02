@@ -179,12 +179,6 @@ bool MovePicker::hasNext(){
         }
     }
 
-    if (_stage == MP_QUIETS && _currHead < _moves.size()){
-        return true;
-    }else{
-        _stage = MP_BAD_CAPTURES;
-    }
-
     return _currHead < _moves.size();
 }
 
