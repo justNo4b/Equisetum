@@ -645,7 +645,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
         _posHist.Add(board.getZKey().getValue());
         _sStack.AddMove(move);
-
         // 8. LATE MOVE REDUCTIONS
         // mix of ideas from Weiss code, own ones and what is written in the chessprogramming wiki
         doLMR = tDepth > 2 && legalCount > 2 + pvNode;

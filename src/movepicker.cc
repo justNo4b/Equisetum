@@ -45,9 +45,6 @@ void MovePicker::_checkHashMove(int hMoveInt){
 }
 
 void MovePicker::_scoreMoves() {
-  bool isQsearch  = _ply == MAX_PLY;
-
-  int i = -1;
   int ttIndx = -1;
 
   int Killer1  = _orderingInfo->getKiller1(_ply);
@@ -55,8 +52,8 @@ void MovePicker::_scoreMoves() {
   int Counter  = _orderingInfo->getCounterMoveINT(_color, _pMove);
   int pMoveInx = (_pMove & 0x7) + ((_pMove >> 15) & 0x3f) * 6;
 
-  for (auto &move : _moves) {
-    i++;
+  for (size_t i = _currHead; i < _moves.size(); i ++){
+    Move &move = _moves.at(i);
     int moveINT = move.getMoveINT();
     if (_hashMove.getMoveINT() != 0 && moveINT == _hashMove.getMoveINT()) {
       move.setValue(INF);
@@ -123,6 +120,7 @@ bool MovePicker::hasNext(){
             return true;
         }else if (_ply != MAX_PLY){
             _stage = MP_QUIETS;
+            _addQuiets();
             _scoreMoves();
         }else{
             return false;
