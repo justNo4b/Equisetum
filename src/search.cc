@@ -440,6 +440,19 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   _sStack.AddEval(nodeEval);
 
 
+
+    // Use static evaluation difference to improve quiet move ordering
+    // Stolen from SF (hello Viz)
+    if (pMove != 0 && _sStack.moves[ply - 1].isQuiet())
+    {
+        int bonus = -10 * (_sStack.statEval[ply - 1] + nodeEval);
+        bonus = std::max(-1500, bonus);
+        bonus = std::min(bonus, 1500);
+        _orderingInfo.incrementHistory(getOppositeColor(board.getActivePlayer()), _sStack.moves[ply - 1].getFrom(), _sStack.moves[ply - 1].getTo(), bonus);
+
+    }
+
+
   // Check if we are improving
   // The idea is if we are not improving in this line we probably can prune a bit more
 
