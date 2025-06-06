@@ -244,7 +244,7 @@ inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
 
     //modify
     bonus += 2 * (eval < alpha);
-    bonus += (eval < alpha + 50);
+    bonus += (eval < alpha + 75);
     return std::min(MAX_HISTORY_SCORE, 32 * bonus * bonus);
 }
 
