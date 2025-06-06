@@ -104,6 +104,7 @@ void MovePicker::_scoreQuiets() {
 
   int i = -1;
   int ttIndx = -1;
+  int k1Indx = -1;
 
   int Killer1  = _orderingInfo->getKiller1(_ply);
   int Killer2  = _orderingInfo->getKiller2(_ply);
@@ -140,6 +141,7 @@ void MovePicker::_scoreQuiets() {
         }
       move.setValue(value);
     } else if (moveINT == Killer1) {
+      k1Indx = i;
       move.setValue(KILLER1_BONUS);
     } else if (moveINT == Killer2) {
       move.setValue(KILLER2_BONUS);
@@ -153,6 +155,11 @@ void MovePicker::_scoreQuiets() {
   // swap ttMove first
   if (ttIndx >= 0){
     std::swap(_moves.at(_currHead), _moves.at(ttIndx));
+    _currHead++;
+  }
+
+  if (k1Indx >= 0){
+    std::swap(_moves.at(_currHead), _moves.at(k1Indx));
     _currHead++;
   }
 }
@@ -172,11 +179,24 @@ bool MovePicker::hasNext(){
         if (_currHead < _goodCapCount && _currHead < _moves.size()){
             return true;
         }else if (_ply != MAX_PLY){
-            _stage = MP_QUIETS;
-            _scoreQuiets();
+            _stage = MP_KILLER1;
         }else{
             return false;
         }
+    }
+
+    if (_stage == MP_KILLER1){
+        Move k1 = Move(_orderingInfo->getKiller1(_ply));
+        if (_board->moveIsPseudoLegal(k1)){
+            return true;
+        }else{
+            _stage = MP_GENERATE_QUIET;
+        }
+    }
+
+    if (_stage == MP_GENERATE_QUIET){
+        _stage = MP_QUIETS;
+        _scoreQuiets();
     }
 
     return _currHead < _moves.size();
@@ -189,6 +209,13 @@ Move MovePicker::getNext() {
   if (_stage == MP_TT){
     _stage = MP_GENERATE_CAPTURES;
     return _hashMove;
+  }
+
+  if (_stage == MP_KILLER1){
+    _stage = MP_GENERATE_QUIET;
+    Move k1 = Move(_orderingInfo->getKiller1(_ply));
+    k1.setValue(KILLER1_BONUS);
+    return k1;
   }
 
   // else quiets
