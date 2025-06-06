@@ -111,6 +111,7 @@ class MovePicker {
    * @brief posKey of the current position
    */
   Move _hashMove;
+  Move _killer1;
 
   /**
    * @brief Color of the current sideToMove

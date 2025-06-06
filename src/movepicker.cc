@@ -186,8 +186,8 @@ bool MovePicker::hasNext(){
     }
 
     if (_stage == MP_KILLER1){
-        Move k1 = Move(_orderingInfo->getKiller1(_ply));
-        if (_board->moveIsPseudoLegal(k1)){
+        _killer1 = Move(_orderingInfo->getKiller1(_ply));
+        if (_board->moveIsPseudoLegal(_killer1)){
             return true;
         }else{
             _stage = MP_GENERATE_QUIET;
@@ -213,9 +213,8 @@ Move MovePicker::getNext() {
 
   if (_stage == MP_KILLER1){
     _stage = MP_GENERATE_QUIET;
-    Move k1 = Move(_orderingInfo->getKiller1(_ply));
-    k1.setValue(KILLER1_BONUS);
-    return k1;
+    _killer1.setValue(KILLER1_BONUS);
+    return _killer1;
   }
 
   // else quiets
