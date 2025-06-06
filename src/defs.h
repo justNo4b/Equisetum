@@ -233,9 +233,10 @@ enum MpStage{
     MP_GENERATE_CAPTURES,
     MP_CAPTURES,
     MP_KILLER1,
+    MP_KILLER2,
+    MP_COUNTER,
     MP_GENERATE_QUIET,
-    MP_QUIETS,
-    MP_BAD_CAPTURES
+    MP_QUIETS
 };
 
 struct UpdData{

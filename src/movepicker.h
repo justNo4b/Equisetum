@@ -112,6 +112,8 @@ class MovePicker {
    */
   Move _hashMove;
   Move _killer1;
+  Move _killer2;
+  Move _counter;
 
   /**
    * @brief Color of the current sideToMove

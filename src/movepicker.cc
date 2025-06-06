@@ -105,6 +105,8 @@ void MovePicker::_scoreQuiets() {
   int i = -1;
   int ttIndx = -1;
   int k1Indx = -1;
+  int k2Indx = -1;
+  int coIndx = -1;
 
   int Killer1  = _orderingInfo->getKiller1(_ply);
   int Killer2  = _orderingInfo->getKiller2(_ply);
@@ -144,8 +146,10 @@ void MovePicker::_scoreQuiets() {
       k1Indx = i;
       move.setValue(KILLER1_BONUS);
     } else if (moveINT == Killer2) {
+      k2Indx = i;
       move.setValue(KILLER2_BONUS);
     } else if (moveINT == Counter){
+        coIndx = i;
       move.setValue(COUNTERMOVE_BONUS);
     } else { // Quiet
       move.setValue(_orderingInfo->getHistory(_color, move.getFrom(), move.getTo()) +
@@ -160,6 +164,16 @@ void MovePicker::_scoreQuiets() {
 
   if (k1Indx >= 0){
     std::swap(_moves.at(_currHead), _moves.at(k1Indx));
+    _currHead++;
+  }
+
+  if (k2Indx >= 0){
+    std::swap(_moves.at(_currHead), _moves.at(k2Indx));
+    _currHead++;
+  }
+
+  if (coIndx >= 0){
+        std::swap(_moves.at(_currHead), _moves.at(coIndx));
     _currHead++;
   }
 }
@@ -190,6 +204,24 @@ bool MovePicker::hasNext(){
         if (_board->moveIsPseudoLegal(_killer1)){
             return true;
         }else{
+            _stage = MP_KILLER2;
+        }
+    }
+
+    if (_stage == MP_KILLER2){
+        _killer2 = Move(_orderingInfo->getKiller2(_ply));
+        if (_board->moveIsPseudoLegal(_killer2)){
+            return true;
+        }else{
+            _stage = MP_COUNTER;
+        }
+    }
+
+    if (_stage == MP_COUNTER){
+        _counter = Move(_orderingInfo->getCounterMoveINT(_color, _pMove));
+        if (_board->moveIsPseudoLegal(_counter)){
+            return true;
+        }else{
             _stage = MP_GENERATE_QUIET;
         }
     }
@@ -212,9 +244,21 @@ Move MovePicker::getNext() {
   }
 
   if (_stage == MP_KILLER1){
-    _stage = MP_GENERATE_QUIET;
+    _stage = MP_KILLER2;
     _killer1.setValue(KILLER1_BONUS);
     return _killer1;
+  }
+
+  if (_stage == MP_KILLER2){
+    _stage = MP_COUNTER;
+    _killer2.setValue(KILLER2_BONUS);
+    return _killer2;
+  }
+
+  if (_stage == MP_COUNTER){
+    _stage = MP_GENERATE_QUIET;
+    _counter.setValue(COUNTERMOVE_BONUS);
+    return _counter;
   }
 
   // else quiets
