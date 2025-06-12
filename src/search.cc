@@ -416,16 +416,16 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         hashScore = (hashScore > 0) ? (hashScore - ply) :  (hashScore + ply);
       }
 
-      if (ttEntry.Flag == EXACT){
+      if (ttEntry.Flag & EXACT){
         return hashScore;
       }
-      if (ttEntry.Flag == BETA && hashScore >= beta){
+      if (ttEntry.Flag & BETA && hashScore >= beta){
         int bonus = _getHistoryBonus(depth, 0, 0);
         _updateBeta(qttNode, ttMove, board.getActivePlayer(), pMove, ply, bonus);
         return beta;
       }
 
-      if (ttEntry.Flag == ALPHA && hashScore <= alpha){
+      if (ttEntry.Flag & ALPHA && hashScore <= alpha){
         return alpha;
       }
     }
@@ -605,7 +605,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // At high depth if we have the TT move, and we are certain
         // that non other moves are even close to it, extend this move
         // At low depth use statEval instead of search (Kimmys idea)
-        if (ttEntry.Flag != ALPHA &&
+        if (!(ttEntry.Flag & ALPHA) &&
             ttEntry.depth >= depth - 3 &&
             ttEntry.move == move.getMoveINT() &&
             abs(ttEntry.score) < WON_IN_X / 4){
@@ -853,13 +853,13 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
       if (abs(hashScore) > WON_IN_X){
         hashScore = (hashScore > 0) ? (hashScore - MAX_PLY) :  (hashScore + MAX_PLY);
       }
-      if (ttEntry.Flag == EXACT){
+      if (ttEntry.Flag & EXACT){
         return hashScore;
       }
-      if (ttEntry.Flag == BETA && hashScore >= beta){
+      if (ttEntry.Flag & BETA && hashScore >= beta){
         return beta;
       }
-      if (ttEntry.Flag == ALPHA && hashScore <= alpha){
+      if (ttEntry.Flag & ALPHA && hashScore <= alpha){
         return alpha;
       }
     }
