@@ -344,7 +344,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   }
 
   if (!_stop && !(bestMove.getFlags() & Move::NULL_MOVE)) {
-    myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, 0);
+    myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, true, alpha, depth, 0);
     _bestMove = bestMove;
     _bestScore = alpha;
   }
@@ -759,7 +759,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           if (isPmQuietCounter) _orderingInfo.incrementCounterHistory(board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
-            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
+            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, pvNode, score, depth, ply);
           }
           // we updated beta and in the pVNode so we should update our pV
           if (pvNode && !_stop){
@@ -809,9 +809,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (!_stop && !singSearch){
       if (alpha <= alphaOrig) {
         int saveMove = ttMove.getMoveINT() != 0 ? ttMove.getMoveINT() : 0;
-        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, alpha, depth, ply);
+        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, pvNode, alpha, depth, ply);
       } else {
-        myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, ply);
+        myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, pvNode, alpha, depth, ply);
       }
   }
 
@@ -890,7 +890,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
           if (score >= beta) {
             // Add a new tt entry for this node
             if (!_stop){
-                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, 0, MAX_PLY);
+                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, pvNode, score, 0, MAX_PLY);
             }
             return beta;
           }
