@@ -473,7 +473,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // The idea is so if we are very far ahead of beta at low
   // depth, we can just return estimated eval (eval - margin),
   // because beta probably will be beaten
-  if (isPrune && depth <= 8 && ((nodeEval - 161 * depth + 142 * improving) >= beta)){
+  if ( !ttPv && isPrune && depth <= 8 && ((nodeEval - 161 * depth + 142 * improving) >= beta)){
       return beta;
   }
 
