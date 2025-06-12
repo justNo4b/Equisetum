@@ -252,9 +252,9 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     int penalty = depth;
 
     // modify
+    if (ttCut & ALPHA) penalty -= 1;
     penalty -= (eval < alpha);
     penalty -= (!ttNode && depth >= 4);
-    penalty -= ttCut == ALPHA;
     penalty += (pmScore < -HALFMAX_HISTORY_SCORE);
     penalty += cutNode;
 
