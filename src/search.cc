@@ -675,8 +675,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // if move is quiet, reduce a bit more (from Weiss)
           reduction += isQuiet;
 
-          reduction += ttPv;
-
           //reduce more when side to move is in check
           reduction += incheckNode;
 
@@ -689,6 +687,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
           // Reduce more in the cut-nodes - used by SF/Komodo/etc
           reduction += cutNode;
+
+          reduction -= ttPv;
 
           // Reduce less if move on the previous ply was bad
           // Ie hystorycally bad quiet, see- capture or underpromotion
