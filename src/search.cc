@@ -675,6 +675,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // if move is quiet, reduce a bit more (from Weiss)
           reduction += isQuiet;
 
+          reduction += ttPv;
+
           //reduce more when side to move is in check
           reduction += incheckNode;
 
