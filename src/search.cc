@@ -41,14 +41,14 @@ void Search::init_LMR_array(){
 
   for (int depth = 0; depth < 34; depth++){
     for (int movenum = 0; movenum < 34; movenum++){
-      _lmr_R_array[depth][movenum] = (int) (0.57 + (pow(depth, 0.10) * pow(movenum, 0.16))/2.49);
+      _lmr_R_array[depth][movenum] = (int) (0.56 + (pow(depth, 0.11) * pow(movenum, 0.16))/2.50);
     }
   }
   // 2. Initialization of the LMP array.
   // Current formula is completely based on the Weiss chess engine.
   for (int depth = 0; depth < MAX_PLY; depth++){
-    _lmp_Array[depth][0] = (int)  (1.57 + pow((depth - 1), 2) * 1.71);
-    _lmp_Array[depth][1] = (int)  (3.51 + pow((depth - 1), 2) * 1.73);
+    _lmp_Array[depth][0] = (int)  (1.62 + pow((depth - 1), 2) * 1.63);
+    _lmp_Array[depth][1] = (int)  (3.44 + pow((depth - 1), 2) * 1.71);
   }
 
 }
@@ -79,8 +79,8 @@ void Search::iterDeep() {
   int maxDepthSearched = 0;
 
   int targetDepth = _timer.getSearchDepth();
-  int aspWindow = 30;
-  int aspDelta  = 48;
+  int aspWindow = 23;
+  int aspDelta  = 42;
 
     for (int currDepth = 1; currDepth <= targetDepth; currDepth++) {
         maxDepthSearched = std::max(maxDepthSearched, currDepth);
@@ -88,7 +88,7 @@ void Search::iterDeep() {
 
         int aspAlpha = LOST_SCORE;
         int aspBeta  =-LOST_SCORE;
-        if (currDepth > 6){
+        if (currDepth >= 7){
             aspAlpha = _bestScore - aspWindow;
             aspBeta  = _bestScore + aspWindow;
         }
@@ -107,7 +107,7 @@ void Search::iterDeep() {
                 break;
             }
 
-            aspDelta += aspDelta * 2 / 3;
+            aspDelta += aspDelta * 208 / 300;
         }
 
         // Iteration finished normally
@@ -235,7 +235,7 @@ bool Search::_checkLimits() {
 }
 
 inline int Search::_makeCmhBonus(int bonus){
-    return std::min(MAX_HISTORY_SCORE, bonus * 4);
+    return std::min(MAX_HISTORY_SCORE, bonus * 508 / 128);
 }
 
 inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
@@ -244,7 +244,7 @@ inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
 
     //modify
     bonus += 2 * (eval < alpha);
-    return std::min(MAX_HISTORY_SCORE, 32 * bonus * bonus);
+    return std::min(MAX_HISTORY_SCORE, 32 * bonus * bonus + bonus + 1);
 }
 
 int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool ttNode, bool cutNode, CutOffState ttCut){
@@ -259,7 +259,7 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     penalty += cutNode;
 
     penalty = std::max(0, penalty);
-    return std::max(-MAX_HISTORY_SCORE, -32 * penalty * (penalty - 1));
+    return std::max(-MAX_HISTORY_SCORE, -33 * penalty * penalty + 29 * penalty - 11);
 }
 
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int bonus){
@@ -471,7 +471,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // The idea is so if we are very far ahead of beta at low
   // depth, we can just return estimated eval (eval - margin),
   // because beta probably will be beaten
-  if (isPrune && depth <= 8 && ((nodeEval - 161 * depth + 142 * improving) >= beta)){
+  if (isPrune && depth <= 8 && ((nodeEval - 149 * depth + 146 * improving) >= beta)){
       return beta;
   }
 
@@ -514,7 +514,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (!pvNode &&
        depth >= 4 &&
        alpha < WON_IN_X){
-        int pcBeta = beta + 218 - 100 * improving;
+        int pcBeta = beta + 211 - 95 * improving;
 
         MovePicker pcPicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
         while (pcPicker.hasNext()){
@@ -579,21 +579,21 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       // 5.1 LATE MOVE PRUNING
       // If we made many quiet moves in the position already
       // we suppose other moves wont improve our situation
-      if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= 0)) break;
+      if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= -8)) break;
 
       // 5.2. SEE pruning of quiet moves
       // At shallow depth prune highlyish -negative SEE-moves
       if (depth <= 10
           && isQuiet
-          && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
+          && !board.SEE_GreaterOrEqual(move, (-79 * depth + 46))) continue;
 
       if (depth <= 6
           && !isQuiet
-          && !board.SEE_GreaterOrEqual(move, (-150 * depth + 100))) continue;
+          && !board.SEE_GreaterOrEqual(move, (-144 * depth + 101))) continue;
 
       // 5.3. COUNTER-MOVE HISTORY PRUNING
       // Prune quiet moves with poor CMH on the tips of the tree
-      if (depth <= 3 && isQuiet && cmHistory <= (-4096 * depth + 4096)) continue;
+      if (depth <= 3 && isQuiet && cmHistory <= (-4367 * depth + 4331)) continue;
     }
 
 
@@ -688,7 +688,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
           // Reduce less if move on the previous ply was bad
           // Ie hystorycally bad quiet, see- capture or underpromotion
-          reduction -= pMoveScore < -HALFMAX_HISTORY_SCORE;
+          reduction -= pMoveScore < -8062;
 
           // if we are improving, reduce a bit less (from Weiss)
           reduction -= improving;
@@ -700,8 +700,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           reduction -= singNode;
 
           // reduce more/less based on the hitory
-          reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
-          reduction -= cmHistory  / HALFMAX_HISTORY_SCORE;
+          reduction -= _clamp(-2, moveHistory / 7842, 2);
+          reduction -= _clamp(-2, cmHistory  / 7524, 2);
 
           // reduce less when move is a Queen promotion
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
@@ -877,7 +877,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     }
 
     // Use Halogen futility variation
-    if (!(move.getFlags() & Move::PROMOTION) && !board.SEE_GreaterOrEqual(move, (alpha - standPat - DELTA_MOVE_CONST)))
+    if (!(move.getFlags() & Move::PROMOTION) && !board.SEE_GreaterOrEqual(move, (alpha - standPat - 190)))
       continue;
 
     Board movedBoard = board;

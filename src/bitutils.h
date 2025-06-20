@@ -151,4 +151,8 @@ inline U64 _sqBB(int square){
     return (ONE << square);
 }
 
+inline int _clamp(int low, int x, int high){
+    return std::min(high, std::max(x, low));
+}
+
 #endif
