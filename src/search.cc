@@ -252,9 +252,9 @@ int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool
     int penalty = depth;
 
     // modify
+    if (ttCut & ALPHA) penalty -= 1;
     penalty -= (eval < alpha);
     penalty -= (!ttNode && depth >= 4);
-    penalty -= ttCut == ALPHA;
     penalty += (pmScore < -HALFMAX_HISTORY_SCORE);
     penalty += cutNode;
 
@@ -345,7 +345,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   }
 
   if (!_stop && !(bestMove.getFlags() & Move::NULL_MOVE)) {
-    myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, 0);
+    myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, true, alpha, depth, 0);
     _bestMove = bestMove;
     _bestScore = alpha;
   }
@@ -362,6 +362,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   bool singNode = false;
   bool nmpTree = _sStack.nmpTree;
   bool pvNode = alpha != beta - 1;
+  bool ttPv = pvNode;
   bool endgameNode = board.isEndGamePosition();
   int score;
   int ply = _sStack.ply;
@@ -417,6 +418,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     ttNode = true;
     ttMove = Move(ttEntry.move);
     qttNode = ttMove.isQuiet();
+    ttPv = ttPv || (ttEntry.Flag & TTPV);
     if (ttEntry.depth >= depth && !pvNode && !singSearch){
       int hashScore = ttEntry.score;
 
@@ -424,16 +426,16 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         hashScore = (hashScore > 0) ? (hashScore - ply) :  (hashScore + ply);
       }
 
-      if (ttEntry.Flag == EXACT){
+      if (ttEntry.Flag & EXACT){
         return hashScore;
       }
-      if (ttEntry.Flag == BETA && hashScore >= beta){
+      if (ttEntry.Flag & BETA && hashScore >= beta){
         int bonus = _getHistoryBonus(depth, 0, 0);
         _updateBeta(qttNode, ttMove, board.getActivePlayer(), pMove, ppMove, ply, bonus);
         return beta;
       }
 
-      if (ttEntry.Flag == ALPHA && hashScore <= alpha){
+      if (ttEntry.Flag & ALPHA && hashScore <= alpha){
         return alpha;
       }
     }
@@ -613,7 +615,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // At high depth if we have the TT move, and we are certain
         // that non other moves are even close to it, extend this move
         // At low depth use statEval instead of search (Kimmys idea)
-        if (ttEntry.Flag != ALPHA &&
+        if (!(ttEntry.Flag & ALPHA) &&
             ttEntry.depth >= depth - 3 &&
             ttEntry.move == move.getMoveINT() &&
             abs(ttEntry.score) < WON_IN_X / 4){
@@ -694,6 +696,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Reduce more in the cut-nodes - used by SF/Komodo/etc
           reduction += cutNode;
 
+          // Reduce less in pv node or nodes that were in pv previously
+          reduction -= ttPv;
+
           // Reduce less if move on the previous ply was bad
           // Ie hystorycally bad quiet, see- capture or underpromotion
           reduction -= pMoveScore < -HALFMAX_HISTORY_SCORE;
@@ -770,7 +775,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           }
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
-            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
+            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, ttPv, score, depth, ply);
           }
           // we updated beta and in the pVNode so we should update our pV
           if (pvNode && !_stop){
@@ -821,9 +826,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (!_stop && !singSearch){
       if (alpha <= alphaOrig) {
         int saveMove = ttMove.getMoveINT() != 0 ? ttMove.getMoveINT() : 0;
-        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, alpha, depth, ply);
+        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, ttPv, alpha, depth, ply);
       } else {
-        myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, ply);
+        myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, ttPv, alpha, depth, ply);
       }
   }
 
@@ -833,6 +838,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 int Search::_qSearch(Board &board, int alpha, int beta) {
    _nodes++;
    bool pvNode = alpha != beta - 1;
+   bool ttPv = pvNode;
    int nodeEval = NOSCORE;
    int standPat = NOSCORE;
 
@@ -861,17 +867,18 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
   if (ttEntry.Flag != NONE){
     if (!pvNode){
       int hashScore = ttEntry.score;
+      ttPv = ttPv || (ttEntry.Flag & TTPV);
 
       if (abs(hashScore) > WON_IN_X){
         hashScore = (hashScore > 0) ? (hashScore - MAX_PLY) :  (hashScore + MAX_PLY);
       }
-      if (ttEntry.Flag == EXACT){
+      if (ttEntry.Flag & EXACT){
         return hashScore;
       }
-      if (ttEntry.Flag == BETA && hashScore >= beta){
+      if (ttEntry.Flag & BETA && hashScore >= beta){
         return beta;
       }
-      if (ttEntry.Flag == ALPHA && hashScore <= alpha){
+      if (ttEntry.Flag & ALPHA && hashScore <= alpha){
         return alpha;
       }
     }
@@ -902,7 +909,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
           if (score >= beta) {
             // Add a new tt entry for this node
             if (!_stop){
-                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, 0, MAX_PLY);
+                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, ttPv, score, 0, MAX_PLY);
             }
             return beta;
           }
