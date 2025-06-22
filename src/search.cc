@@ -663,7 +663,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
         // 8. LATE MOVE REDUCTIONS
         // mix of ideas from Weiss code, own ones and what is written in the chessprogramming wiki
-        doLMR = tDepth > 2 && legalCount > 2 + pvNode;
+        doLMR = tDepth > 2 && legalCount > 1 + pvNode + !isQuiet;
         if (doLMR){
 
           //Basic reduction is done according to the array
