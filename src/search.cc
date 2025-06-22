@@ -688,6 +688,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Reduce more in the cut-nodes - used by SF/Komodo/etc
           reduction += cutNode;
 
+          // Reduce less in pv node or nodes that were in pv previously
+          reduction -= ttPv;
+
           // Reduce less if move on the previous ply was bad
           // Ie hystorycally bad quiet, see- capture or underpromotion
           reduction -= pMoveScore < -HALFMAX_HISTORY_SCORE;
