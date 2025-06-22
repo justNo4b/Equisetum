@@ -41,22 +41,14 @@ struct SEARCH_Data
         ply++;
     };
 
-    void AddNullMove(Color sB){
+    void AddNullMove(){
         moves[ply] = Move(0);
         ply++;
-        sideBehind = sB;
-        nmpTree = true;
     };
 
     void Remove(){
         ply--;
     };
-
-    void RemoveNull(Color sB, bool treeStatus){
-        ply--;
-        sideBehind = sB;
-        nmpTree = treeStatus;
-    }
 
 };
 

@@ -485,14 +485,14 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (isPrune && pMove != 0 && nodeEval >= beta + std::max(0, 118 - 21 * depth) && board.isThereMajorPiece()){
           Board movedBoard = board;
           _posHist.Add(board.getZKey().getValue());
-          _sStack.AddNullMove(getOppositeColor(board.getActivePlayer()));
+          _sStack.AddNullMove();
           movedBoard.doNool();
 
           int fDepth = depth - NULL_MOVE_REDUCTION - depth / 4 - std::min((nodeEval - beta) / 128, 5);
           int score = -_negaMax(movedBoard, &thisPV, fDepth , -beta, -beta + 1, false, false);
 
           _posHist.Remove();
-          _sStack.RemoveNull(behindColor, nmpTree);
+          _sStack.Remove();
 
           if (score >= beta){
             return beta;
@@ -680,10 +680,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
           // Reduce more for late quiets if ttNode exists and it is non-Quiet move
           reduction += isQuiet && !qttNode && ttNode;
-
-          // Reduce more when side-to-move was behind prior to NMP on the previous NMP try
-          // Basically copy-pasted Koivisto idea
-          reduction += isQuiet && nmpTree && board.getActivePlayer() == behindColor;
 
           // Reduce more in the cut-nodes - used by SF/Komodo/etc
           reduction += cutNode;
