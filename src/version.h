@@ -19,7 +19,7 @@
 #define VERSION_H
 
 #define VER_MAJ ("1")
-#define VER_MIN ("25")
+#define VER_MIN ("26")
 #define VER_PATCH ("telmateia")
 
 #endif
