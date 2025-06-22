@@ -359,7 +359,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   bool fnNode = false;
   bool improving = false;
   bool singNode = false;
-  bool nmpTree = _sStack.nmpTree;
   bool pvNode = alpha != beta - 1;
   bool ttPv = pvNode;
   bool endgameNode = board.isEndGamePosition();
@@ -376,7 +375,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   Move bestMove;
   pV   thisPV = pV();
   up_pV->length = 0;
-  Color behindColor = _sStack.sideBehind;
 
   bool isPmQuietCounter = (pMoveScore >= 50000 && pMoveScore <= 200000);
 
