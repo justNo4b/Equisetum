@@ -1231,7 +1231,6 @@ inline fupdater Board::calculateBoardDifference(Color half, U64 (* otherPieces)[
         }
 
 
-        memcpy((*entry)[curside][_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
         // if finny acc is ready and have reasonable amount of changes, copy and refresh
         // otherwise do half reset
        if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true){
@@ -1246,6 +1245,7 @@ inline fupdater Board::calculateBoardDifference(Color half, U64 (* otherPieces)[
             (*entry)[curside][_updSchedule.color][curbucket].isReady = true;
             memcpy(nncache, _nnue->getHalfAccumulatorPtr(_updSchedule.color), sizeof(int16_t) * NNUE_HIDDEN);
         }
+        memcpy((*entry)[curside][_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
 
       return;
     }
