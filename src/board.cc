@@ -1231,13 +1231,12 @@ inline fupdater Board::calculateBoardDifference(Color half, U64 (* otherPieces)[
         }
 
 
-        fupdater notManyDiffs = calculateBoardDifference(_updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces);
         memcpy((*entry)[curside][_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
         // if finny acc is ready and have reasonable amount of changes, copy and refresh
         // otherwise do half reset
-       if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true && notManyDiffs.result == true){
+       if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true){
 
-            (*cache)[curside][curbucket].addSubDifference(_updSchedule.color, &notManyDiffs.add, notManyDiffs.addCount, &notManyDiffs.sub, notManyDiffs.subCount);
+            (*cache)[curside][curbucket].addSubDifference(*this,  _updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces);
             memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), nncache, sizeof(int16_t) * NNUE_HIDDEN);
 
         }else{

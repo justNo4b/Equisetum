@@ -68,7 +68,7 @@ public:
 
     void fullReset(const Board &board);
     void halfReset(const Board &, Color);
-    void addSubDifference(Color, int (*)[32], int, int (*)[32], int);
+    void addSubDifference(const Board &, Color, U64 (*)[2][6]);
     void addSubDifferenceExternal(int16_t (*)[NNUE_HIDDEN] , int (*)[32], int, int (*)[32], int);
 
     bool resetNeeded(PieceType, int, int, Color);

@@ -161,18 +161,41 @@ void NNueEvaluation::halfReset(const Board &board, Color half){
     }
 }
 
-void NNueEvaluation::addSubDifference(Color half, int (*add)[32], int addCount, int (*sub)[32], int subCount){
+void NNueEvaluation::addSubDifference(const Board &board, Color half, U64 (* otherPieces)[2][6]){
 
+    int hKing = half == WHITE ? _bitscanForward(board.getPieces(WHITE, KING)) : _bitscanForward(board.getPieces(BLACK, KING));
+    int maxSubs = _popCount(board.getOccupied());
 
-    for (int i = 0; i < NNUE_HIDDEN; i++){
-        for (int j = 0; j < addCount; j++){
-            _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[(*add)[j]][i];
-        }
+    for (auto color : { WHITE, BLACK }){
+        for (auto piece :{PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
 
-        for (int k = 0; k < subCount; k++){
-            _hiddenScore[half][i] -= NNUE_HIDDEN_WEIGHT[(*sub)[k]][i];
+            U64 toremove = (*otherPieces)[color][piece] & ~board.getPieces(color, piece);
+            U64 toadd = board.getPieces(color, piece) & ~(*otherPieces)[color][piece];
+
+            // exists in current board, absent in past -> add index
+            while (toadd){
+                int square = _popLsb(toadd);
+                int index = _getPieceIndex(square, piece, color, half, hKing);
+                for (int i = 0; i < NNUE_HIDDEN; i++){
+                        _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[index][i];
+                    }
+            }
+
+            // absent in current, thus present in the past -> remove index
+            while(toremove){
+                int square = _popLsb(toremove);
+                int index = _getPieceIndex(square, piece, color, half, hKing);
+                for (int i = 0; i < NNUE_HIDDEN; i++){
+                    _hiddenScore[half][i] -= NNUE_HIDDEN_WEIGHT[index][i];
+                }
+            }
         }
     }
+
+
+
+
+
 }
 
 void NNueEvaluation::addSubDifferenceExternal(int16_t (*external)[NNUE_HIDDEN], int (* add)[32], int addCount, int (* sub)[32], int subCount){
