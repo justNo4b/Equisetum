@@ -162,10 +162,7 @@ void NNueEvaluation::halfReset(const Board &board, Color half){
 }
 
 void NNueEvaluation::addSubDifference(const Board &board, Color half, U64 (* otherPieces)[2][6]){
-
     int hKing = half == WHITE ? _bitscanForward(board.getPieces(WHITE, KING)) : _bitscanForward(board.getPieces(BLACK, KING));
-    int maxSubs = _popCount(board.getOccupied());
-
     for (auto color : { WHITE, BLACK }){
         for (auto piece :{PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
 
@@ -191,11 +188,6 @@ void NNueEvaluation::addSubDifference(const Board &board, Color half, U64 (* oth
             }
         }
     }
-
-
-
-
-
 }
 
 void NNueEvaluation::addSubDifferenceExternal(int16_t (*external)[NNUE_HIDDEN], int (* add)[32], int addCount, int (* sub)[32], int subCount){

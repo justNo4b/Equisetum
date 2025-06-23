@@ -1142,41 +1142,23 @@ int Board::getPhase() const{
     return _frc;
  }
 
-inline fupdater Board::calculateBoardDifference(Color half, U64 (* otherPieces)[2][6]){
-    fupdater FU;
-    FU.addCount = 0;
-    FU.subCount = 0;
-    FU.result = true;
-    int hKing = half == WHITE ? _bitscanForward(getPieces(WHITE, KING)) : _bitscanForward(getPieces(BLACK, KING));
+inline bool Board::calculateBoardDifference(U64 (* otherPieces)[2][6]){
     int maxSubs = _popCount(_occupied);
+    int differences = 0;
     for (auto color : { WHITE, BLACK }){
         for (auto piece :{PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
             U64 toremove = (*otherPieces)[color][piece] & ~_pieces[color][piece];
             U64 toadd = _pieces[color][piece] & ~(*otherPieces)[color][piece];
 
-            // exists in current board, absent in past -> add index
-            while (toadd){
-                int square = _popLsb(toadd);
-                int index = _nnue->getIndex(square, piece, color, half, hKing);
-                FU.add[FU.addCount] = index;
-                FU.addCount++;
-            }
-            // absent in current, thus present in the past -> remove index
-            while(toremove){
-                int square = _popLsb(toremove);
-                int index = _nnue->getIndex(square, piece, color, half, hKing);
-                FU.sub[FU.subCount] = index;
-                FU.subCount++;
-            }
-            if ((FU.addCount + FU.subCount) >= maxSubs){
-                FU.result = false;
-                return FU;
+            differences += _popCount(toremove) + _popCount(toadd);
+
+            if (differences > maxSubs){
+                return false;
             }
         }
     }
     // we dont overflow sub/add, everything is ok
-
-    return FU;
+    return true;
  }
 
 
@@ -1233,7 +1215,8 @@ inline fupdater Board::calculateBoardDifference(Color half, U64 (* otherPieces)[
 
         // if finny acc is ready and have reasonable amount of changes, copy and refresh
         // otherwise do half reset
-       if ((*entry)[curside][_updSchedule.color][curbucket].isReady == true){
+       if ( calculateBoardDifference(&(*entry)[curside][_updSchedule.color][curbucket]._pieces) &&
+        (*entry)[curside][_updSchedule.color][curbucket].isReady == true){
 
             (*cache)[curside][curbucket].addSubDifference(*this,  _updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces);
             memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), nncache, sizeof(int16_t) * NNUE_HIDDEN);

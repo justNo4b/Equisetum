@@ -32,14 +32,4 @@ struct FinnyEntry
 };
 
 
-struct fupdater
-{
-        int add[32] = {0};
-        int sub[32] = {0};
-        int addCount = 0;
-        int subCount = 0;
-        bool result = true;
-};
-
-
 #endif
