@@ -580,6 +580,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                         _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) :
                         _orderingInfo.getCaptureHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo());
     int cmHistory     = isQuiet ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()) : 0;
+    int fhHistory     = isQuiet && ppMove != 0 ? _orderingInfo.getFollowupHistory(board.getActivePlayer(), ppMoveIndx, move.getPieceType(), move.getTo()) / 2 : 0;
 
     // 5. PRE-MOVELOOP PRUNING
 
@@ -715,6 +716,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // reduce more/less based on the hitory
           reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
           reduction -= cmHistory  / HALFMAX_HISTORY_SCORE;
+          reduction -= fhHistory / HALFMAX_HISTORY_SCORE;
 
           // reduce less when move is a Queen promotion
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
