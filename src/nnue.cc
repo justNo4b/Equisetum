@@ -177,8 +177,8 @@ void NNueEvaluation::addSubDifference(const Board &board, Color half, U64 (* oth
                 int square = _popLsb(toadd);
                 int index = _getPieceIndex(square, piece, color, half, hKing);
                 for (int i = 0; i < NNUE_HIDDEN; i++){
-                        _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[index][i];
-                    }
+                    _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[index][i];
+                }
             }
 
             // absent in current, thus present in the past -> remove index
