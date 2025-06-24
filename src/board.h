@@ -23,6 +23,7 @@
 #include "nnue.h"
 #include "zkey.h"
 #include "move.h"
+#include "finnyentry.h"
 #include <string>
 
 class Move;
@@ -272,7 +273,8 @@ class Board {
   U64  getCastlingRightsColored(Color) const;
   U64 getCastlingRights() const;
 
-  void performUpdate();
+  void performUpdate(FinnyEntry (*)[2][2][NNUE_BUCKETS], NNueEvaluation (*)[2][NNUE_BUCKETS]);
+  inline bool calculateBoardDifference(U64 (*)[2][6]);
 
   // check if the move is pseudo-legal on the given board
   bool moveIsPseudoLegal(Move) const;
