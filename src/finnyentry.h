@@ -15,11 +15,21 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef VERSION_H
-#define VERSION_H
+#ifndef FINNYENTRY_H
+#define FINNYENTRY_H
 
-#define VER_MAJ ("1")
-#define VER_MIN ("28")
-#define VER_PATCH ("telmateia")
+// Finny Table for super efficient accumulator updates.
+// Base idea is from Koivisto, implementation is mine (probably better to look in original)
+
+#include "nnue.h"
+
+struct FinnyEntry
+{
+    U64 _pieces[2][6];
+    bool isReady;
+
+    FinnyEntry() : _pieces{0}, isReady(false) {};
+};
+
 
 #endif

@@ -76,6 +76,7 @@ void Search::iterDeep() {
   _selDepth = 0;
   std::memset(_rootNodesSpent, 0, sizeof(_rootNodesSpent));
   _timer.startIteration();
+  _populateFinnyTable();
   int maxDepthSearched = 0;
 
   int targetDepth = _timer.getSearchDepth();
@@ -203,6 +204,17 @@ void Search::_logUciInfo(const MoveList &pv, int depth, int bestScore, U64 nodes
   std::cout << "time " + std::to_string(elapsed) + " ";
   std::cout << "pv " + pvString;
   std::cout << std::endl;
+}
+
+void Search::_populateFinnyTable(){
+    for (auto color : {WHITE, BLACK}){
+        for (int i = 0; i < NNUE_BUCKETS; i++){
+            for (int j = 0; j < 2; j++){
+            _finnyTable[j][color][i] = FinnyEntry();
+            }
+
+        }
+    }
 }
 
 void Search::stop() {
@@ -445,7 +457,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Do the Evaluation, unless we are in check or prev move was NULL
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
-  board.performUpdate();
+  board.performUpdate(&_finnyTable, &_nnCache);
   nodeEval = Eval::evaluate(board, board.getActivePlayer());
   _sStack.AddEval(nodeEval);
 
@@ -849,7 +861,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     return 0;
   }
 
-  board.performUpdate();
+  board.performUpdate(&_finnyTable, &_nnCache);
   nodeEval = Eval::evaluate(board, board.getActivePlayer());
   standPat = nodeEval;
 

@@ -161,6 +161,35 @@ void NNueEvaluation::halfReset(const Board &board, Color half){
     }
 }
 
+void NNueEvaluation::addSubDifference(const Board &board, Color half, U64 (* otherPieces)[2][6]){
+    int hKing = half == WHITE ? _bitscanForward(board.getPieces(WHITE, KING)) : _bitscanForward(board.getPieces(BLACK, KING));
+    for (auto color : { WHITE, BLACK }){
+        for (auto piece :{PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
+
+            U64 toremove = (*otherPieces)[color][piece] & ~board.getPieces(color, piece);
+            U64 toadd = board.getPieces(color, piece) & ~(*otherPieces)[color][piece];
+
+            // exists in current board, absent in past -> add index
+            while (toadd){
+                int square = _popLsb(toadd);
+                int index = _getPieceIndex(square, piece, color, half, hKing);
+                for (int i = 0; i < NNUE_HIDDEN; i++){
+                    _hiddenScore[half][i] += NNUE_HIDDEN_WEIGHT[index][i];
+                }
+            }
+
+            // absent in current, thus present in the past -> remove index
+            while(toremove){
+                int square = _popLsb(toremove);
+                int index = _getPieceIndex(square, piece, color, half, hKing);
+                for (int i = 0; i < NNUE_HIDDEN; i++){
+                    _hiddenScore[half][i] -= NNUE_HIDDEN_WEIGHT[index][i];
+                }
+            }
+        }
+    }
+}
+
 bool NNueEvaluation::resetNeeded(PieceType pt, int from, int to, Color view){
     int bucket_to   = BUCKETS[view == WHITE ? to    : _mir(to)];
     int bucket_from = BUCKETS[view == WHITE ? from  : _mir(from)];
@@ -173,6 +202,10 @@ bool NNueEvaluation::resetNeeded(PieceType pt, int from, int to, Color view){
         }
 
     return false;
+}
+
+int NNueEvaluation::getCurrentBucket(int to, Color view){
+    return BUCKETS[view == WHITE ? to    : _mir(to)];
 }
 
 int NNueEvaluation::evaluate(const Color color){
@@ -365,7 +398,6 @@ void NNueEvaluation::capturePieceHalf(UpdData ud, Color half){
 
 }
 
-
 void NNueEvaluation::castleMoveHalf(UpdData ud, Color half){
     Color color = ud.color;
     int fromSquareKing = ud.from;
@@ -387,9 +419,6 @@ void NNueEvaluation::castleMoveHalf(UpdData ud, Color half){
     }
 
 }
-
-
-
 
 void NNueEvaluation::enpassMove(UpdData ud){
     Color color = ud.color;
