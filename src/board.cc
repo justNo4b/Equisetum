@@ -1213,15 +1213,17 @@ inline bool Board::calculateBoardDifference(U64 (* otherPieces)[2][6]){
         }
 
 
+        // Use Finny Table from Koivisto to optimize updates of the accumulator
         // if finny acc is ready and have reasonable amount of changes, copy and refresh
-        // otherwise do half reset
        if ( calculateBoardDifference(&(*entry)[curside][_updSchedule.color][curbucket]._pieces) &&
         (*entry)[curside][_updSchedule.color][curbucket].isReady == true){
 
+            // Update accumulator based on difference in boards and copy to current accumulator point
             (*cache)[curside][curbucket].addSubDifference(*this,  _updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces);
             memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), nncache, sizeof(int16_t) * NNUE_HIDDEN);
 
         }else{
+            // otherwise do half reset
             // half reset "bad" part
             _nnue->halfReset(*this, _updSchedule.color);
             // save to finny table
