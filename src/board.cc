@@ -1142,7 +1142,27 @@ int Board::getPhase() const{
     return _frc;
  }
 
- void Board::performUpdate(){
+inline bool Board::calculateBoardDifference(U64 (* otherPieces)[2][6]){
+    int maxSubs = _popCount(_occupied);
+    int differences = 0;
+    for (auto color : { WHITE, BLACK }){
+        for (auto piece :{PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
+            U64 toremove = (*otherPieces)[color][piece] & ~_pieces[color][piece];
+            U64 toadd = _pieces[color][piece] & ~(*otherPieces)[color][piece];
+
+            differences += _popCount(toremove) + _popCount(toadd);
+
+            if (differences > maxSubs){
+                return false;
+            }
+        }
+    }
+    // we dont overflow sub/add, everything is ok
+    return true;
+ }
+
+
+ void Board::performUpdate(FinnyEntry (*entry)[2][2][NNUE_BUCKETS], NNueEvaluation (*cache)[2][NNUE_BUCKETS]){
 
     // already updated
     if (_updDone) return;
@@ -1152,16 +1172,18 @@ int Board::getPhase() const{
 
     // Check if full reset is needed - when we change bucket or a side.
     bool isResetNeeded = _nnue->resetNeeded(_updSchedule.movingPiece, _updSchedule.from, _updSchedule.to, _updSchedule.color);
-
     // Reset is needed
     if(isResetNeeded){
         // good color - > color of the accumulator that does not need to be updated
         Color goodcolor = getOppositeColor(_updSchedule.color);
+        int curbucket = _nnue->getCurrentBucket(_updSchedule.to, _updSchedule.color);
+        int curside = (_col(_updSchedule.to) > 3);
 
         // Copy "good" part of accumulator to a new shit
         int16_t * goodhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
         _nnue = _nnue + 1;
         int16_t * newhalf = _nnue->getHalfAccumulatorPtr(goodcolor);
+        int16_t * nncache = (*cache)[curside][curbucket].getHalfAccumulatorPtr(_updSchedule.color);
         std::memcpy(newhalf, goodhalf, sizeof(int16_t) * NNUE_HIDDEN);
 
         // incrementally update good part by using half update functions
@@ -1190,13 +1212,30 @@ int Board::getPhase() const{
             break;
         }
 
-        // half reset "bad" part
-        _nnue->halfReset(*this, _updSchedule.color);
+
+        // Use Finny Table from Koivisto to optimize updates of the accumulator
+        // if finny acc is ready and have reasonable amount of changes, copy and refresh
+       if ( calculateBoardDifference(&(*entry)[curside][_updSchedule.color][curbucket]._pieces) &&
+        (*entry)[curside][_updSchedule.color][curbucket].isReady == true){
+
+            // Update accumulator based on difference in boards and copy to current accumulator point
+            (*cache)[curside][curbucket].addSubDifference(*this,  _updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces);
+            memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), nncache, sizeof(int16_t) * NNUE_HIDDEN);
+
+        }else{
+            // otherwise do half reset
+            // half reset "bad" part
+            _nnue->halfReset(*this, _updSchedule.color);
+            // save to finny table
+            (*entry)[curside][_updSchedule.color][curbucket].isReady = true;
+            memcpy(nncache, _nnue->getHalfAccumulatorPtr(_updSchedule.color), sizeof(int16_t) * NNUE_HIDDEN);
+        }
+        memcpy((*entry)[curside][_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
 
       return;
     }
 
-    // Fll reset is not needed
+    // Full reset is not needed
     // copy accumulator and proceed
     *(_nnue + 1) = *_nnue;
     _nnue = _nnue + 1;
@@ -1286,7 +1325,6 @@ void Board::_scheduleUpdateCapture(const Board &board, Color c, PieceType moving
     _updDone = false;
 }
 
-
 void Board::_scheduleUpdateCastle(const Board &board, Color c, unsigned int from, unsigned int to, unsigned int fromR, unsigned int toR){
 
     _updSchedule.type = NN_CASTLE;
@@ -1302,8 +1340,6 @@ void Board::_scheduleUpdateCastle(const Board &board, Color c, unsigned int from
 
     _updDone = false;
 }
-
-
 
 void Board::_scheduleUpdateEnpass(const Board &board, Color c, unsigned int from, unsigned int to){
 
