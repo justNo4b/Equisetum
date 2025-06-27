@@ -274,7 +274,7 @@ class Board {
   U64 getCastlingRights() const;
 
   void performUpdate(FinnyEntry (*)[2][2][NNUE_BUCKETS], NNueEvaluation (*)[2][NNUE_BUCKETS]);
-  inline bool calculateBoardDifference(U64 (*)[2][6]);
+  inline bool calculateBoardDifference(U64);
 
   // check if the move is pseudo-legal on the given board
   bool moveIsPseudoLegal(Move) const;

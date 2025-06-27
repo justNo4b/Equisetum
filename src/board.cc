@@ -1142,22 +1142,14 @@ int Board::getPhase() const{
     return _frc;
  }
 
-inline bool Board::calculateBoardDifference(U64 (* otherPieces)[2][6]){
+inline bool Board::calculateBoardDifference(U64 occupied){
     int maxSubs = _popCount(_occupied);
-    int differences = 0;
-    for (auto color : { WHITE, BLACK }){
-        for (auto piece :{PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING}){
-            U64 toremove = (*otherPieces)[color][piece] & ~_pieces[color][piece];
-            U64 toadd = _pieces[color][piece] & ~(*otherPieces)[color][piece];
+    int curSubs = _popCount(_occupied ^ occupied);
 
-            differences += _popCount(toremove) + _popCount(toadd);
-
-            if (differences > maxSubs){
-                return false;
-            }
-        }
+    if (curSubs > maxSubs){
+        return false;
     }
-    // we dont overflow sub/add, everything is ok
+
     return true;
  }
 
@@ -1215,11 +1207,11 @@ inline bool Board::calculateBoardDifference(U64 (* otherPieces)[2][6]){
 
         // Use Finny Table from Koivisto to optimize updates of the accumulator
         // if finny acc is ready and have reasonable amount of changes, copy and refresh
-       if ( calculateBoardDifference(&(*entry)[curside][_updSchedule.color][curbucket]._pieces) &&
+       if ( calculateBoardDifference((*entry)[curside][_updSchedule.color][curbucket].occupied) &&
         (*entry)[curside][_updSchedule.color][curbucket].isReady == true){
 
             // Update accumulator based on difference in boards and copy to current accumulator point
-            (*cache)[curside][curbucket].addSubDifference(*this,  _updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket]._pieces);
+            (*cache)[curside][curbucket].addSubDifference(*this,  _updSchedule.color, &(* entry)[curside][_updSchedule.color][curbucket].pieces);
             memcpy(_nnue->getHalfAccumulatorPtr(_updSchedule.color), nncache, sizeof(int16_t) * NNUE_HIDDEN);
 
         }else{
@@ -1230,7 +1222,8 @@ inline bool Board::calculateBoardDifference(U64 (* otherPieces)[2][6]){
             (*entry)[curside][_updSchedule.color][curbucket].isReady = true;
             memcpy(nncache, _nnue->getHalfAccumulatorPtr(_updSchedule.color), sizeof(int16_t) * NNUE_HIDDEN);
         }
-        memcpy((*entry)[curside][_updSchedule.color][curbucket]._pieces, this->_pieces, sizeof(this->_pieces));
+        memcpy((*entry)[curside][_updSchedule.color][curbucket].pieces, this->_pieces, sizeof(this->_pieces));
+        (*entry)[curside][_updSchedule.color][curbucket].occupied = _occupied;
 
       return;
     }

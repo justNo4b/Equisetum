@@ -25,10 +25,11 @@
 
 struct FinnyEntry
 {
-    U64 _pieces[2][6];
+    U64 pieces[2][6];
+    U64 occupied;
     bool isReady;
 
-    FinnyEntry() : _pieces{0}, isReady(false) {};
+    FinnyEntry() : pieces{0}, occupied(0), isReady(false) {};
 };
 
 
