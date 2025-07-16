@@ -24,6 +24,7 @@
 #include "transptable.h"
 #include "orderinginfo.h"
 #include "timer.h"
+#include "finnyentry.h"
 #include <chrono>
 #include <atomic>
 
@@ -119,6 +120,9 @@ class Search {
 
   SEARCH_Data _sStack;
 
+  FinnyEntry _finnyTable[2][2][NNUE_BUCKETS];
+  NNueEvaluation _nnCache[2][NNUE_BUCKETS];
+
   NNueEvaluation _nnStack[MAX_PLY * 2];
 
   /**
@@ -192,11 +196,16 @@ class Search {
    * @param depth search depth
    */
 
-  inline void _updateBeta(bool, const Move, Color, int, int, int, int [], int, int[], int);
+  inline int _getHistoryBonus(int, int, int);
+  inline int _getHistoryPenalty(int, int, int, int, bool, bool, CutOffState);
+
+  inline void _updateBeta(bool, const Move, Color, int, int, int, int);
 
   inline bool _isRepetitionDraw(U64, int);
 
   inline int _makeDrawScore();
+
+  inline int _makeCmhBonus(int);
 
   /**
    * @brief Root negamax function.
@@ -261,6 +270,8 @@ class Search {
    * it in the _lmr_R_array
    */
   void init_LMR_array();
+
+  void _populateFinnyTable();
 
 };
 

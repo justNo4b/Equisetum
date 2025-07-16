@@ -22,9 +22,6 @@
 #include "board.h"
 #include "orderinginfo.h"
 
-#define  MAX_HISTORY_SCORE      (16384)
-#define  HALFMAX_HISTORY_SCORE  (8192)
-
 /**
  * @brief Abstract base class for an object that picks moves from a move list in an optimal order.
  *
@@ -42,7 +39,7 @@ class MovePicker {
    * @param board Current board state for all moves in the provided MoveList
    * @param moveList Pointer to the MoveList to pick moves from
    */
-  MovePicker(const OrderingInfo *, const Board *, int, Color, int, int);
+  MovePicker(const OrderingInfo *, const Board *, int, Color, int, int, int);
 
   /**
    * @brief Returns the next best move from this MovePicker's MoveList.
@@ -137,6 +134,7 @@ class MovePicker {
    * Used to determine CounterMoves
    */
   int _pMove;
+  int _ppMove;
 };
 
 #endif

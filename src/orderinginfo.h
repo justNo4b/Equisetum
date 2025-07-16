@@ -24,6 +24,8 @@
 #include "move.h"
 
 #define cmhCalculateIndex(moveInt) (((moveInt & 0x7) + ((moveInt >> 15) & 0x3f) * 6))
+#define  MAX_HISTORY_SCORE      (16384)
+#define  HALFMAX_HISTORY_SCORE  (8192)
 
 /**
  * @brief Contains information related to a search in progress
@@ -62,8 +64,9 @@ class OrderingInfo {
    * @param depth Depth of move that caused this increment
    */
   void incrementHistory(Color, int, int, int16_t);
-  void incrementCounterHistory(Color, int, PieceType, int, int);
   void incrementCapHistory(PieceType, PieceType, int, int);
+  void incrementHistory(Color, int, int, int);
+  void incrementCounterHistory(int, Color, int, PieceType, int, int);
 
   /**
    * @brief Update countermove.
@@ -94,15 +97,6 @@ class OrderingInfo {
    */
   int getHistory(Color, int, int) const;
 
-    /**
-   * @brief Get CounterMoveHistory for the move
-   *
-   * @param prevMove  previous move made
-   * @param pType     moving piece type
-   * @param to        move to
-   */
-  int getCountermoveHistory(Color, int, PieceType, int) const;
-
   /**
    * @brief Get history information for the current capture move
    *
@@ -111,6 +105,17 @@ class OrderingInfo {
    * @param to              move to location
    */
   int getCaptureHistory(PieceType, PieceType, int) const;
+
+  /**
+   * @brief Get CounterMoveHistory for the move
+   *
+   * @param prevMove  previous move made
+   * @param pType     moving piece type
+   * @param to        move to
+   */
+  int getCountermoveHistory(Color, int, PieceType, int) const;
+
+  int getFollowupHistory(Color, int, PieceType, int) const;
 
   /**
    * @brief Update the killer moves for the given ply with the given move.
@@ -157,7 +162,7 @@ class OrderingInfo {
    * @brief Table of beta-cutoff values dependand on the previous move by opponent
    * Indexed by [prevPieceType][prevTo][movePieceType][moveTo]
    */
-  int16_t _counterMoveHistory[2][6 * 64][6][64];
+  int16_t _counterMoveHistory[2][2][6 * 64][6][64];
 
   /**
    * @brief Table of beta-cutoff values for captures indexed by [capturingPiece][capturedPiece][to_square]

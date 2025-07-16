@@ -76,6 +76,7 @@ void Search::iterDeep() {
   _selDepth = 0;
   std::memset(_rootNodesSpent, 0, sizeof(_rootNodesSpent));
   _timer.startIteration();
+  _populateFinnyTable();
   int maxDepthSearched = 0;
 
   int targetDepth = _timer.getSearchDepth();
@@ -205,6 +206,17 @@ void Search::_logUciInfo(const MoveList &pv, int depth, int bestScore, U64 nodes
   std::cout << std::endl;
 }
 
+void Search::_populateFinnyTable(){
+    for (auto color : {WHITE, BLACK}){
+        for (int i = 0; i < NNUE_BUCKETS; i++){
+            for (int j = 0; j < 2; j++){
+            _finnyTable[j][color][i] = FinnyEntry();
+            }
+
+        }
+    }
+}
+
 void Search::stop() {
   _stop = true;
 }
@@ -234,6 +246,7 @@ bool Search::_checkLimits() {
   return _timer.checkLimits(_nodes);
 }
 
+<<<<<<< HEAD
 inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ply, int depth, int qMoves[], int qCount, int cMoves[], int cCount){
 	// best move is quiet, update all quiet heuristics (bonuses and penalties)
     int16_t bonus = std::min(2657, 286 * depth - 280);
@@ -259,6 +272,44 @@ inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int 
   }
 
   if (!isQuiet){
+=======
+inline int Search::_makeCmhBonus(int bonus){
+    return std::min(MAX_HISTORY_SCORE, bonus * 4);
+}
+
+inline int Search::_getHistoryBonus(int depth, int eval, int alpha){
+    // initial bonus is depth
+    int bonus = depth;
+
+    //modify
+    bonus += 2 * (eval < alpha);
+    return std::min(MAX_HISTORY_SCORE, 32 * bonus * bonus);
+}
+
+int Search::_getHistoryPenalty(int depth, int eval, int alpha, int pmScore, bool ttNode, bool cutNode, CutOffState ttCut){
+    // initial penalty is depth
+    int penalty = depth;
+
+    // modify
+    if (ttCut & ALPHA) penalty -= 1;
+    penalty -= (eval < alpha);
+    penalty -= (!ttNode && depth >= 4);
+    penalty += (pmScore < -HALFMAX_HISTORY_SCORE);
+    penalty += cutNode;
+
+    penalty = std::max(0, penalty);
+    return std::max(-MAX_HISTORY_SCORE, -32 * penalty * (penalty - 1));
+}
+
+inline void Search::_updateBeta(bool isQuiet, const Move move, Color color, int pMove, int ppMove, int ply, int bonus){
+	if (isQuiet) {
+    _orderingInfo.updateKillers(ply, move);
+    _orderingInfo.incrementHistory(color, move.getFrom(), move.getTo(), bonus);
+    _orderingInfo.updateCounterMove(color, pMove, move.getMoveINT());
+    _orderingInfo.incrementCounterHistory(0, color, pMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
+    _orderingInfo.incrementCounterHistory(1, color, ppMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
+  }else{
+>>>>>>> 5109d82bb07addaf2141fe7cb6f6a6b43f3c24d9
     _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), bonus);
   }
 
@@ -300,7 +351,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
 
   _sStack.AddEval(nodeEval);
 
-  MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0);
+  MovePicker movePicker(&_orderingInfo, &board, hashMove, board.getActivePlayer(), 0, 0, 0);
 
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
@@ -343,7 +394,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
   }
 
   if (!_stop && !(bestMove.getFlags() & Move::NULL_MOVE)) {
-    myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, 0);
+    myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, true, alpha, depth, 0);
     _bestMove = bestMove;
     _bestScore = alpha;
   }
@@ -360,12 +411,15 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   bool singNode = false;
   bool nmpTree = _sStack.nmpTree;
   bool pvNode = alpha != beta - 1;
+  bool ttPv = pvNode;
   bool endgameNode = board.isEndGamePosition();
   int score;
   int ply = _sStack.ply;
   int pMove = _sStack.moves[ply - 1].getMoveINT();
   int pMoveScore = _sStack.moves[ply - 1].getValue();
   int pMoveIndx = cmhCalculateIndex(pMove);
+  int ppMove = 0;
+  int ppMoveIndx = 0;
   int alphaOrig = alpha;
   int nodeEval = NOSCORE;
   int  legalCount = 0;
@@ -401,6 +455,11 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     return _qSearch(board, alpha, beta);
   }
 
+  if (ply >= 2){
+    ppMove = _sStack.moves[ply - 2].getMoveINT();
+    ppMoveIndx = cmhCalculateIndex(ppMove);
+  }
+
     // Check transposition table cache
   // If TT is causing a cuttoff, we update move ordering stuff
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
@@ -408,6 +467,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     ttNode = true;
     ttMove = Move(ttEntry.move);
     qttNode = ttMove.isQuiet();
+    ttPv = ttPv || (ttEntry.Flag & TTPV);
     if (ttEntry.depth >= depth && !pvNode && !singSearch){
       int hashScore = ttEntry.score;
 
@@ -415,14 +475,20 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         hashScore = (hashScore > 0) ? (hashScore - ply) :  (hashScore + ply);
       }
 
-      if (ttEntry.Flag == EXACT){
+      if (ttEntry.Flag & EXACT){
         return hashScore;
       }
+<<<<<<< HEAD
       if (ttEntry.Flag == BETA && hashScore >= beta){
+=======
+      if (ttEntry.Flag & BETA && hashScore >= beta){
+        int bonus = _getHistoryBonus(depth, 0, 0);
+        _updateBeta(qttNode, ttMove, board.getActivePlayer(), pMove, ppMove, ply, bonus);
+>>>>>>> 5109d82bb07addaf2141fe7cb6f6a6b43f3c24d9
         return beta;
       }
 
-      if (ttEntry.Flag == ALPHA && hashScore <= alpha){
+      if (ttEntry.Flag & ALPHA && hashScore <= alpha){
         return alpha;
       }
     }
@@ -432,9 +498,22 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Do the Evaluation, unless we are in check or prev move was NULL
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
-  board.performUpdate();
+  board.performUpdate(&_finnyTable, &_nnCache);
   nodeEval = Eval::evaluate(board, board.getActivePlayer());
   _sStack.AddEval(nodeEval);
+
+
+
+    // Use static evaluation difference to improve quiet move ordering
+    // Stolen from SF (hello Viz)
+    if (pMove != 0 && _sStack.moves[ply - 1].isQuiet())
+    {
+        int bonus = -10 * (_sStack.statEval[ply - 1] + nodeEval);
+        bonus = std::max(-1500, bonus);
+        bonus = std::min(bonus, 1500);
+        _orderingInfo.incrementHistory(getOppositeColor(board.getActivePlayer()), _sStack.moves[ply - 1].getFrom(), _sStack.moves[ply - 1].getTo(), bonus);
+
+    }
 
 
   // Check if we are improving
@@ -499,6 +578,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
        depth >= 4 &&
        alpha < WON_IN_X){
         int pcBeta = beta + 218 - 100 * improving;
+<<<<<<< HEAD
 
         MovePicker pcPicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), MAX_PLY, 0);
         while (pcPicker.hasNext()){
@@ -508,10 +588,21 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
             if (move.getValue() <= 300000){
                 break;
             }
+=======
 
-            // skip quiet TT moves
-            if (move == ttEntry.move && move.isQuiet()){
+        MovePicker pcPicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0, 0);
+        while (pcPicker.hasNext()){
+            Move move = pcPicker.getNext();
+>>>>>>> 5109d82bb07addaf2141fe7cb6f6a6b43f3c24d9
+
+            // when proving singularity, dont try ttmove
+            if (move == ttEntry.move && singSearch){
                 continue;
+            }
+
+            // exit when there is no more good captures
+            if (move.getValue() <= 300000){
+                break;
             }
 
             // make a move
@@ -540,10 +631,14 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     }
 
   // Initiate normal picker and proceed
+<<<<<<< HEAD
   MovePicker movePicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), ply, pMove);
 
   int qMoves[32] = {0};
   int cMoves[32] = {0};
+=======
+  MovePicker movePicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), ply, pMove, ppMove);
+>>>>>>> 5109d82bb07addaf2141fe7cb6f6a6b43f3c24d9
 
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
@@ -555,10 +650,17 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
 
     int  moveHistory  = isQuiet ?
+<<<<<<< HEAD
                         _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) +
                         _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()):
                         _orderingInfo.getCaptureHistory(move.getPieceType(),move.getCapturedPieceType(), move.getTo());
     int cmHistory =  isQuiet ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()) : 0;
+=======
+                        _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) :
+                        _orderingInfo.getCaptureHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo());
+    int cmHistory     = isQuiet ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()) : 0;
+    int fhHistory     = isQuiet && ppMove != 0 ? _orderingInfo.getFollowupHistory(board.getActivePlayer(), ppMoveIndx, move.getPieceType(), move.getTo()) : 0;
+>>>>>>> 5109d82bb07addaf2141fe7cb6f6a6b43f3c24d9
 
     // 5. PRE-MOVELOOP PRUNING
 
@@ -570,16 +672,26 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       // we suppose other moves wont improve our situation
       if ((qSeen > _lmp_Array[depth][(improving || pvNode)])) break;
 
-      // 5.2. SEE pruning of quiet moves
+      // 5.2. COUNTER-MOVE HISTORY PRUNING
+      // Prune quiet moves with poor CMH on the tips of the tree
+      if (depth <= 3 && isQuiet && (cmHistory + fhHistory / 2 <= (-4096 * depth + 4096))) continue;
+
+      // 5.3. SEE pruning of quiet
       // At shallow depth prune highlyish -negative SEE-moves
       if (depth <= 10
           && isQuiet
           && !board.SEE_GreaterOrEqual(move, (-68 * depth + 48))) continue;
-          //&& board.Calculate_SEE(move) < ) continue;
 
+<<<<<<< HEAD
       if (depth <= 3 && isQuiet && cmHistory <= -3254 * depth -1952) continue;
 
 }
+=======
+      if (depth <= 6
+          && !isQuiet
+          && !board.SEE_GreaterOrEqual(move, (-150 * depth + 100))) continue;
+    }
+>>>>>>> 5109d82bb07addaf2141fe7cb6f6a6b43f3c24d9
 
 
         int tDepth = depth;
@@ -590,7 +702,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // At high depth if we have the TT move, and we are certain
         // that non other moves are even close to it, extend this move
         // At low depth use statEval instead of search (Kimmys idea)
-        if (ttEntry.Flag != ALPHA &&
+        if (!(ttEntry.Flag & ALPHA) &&
             ttEntry.depth >= depth - 3 &&
             ttEntry.move == move.getMoveINT() &&
             abs(ttEntry.score) < WON_IN_X / 4){
@@ -602,6 +714,8 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                 singNode = true;
               }else if(!incheckNode && depth > 5 && ttEntry.score >= beta){
                 tDepth -= 2;
+              }else if (!incheckNode && depth > 5 && cutNode){
+                tDepth -= 1;
               }
             }
 
@@ -668,6 +782,16 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // Reduce more in the cut-nodes - used by SF/Komodo/etc
           reduction += cutNode;
 
+<<<<<<< HEAD
+=======
+          // Reduce less in pv node or nodes that were in pv previously
+          reduction -= ttPv;
+
+          // Reduce less if move on the previous ply was bad
+          // Ie hystorycally bad quiet, see- capture or underpromotion
+          reduction -= pMoveScore < -HALFMAX_HISTORY_SCORE;
+
+>>>>>>> 5109d82bb07addaf2141fe7cb6f6a6b43f3c24d9
           // if we are improving, reduce a bit less (from Weiss)
           reduction -= improving;
 
@@ -677,7 +801,14 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // reduce less for a position where singular move exists
           reduction -= singNode;
 
+<<<<<<< HEAD
           reduction -= _clamp(-2, moveHistory / 4265, 2);
+=======
+          // reduce more/less based on the hitory
+          reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
+          reduction -= cmHistory  / HALFMAX_HISTORY_SCORE;
+          reduction -= fhHistory / HALFMAX_HISTORY_SCORE;
+>>>>>>> 5109d82bb07addaf2141fe7cb6f6a6b43f3c24d9
 
           // reduce less when move is a Queen promotion
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
@@ -728,10 +859,21 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         _sStack.Remove();
         // Beta cutoff
         if (score >= beta) {
+<<<<<<< HEAD
           _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ply, depth, qMoves, qPlayed, cMoves, cPlayed);
+=======
+          // Add this move as a new killer move and update history if move is quiet
+          int bonus = _getHistoryBonus(depth, nodeEval, alpha);
+          _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ppMove, ply, bonus);
+          // Award counter-move history additionally if we refuted special quite previous move
+          if (isPmQuietCounter){
+            _orderingInfo.incrementCounterHistory(0, board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
+            _orderingInfo.incrementCounterHistory(1, board.getActivePlayer(), ppMove, move.getPieceType(), move.getTo(), _makeCmhBonus(bonus));
+          }
+>>>>>>> 5109d82bb07addaf2141fe7cb6f6a6b43f3c24d9
           // Add a new tt entry for this node
           if (!_stop && !singSearch){
-            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, depth, ply);
+            myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, ttPv, score, depth, ply);
           }
           // we updated beta and in the pVNode so we should update our pV
           if (pvNode && !_stop){
@@ -755,6 +897,20 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
             // memcpy - (куда, откуда, длина)
             std::memcpy(up_pV->pVmoves + 1, thisPV.pVmoves, sizeof(int) * thisPV.length);
           }
+<<<<<<< HEAD
+=======
+
+        }else{
+          // Beta was not beaten and we dont improve alpha in this case we lower our search history values
+          int penalty = _getHistoryPenalty(depth, nodeEval, alpha, pMoveScore, ttNode, cutNode, (CutOffState)ttEntry.Flag);
+          if (isQuiet){
+            _orderingInfo.incrementHistory(board.getActivePlayer(), move.getFrom(), move.getTo(), penalty);
+            _orderingInfo.incrementCounterHistory(0, board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), penalty);
+            _orderingInfo.incrementCounterHistory(1, board.getActivePlayer(), ppMove, move.getPieceType(), move.getTo(), penalty);
+          }else{
+            _orderingInfo.incrementCapHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo(), penalty);
+          }
+>>>>>>> 5109d82bb07addaf2141fe7cb6f6a6b43f3c24d9
         }
       }
 
@@ -785,9 +941,9 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   if (!_stop && !singSearch){
       if (alpha <= alphaOrig) {
         int saveMove = ttMove.getMoveINT() != 0 ? ttMove.getMoveINT() : 0;
-        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, alpha, depth, ply);
+        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, ttPv, alpha, depth, ply);
       } else {
-        myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, alpha, depth, ply);
+        myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, ttPv, alpha, depth, ply);
       }
   }
 
@@ -797,6 +953,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 int Search::_qSearch(Board &board, int alpha, int beta) {
    _nodes++;
    bool pvNode = alpha != beta - 1;
+   bool ttPv = pvNode;
    int nodeEval = NOSCORE;
    int standPat = NOSCORE;
 
@@ -805,7 +962,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     return 0;
   }
 
-  board.performUpdate();
+  board.performUpdate(&_finnyTable, &_nnCache);
   nodeEval = Eval::evaluate(board, board.getActivePlayer());
   standPat = nodeEval;
 
@@ -825,23 +982,24 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
   if (ttEntry.Flag != NONE){
     if (!pvNode){
       int hashScore = ttEntry.score;
+      ttPv = ttPv || (ttEntry.Flag & TTPV);
 
       if (abs(hashScore) > WON_IN_X){
         hashScore = (hashScore > 0) ? (hashScore - MAX_PLY) :  (hashScore + MAX_PLY);
       }
-      if (ttEntry.Flag == EXACT){
+      if (ttEntry.Flag & EXACT){
         return hashScore;
       }
-      if (ttEntry.Flag == BETA && hashScore >= beta){
+      if (ttEntry.Flag & BETA && hashScore >= beta){
         return beta;
       }
-      if (ttEntry.Flag == ALPHA && hashScore <= alpha){
+      if (ttEntry.Flag & ALPHA && hashScore <= alpha){
         return alpha;
       }
     }
   }
 
-  MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0);
+  MovePicker movePicker(&_orderingInfo, &board, 0, board.getActivePlayer(), MAX_PLY, 0, 0);
 
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
@@ -866,7 +1024,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
           if (score >= beta) {
             // Add a new tt entry for this node
             if (!_stop){
-                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, score, 0, MAX_PLY);
+                myHASH->HASH_Store(board.getZKey().getValue(), move.getMoveINT(), BETA, ttPv, score, 0, MAX_PLY);
             }
             return beta;
           }
