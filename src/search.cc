@@ -489,6 +489,13 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // We do not do them InCheck, in pvNodes and when proving singularity
   bool isPrune = !pvNode && !incheckNode && !singSearch;
 
+
+  if (isPrune && depth <= 3 && nodeEval + 900 * depth <= alpha){
+    int rScore = _qSearch(board, alpha, alpha + 1);
+    if (rScore <= alpha){
+        return alpha;
+    }
+  }
   // 2. REVERSE FUTILITY
   // The idea is so if we are very far ahead of beta at low
   // depth, we can just return estimated eval (eval - margin),
