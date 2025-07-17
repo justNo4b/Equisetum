@@ -388,7 +388,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   int  legalCount = 0;
   int  qCount = 0;
   Move ttMove = Move(0);
-  Move bestMove;
+  Move bestMove = Move(0);
   pV   thisPV = pV();
   up_pV->length = 0;
   Color behindColor = _sStack.sideBehind;
@@ -839,8 +839,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Store bestScore in transposition table
   if (!_stop && !singSearch){
       if (alpha <= alphaOrig) {
-        int saveMove = ttMove.getMoveINT() != 0 ? ttMove.getMoveINT() : 0;
-        myHASH->HASH_Store(board.getZKey().getValue(),  saveMove, ALPHA, ttPv, alpha, depth, ply);
+        myHASH->HASH_Store(board.getZKey().getValue(),  bestMove.getMoveINT(), ALPHA, ttPv, alpha, depth, ply);
       } else {
         myHASH->HASH_Store(board.getZKey().getValue(), bestMove.getMoveINT(), EXACT, ttPv, alpha, depth, ply);
       }
