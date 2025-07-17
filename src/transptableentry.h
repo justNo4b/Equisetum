@@ -25,10 +25,11 @@
  * @brief Represent CuttOffState of the node saved in the transposition table.
  */
 enum CutOffState{
-    NONE,
-    EXACT,
-    ALPHA,
-    BETA
+    NONE = 0,
+    EXACT = 1,
+    ALPHA = 2,
+    BETA = 4,
+    TTPV = 8
 };
 
 /**
@@ -38,7 +39,7 @@ enum CutOffState{
  */
 struct HASH_Entry
 {
-  uint32_t key32;           // 8
+  uint32_t key32;       // 8
   int move;             // 4
   int16_t score;        // 2
   int16_t eval;         // 2

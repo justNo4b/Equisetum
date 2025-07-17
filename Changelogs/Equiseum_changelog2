@@ -244,26 +244,90 @@ SPRT  | 40.0+0.40s Threads=1 Hash=64MB
 LLR   | 2.95 (-2.94, 2.94) [0.00, 4.00]
 Games | N: 27648 W: 6905 L: 6695 D: 14048
 ------------------------------------------------------------------
+24. Use static evaluation difference to improve quiet move ordering
+Idea from SF, thanks Vizvezdenec (1.24)
+------------------------------------------------------------------
+Elo   | 2.31 +- 1.85 (95%)
+SPRT  | 40.0+0.40s Threads=1 Hash=64MB
+LLR   | 2.95 (-2.94, 2.94) [0.00, 4.00]
+Games | N: 34330 W: 8516 L: 8288 D: 17526
+------------------------------------------------------------------
+25. Train new net using 7B data genearated with previous net (1.25)
+------------------------------------------------------------------
+Neutral at STC:
+Elo   | 0.58 +- 1.36 (95%)
+SPRT  | 8.0+0.08s Threads=1 Hash=8MB
+LLR   | -3.01 (-2.94, 2.94) [0.00, 4.00]
+Games | N: 89240 W: 24693 L: 24543 D: 40004
+http://chess.grantnet.us/test/39574/
 
+Much worse at DFRC STC:
+Elo   | -17.85 +- 8.09 (95%)
+SPRT  | 8.0+0.08s Threads=1 Hash=8MB
+LLR   | -2.99 (-2.94, 2.94) [0.00, 4.00]
+Games | N: 3136 W: 759 L: 920 D: 1457
+http://chess.grantnet.us/test/39575/
 
-Check crash
-http://chess.grantnet.us/test/39378/
-[Event "?"]
-[Site "?"]
-[Date "2025.05.30"]
-[Round "1"]
-[White "Equisetum-dev"]
-[Black "Equisetum-base"]
-[Result "0-1"]
-[ECO "A20"]
-[GameDuration "00:00:00"]
-[GameEndTime "2025-05-30T16:18:59.871 CST"]
-[GameStartTime "2025-05-30T16:18:59.852 CST"]
-[Opening "English Opening"]
-[PlyCount "16"]
-[Termination "abandoned"]
-[TimeControl "36.29+0.36"]
-
-1. c4 {book} e5 {book} 2. g3 {book} f5 {book} 3. Bg2 {book} Nc6 {book}
-4. Nc3 {book} a6 {book} 5. e3 {book} Nf6 {book} 6. d4 {book} e4 {book}
-7. f3 {book} d6 {book} 8. fxe4 {book} fxe4 {book, White disconnects} 0-1
+Passed STD LTC:
+Elo   | 3.80 +- 2.72 (95%)
+SPRT  | 40.0+0.40s Threads=1 Hash=64MB
+LLR   | 2.98 (-2.94, 2.94) [0.00, 4.00]
+Games | N: 16846 W: 4407 L: 4223 D: 8216
+Penta | [59, 1911, 4317, 2059, 77]
+http://chess.grantnet.us/test/39577/
+------------------------------------------------------------------
+26. Reduce less in pv node or nodes that were in pv previously (1.26)
+------------------------------------------------------------------
+Elo   | 4.88 +- 3.19 (95%)
+SPRT  | 40.0+0.40s Threads=1 Hash=64MB
+LLR   | 2.97 (-2.94, 2.94) [0.00, 4.00]
+Games | N: 11752 W: 2934 L: 2769 D: 6049
+Penta | [22, 1322, 3042, 1449, 41]
+http://chess.grantnet.us/test/39609/
+------------------------------------------------------------------
+27. Implement Follow-up history for ordering quiet moves (1.27)
+------------------------------------------------------------------
+Elo   | 3.97 +- 2.79 (95%)
+SPRT  | 40.0+0.40s Threads=1 Hash=64MB
+LLR   | 2.96 (-2.94, 2.94) [0.00, 4.00]
+Games | N: 15314 W: 3792 L: 3617 D: 7905
+Penta | [37, 1725, 3966, 1884, 45]
+http://chess.grantnet.us/test/39619/
+------------------------------------------------------------------
+28. Implement FinnyTables from Koivisto for accumulator updates (1.28)
+------------------------------------------------------------------
+Elo   | 8.94 +- 4.83 (95%)
+SPRT  | 8.0+0.08s Threads=1 Hash=8MB
+LLR   | 2.95 (-2.94, 2.94) [0.00, 4.00]
+Games | N: 6572 W: 1793 L: 1624 D: 3155
+Penta | [60, 738, 1545, 859, 84]
+http://chess.grantnet.us/test/39635/
+------------------------------------------------------------------
+29. Use followup history to adjust LMR (1.29)
+------------------------------------------------------------------
+Elo   | 1.77 +- 1.42 (95%)
+SPRT  | 40.0+0.40s Threads=1 Hash=64MB
+LLR   | 2.96 (-2.94, 2.94) [0.00, 4.00]
+Games | N: 58432 W: 14272 L: 13974 D: 30186
+Penta | [142, 6652, 15334, 6942, 146]
+http://chess.grantnet.us/test/39637/
+------------------------------------------------------------------
+30. Use followup history to adjustment pruning (1.30)
+------------------------------------------------------------------
+Elo   | 1.72 +- 1.37 (95%)
+SPRT  | 40.0+0.40s Threads=1 Hash=64MB
+LLR   | 2.98 (-2.94, 2.94) [0.00, 4.00]
+Games | N: 62252 W: 15133 L: 14824 D: 32295
+Penta | [136, 7080, 16409, 7341, 160]
+http://chess.grantnet.us/test/39661/
+------------------------------------------------------------------
+31. Minor speedup: adjust order of pre-loop pruning conditions
+Thanks to Vizvezdenec for pointing it out (1.31)
+------------------------------------------------------------------
+Elo   | 0.63 +- 0.88 (95%)
+SPRT  | 8.0+0.08s Threads=1 Hash=8MB
+LLR   | 2.95 (-2.94, 2.94) [-1.00, 2.00]
+Games | N: 189808 W: 48301 L: 47955 D: 93552
+Penta | [1716, 22899, 45450, 23001, 1838]
+http://chess.grantnet.us/test/39674/
+------------------------------------------------------------------

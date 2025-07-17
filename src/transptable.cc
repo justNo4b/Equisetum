@@ -80,15 +80,17 @@ void HASH::HASH_Clear(){
     }
 }
 
-void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, int score, int eval, int depth, int ply){
+void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, bool isttpv, int score, int raweval, int depth, int ply){
       if (abs(score) > WON_IN_X){
         score = (score > 0) ? (score - ply) : (score + ply);
       }
 
       uint32_t key32 = posKey >> 32;
       U64 index = posKey & TableMask;
-      if (key32 !=  hashTable[index].key32 || depth * 2 >=  hashTable[index].depth || bound == EXACT){
-         hashTable[index] = HASH_Entry(key32, cMove, (int16_t)score, (int16_t)eval, depth, bound);
+
+     if (key32 !=  hashTable[index].key32 || depth * 2 >=  hashTable[index].depth || bound == EXACT){
+        uint8_t ttbound = isttpv ? bound | TTPV : bound;
+         hashTable[index] = HASH_Entry(key32, cMove, (int16_t)score, (int16_t)raweval, depth, ttbound);
       }
 }
 
