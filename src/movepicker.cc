@@ -99,8 +99,8 @@ void MovePicker::_scoreMoves() {
       move.setValue(COUNTERMOVE_BONUS);
     } else { // Quiet
         int h = _orderingInfo->getHistory(_color, move.getFrom(), move.getTo());
-        int ch = _orderingInfo->getCountermoveHistory(_color, pMoveInx, move.getPieceType(), move.getTo());
-        int fh = _orderingInfo->getFollowupHistory(_color, ppMoveIndx, move.getPieceType(), move.getTo());
+        int ch = _pMove != 0 ? _orderingInfo->getCountermoveHistory(_color, pMoveInx, move.getPieceType(), move.getTo()) : 0;
+        int fh = _ppMove != 0 ? _orderingInfo->getFollowupHistory(_color, ppMoveIndx, move.getPieceType(), move.getTo()) : 0;
       move.setValue(h + ch + fh / 2);
     }
   }
