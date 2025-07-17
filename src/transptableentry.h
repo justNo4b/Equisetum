@@ -47,7 +47,7 @@ struct HASH_Entry
   uint8_t Flag;         // 1
 
   HASH_Entry() : key32(0), move(0),  score(0), eval(NOSCORE), depth(0), Flag(NONE) {}
-  HASH_Entry( uint32_t key, int cMove, int16_t s, int16_t e, uint8_t d, CutOffState state) :
+  HASH_Entry( uint32_t key, int cMove, int16_t s, int16_t e, uint8_t d, int8_t state) :
       key32(key), move(cMove), score(s), eval(e), depth(d), Flag(state) {}
 };
 
