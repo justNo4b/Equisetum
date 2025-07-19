@@ -59,7 +59,7 @@ class HASH{
   uint8_t ttAge;
   // Min is always 1, max should be the leftover bits from TTCutType
   const uint8_t TT_AGE_MIN = 1;
-  const uint8_t TT_AGE_MAX = 16;
+  const uint8_t TT_AGE_MAX = 15;
 
 };
 

@@ -77,6 +77,10 @@ void Search::iterDeep() {
   std::memset(_rootNodesSpent, 0, sizeof(_rootNodesSpent));
   _timer.startIteration();
   _populateFinnyTable();
+
+  // If we are in main thread, increase age
+    if (_logUci) myHASH->HASH_Age();
+
   int maxDepthSearched = 0;
 
   int targetDepth = _timer.getSearchDepth();
