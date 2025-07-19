@@ -92,7 +92,8 @@ void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, bool isttpv, in
       }
 
       U64 index = posKey & TableMask;
-      if (posKey !=  hashTable[index].posKey || depth * 2 >=  hashTable[index].depth || bound == EXACT){
+      uint8_t entryAge = hashTable[index].FlagAge >> 4;
+      if (posKey !=  hashTable[index].posKey || depth * 2 >=  hashTable[index].depth || bound == EXACT || entryAge != ttAge){
         uint8_t ttbound = isttpv ? bound | TTPV : bound;
         ttbound = ttbound | (ttAge << 4);
          hashTable[index] = HASH_Entry(posKey, cMove, (int16_t)score, depth, ttbound);
