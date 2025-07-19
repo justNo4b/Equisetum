@@ -38,6 +38,8 @@ class HASH{
   void          HASH_Store(U64 posKey, int cMove, CutOffState bound, bool ispv, int score, int depth, int ply);
   U64           HASH_Size();
   void          HASH_Prefetch(U64 posKey);
+  void          HASH_Age();
+
 
   void            pHASH_Clear();
   pawn_HASH_Entry pHASH_Get(U64 posKey);
@@ -53,6 +55,11 @@ class HASH{
   pawn_HASH_Entry *pHASH;
   U64 pTableSize;
   U64 pTableMask;
+
+  uint8_t ttAge;
+  // Min is always 1, max should be the leftover bits from TTCutType
+  const uint8_t TT_AGE_MIN = 1;
+  const uint8_t TT_AGE_MAX = 16;
 
 };
 

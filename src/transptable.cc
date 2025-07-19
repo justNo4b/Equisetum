@@ -49,6 +49,10 @@ HASH::HASH(){
 
   // save mask
   pTableMask = pTableSize - 1;
+
+  // set age
+  ttAge = TT_AGE_MIN;
+
 }
 
 void  HASH::HASH_Initalize_MB(const int MB){
@@ -67,6 +71,8 @@ void  HASH::HASH_Initalize_MB(const int MB){
   hashTable = new HASH_Entry [TableSize];
   HASH_Clear();
   TableMask = TableSize - 1;
+
+  ttAge = TT_AGE_MIN;
 }
 
 U64 HASH::HASH_Size(){
@@ -127,4 +133,12 @@ pawn_HASH_Entry HASH::pHASH_Get (U64 posKey){
     return pHASH[index];
   }
   return pawn_HASH_Entry();
+}
+
+void HASH::HASH_Age(){
+    if (ttAge == TT_AGE_MAX){
+      ttAge = TT_AGE_MIN;
+    }else{
+        ttAge++;
+    }
 }

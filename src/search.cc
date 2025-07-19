@@ -310,7 +310,7 @@ int Search::_rootMax(const Board &board, int alpha, int beta, int depth) {
 
   // Load TT
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
-  hashMove = ttEntry.Flag != NONE ? ttEntry.move : 0;
+  hashMove = ttEntry.getFlag() != NONE ? ttEntry.move : 0;
 
   _sStack.AddEval(nodeEval);
 
@@ -392,6 +392,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   pV   thisPV = pV();
   up_pV->length = 0;
   Color behindColor = _sStack.sideBehind;
+  CutOffState ttFlag = NONE;
 
   bool isPmQuietCounter = (pMoveScore >= 50000 && pMoveScore <= 200000);
 
@@ -426,11 +427,12 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
     // Check transposition table cache
   // If TT is causing a cuttoff, we update move ordering stuff
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
-  if (ttEntry.Flag != NONE){
+  ttFlag = ttEntry.getFlag();
+  if (ttFlag != NONE){
     ttNode = true;
     ttMove = Move(ttEntry.move);
     qttNode = ttMove.isQuiet();
-    ttPv = ttPv || (ttEntry.Flag & TTPV);
+    ttPv = ttPv || (ttFlag & TTPV);
     if (ttEntry.depth >= depth && !pvNode && !singSearch){
       int hashScore = ttEntry.score;
 
@@ -438,16 +440,16 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         hashScore = (hashScore > 0) ? (hashScore - ply) :  (hashScore + ply);
       }
 
-      if (ttEntry.Flag & EXACT){
+      if (ttFlag & EXACT){
         return hashScore;
       }
-      if (ttEntry.Flag & BETA && hashScore >= beta){
+      if (ttFlag & BETA && hashScore >= beta){
         int bonus = _getHistoryBonus(depth, 0, 0);
         _updateBeta(qttNode, ttMove, board.getActivePlayer(), pMove, ppMove, ply, bonus);
         return beta;
       }
 
-      if (ttEntry.Flag & ALPHA && hashScore <= alpha){
+      if (ttFlag & ALPHA && hashScore <= alpha){
         return alpha;
       }
     }
@@ -628,7 +630,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // At high depth if we have the TT move, and we are certain
         // that non other moves are even close to it, extend this move
         // At low depth use statEval instead of search (Kimmys idea)
-        if (!(ttEntry.Flag & ALPHA) &&
+        if (!(ttFlag & ALPHA) &&
             ttEntry.depth >= depth - 3 &&
             ttEntry.move == move.getMoveINT() &&
             abs(ttEntry.score) < WON_IN_X / 4){
@@ -816,7 +818,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
 
         }else{
           // Beta was not beaten and we dont improve alpha in this case we lower our search history values
-          int penalty = _getHistoryPenalty(depth, nodeEval, alpha, pMoveScore, ttNode, cutNode, (CutOffState)ttEntry.Flag);
+          int penalty = _getHistoryPenalty(depth, nodeEval, alpha, pMoveScore, ttNode, cutNode, (CutOffState)ttFlag);
           if (isQuiet){
             _orderingInfo.incrementHistory(board.getActivePlayer(), move.getFrom(), move.getTo(), penalty);
             _orderingInfo.incrementCounterHistory(0, board.getActivePlayer(), pMove, move.getPieceType(), move.getTo(), penalty);
@@ -855,6 +857,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
    bool ttPv = pvNode;
    int nodeEval = NOSCORE;
    int standPat = NOSCORE;
+   CutOffState ttFlag = NONE;
 
   if (_stop || _checkLimits()) {
     _stop = true;
@@ -878,21 +881,22 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
   // Check transposition table cache
   // If TT is causing a cuttoff, we update move ordering stuff
   const HASH_Entry ttEntry = myHASH->HASH_Get(board.getZKey().getValue());
-  if (ttEntry.Flag != NONE){
+  ttFlag = ttEntry.getFlag();
+  if (ttFlag != NONE){
     if (!pvNode){
       int hashScore = ttEntry.score;
-      ttPv = ttPv || (ttEntry.Flag & TTPV);
+      ttPv = ttPv || (ttFlag & TTPV);
 
       if (abs(hashScore) > WON_IN_X){
         hashScore = (hashScore > 0) ? (hashScore - MAX_PLY) :  (hashScore + MAX_PLY);
       }
-      if (ttEntry.Flag & EXACT){
+      if (ttFlag & EXACT){
         return hashScore;
       }
-      if (ttEntry.Flag & BETA && hashScore >= beta){
+      if (ttFlag & BETA && hashScore >= beta){
         return beta;
       }
-      if (ttEntry.Flag & ALPHA && hashScore <= alpha){
+      if (ttFlag & ALPHA && hashScore <= alpha){
         return alpha;
       }
     }

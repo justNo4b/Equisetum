@@ -43,11 +43,17 @@ struct HASH_Entry
   int move;             // 4
   int16_t score;        // 2
   uint8_t depth;        // 1
-  uint8_t Flag;         // 1
+  // combined info on flag and ttAge
+  uint8_t FlagAge;         // 1
 
-  HASH_Entry() : posKey(0), move(0),  score(0), depth(0), Flag(NONE) {}
+  HASH_Entry() : posKey(0), move(0),  score(0), depth(0), FlagAge(0) {}
   HASH_Entry( U64 key, int cMove, int16_t s, uint8_t d, uint8_t state) :
-      posKey(key), move(cMove), score(s), depth(d), Flag(state) {}
+      posKey(key), move(cMove), score(s), depth(d), FlagAge(state) {}
+
+  CutOffState getFlag() const {
+    return (CutOffState)(FlagAge & 0x000F);
+ };
+
 };
 
 /**
