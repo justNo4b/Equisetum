@@ -84,6 +84,7 @@ void HASH::HASH_Clear(){
     for (U64 i = 0; i < TableSize; i++){
       hashTable [i] = HASH_Entry();
     }
+    ttAge = TT_AGE_MIN;
 }
 
 void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, bool isttpv, int score, int depth, int ply){
@@ -93,7 +94,9 @@ void  HASH::HASH_Store(U64 posKey, int cMove, CutOffState bound, bool isttpv, in
 
       U64 index = posKey & TableMask;
       uint8_t entryAge = hashTable[index].FlagAge >> 4;
-      if (posKey !=  hashTable[index].posKey || depth * (2 - (entryAge != ttAge)) >=  hashTable[index].depth || bound == EXACT){
+      uint8_t ageDiff  = ttAge >= entryAge ? ttAge - entryAge : ttAge + TT_AGE_MAX - entryAge;
+
+      if (posKey !=  hashTable[index].posKey || (depth * 2 >=  hashTable[index].depth - ageDiff) || bound == EXACT){
         uint8_t ttbound = isttpv ? bound | TTPV : bound;
         ttbound = ttbound | (ttAge << 4);
          hashTable[index] = HASH_Entry(posKey, cMove, (int16_t)score, depth, ttbound);
