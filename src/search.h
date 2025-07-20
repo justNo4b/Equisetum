@@ -24,6 +24,7 @@
 #include "transptable.h"
 #include "orderinginfo.h"
 #include "timer.h"
+#include "finnyentry.h"
 #include <chrono>
 #include <atomic>
 
@@ -118,6 +119,9 @@ class Search {
   Hist  _posHist;
 
   SEARCH_Data _sStack;
+
+  FinnyEntry _finnyTable[2][2][NNUE_BUCKETS];
+  NNueEvaluation _nnCache[2][NNUE_BUCKETS];
 
   NNueEvaluation _nnStack[MAX_PLY * 2];
 
@@ -266,6 +270,8 @@ class Search {
    * it in the _lmr_R_array
    */
   void init_LMR_array();
+
+  void _populateFinnyTable();
 
 };
 

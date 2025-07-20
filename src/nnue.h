@@ -68,8 +68,10 @@ public:
 
     void fullReset(const Board &board);
     void halfReset(const Board &, Color);
+    void addSubDifference(const Board &, Color, U64 (*)[2][6]);
 
     bool resetNeeded(PieceType, int, int, Color);
+    int  getCurrentBucket(int, Color);
 
     int16_t * getHalfAccumulatorPtr(Color);
 

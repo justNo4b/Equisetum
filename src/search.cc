@@ -76,6 +76,7 @@ void Search::iterDeep() {
   _selDepth = 0;
   std::memset(_rootNodesSpent, 0, sizeof(_rootNodesSpent));
   _timer.startIteration();
+  _populateFinnyTable();
   int maxDepthSearched = 0;
 
   int targetDepth = _timer.getSearchDepth();
@@ -203,6 +204,17 @@ void Search::_logUciInfo(const MoveList &pv, int depth, int bestScore, U64 nodes
   std::cout << "time " + std::to_string(elapsed) + " ";
   std::cout << "pv " + pvString;
   std::cout << std::endl;
+}
+
+void Search::_populateFinnyTable(){
+    for (auto color : {WHITE, BLACK}){
+        for (int i = 0; i < NNUE_BUCKETS; i++){
+            for (int j = 0; j < 2; j++){
+            _finnyTable[j][color][i] = FinnyEntry();
+            }
+
+        }
+    }
 }
 
 void Search::stop() {
@@ -445,7 +457,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
   // Do the Evaluation, unless we are in check or prev move was NULL
   // If last Move was Null, just negate prev eval and add 2x tempo bonus (10)
 
-  board.performUpdate();
+  board.performUpdate(&_finnyTable, &_nnCache);
   nodeEval = Eval::evaluate(board, board.getActivePlayer());
   _sStack.AddEval(nodeEval);
 
@@ -580,6 +592,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
                         _orderingInfo.getHistory(board.getActivePlayer(), move.getFrom(), move.getTo()) :
                         _orderingInfo.getCaptureHistory(move.getPieceType(), move.getCapturedPieceType(), move.getTo());
     int cmHistory     = isQuiet ? _orderingInfo.getCountermoveHistory(board.getActivePlayer(), pMoveIndx, move.getPieceType(), move.getTo()) : 0;
+    int fhHistory     = isQuiet && ppMove != 0 ? _orderingInfo.getFollowupHistory(board.getActivePlayer(), ppMoveIndx, move.getPieceType(), move.getTo()) : 0;
 
     // 5. PRE-MOVELOOP PRUNING
 
@@ -591,7 +604,11 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       // we suppose other moves wont improve our situation
       if ((qCount > _lmp_Array[depth][(improving || pvNode)]) && (moveHistory + cmHistory <= 0)) break;
 
-      // 5.2. SEE pruning of quiet moves
+      // 5.2. COUNTER-MOVE HISTORY PRUNING
+      // Prune quiet moves with poor CMH on the tips of the tree
+      if (depth <= 3 && isQuiet && (cmHistory + fhHistory / 2 <= (-4096 * depth + 4096))) continue;
+
+      // 5.3. SEE pruning of quiet
       // At shallow depth prune highlyish -negative SEE-moves
       if (depth <= 10
           && isQuiet
@@ -600,10 +617,6 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
       if (depth <= 6
           && !isQuiet
           && !board.SEE_GreaterOrEqual(move, (-150 * depth + 100))) continue;
-
-      // 5.3. COUNTER-MOVE HISTORY PRUNING
-      // Prune quiet moves with poor CMH on the tips of the tree
-      if (depth <= 3 && isQuiet && cmHistory <= (-4096 * depth + 4096)) continue;
     }
 
 
@@ -715,6 +728,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
           // reduce more/less based on the hitory
           reduction -= moveHistory / HALFMAX_HISTORY_SCORE;
           reduction -= cmHistory  / HALFMAX_HISTORY_SCORE;
+          reduction -= fhHistory / HALFMAX_HISTORY_SCORE;
 
           // reduce less when move is a Queen promotion
           reduction -= (move.getFlags() & Move::PROMOTION) && (move.getPromotionPieceType() == QUEEN);
@@ -848,7 +862,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     return 0;
   }
 
-  board.performUpdate();
+  board.performUpdate(&_finnyTable, &_nnCache);
   nodeEval = Eval::evaluate(board, board.getActivePlayer());
   standPat = nodeEval;
 
