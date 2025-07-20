@@ -853,6 +853,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
    _nodes++;
    Move ttMove = Move(0);
    bool pvNode = alpha != beta - 1;
+   bool qttNode = true;
    bool ttPv = pvNode;
    int nodeEval = NOSCORE;
    int standPat = NOSCORE;
@@ -883,6 +884,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     if (!pvNode){
       int hashScore = ttEntry.score;
       ttMove = Move(ttEntry.move);
+      qttNode = ttMove.isQuiet();
       ttPv = ttPv || (ttEntry.Flag & TTPV);
 
       if (abs(hashScore) > WON_IN_X){
@@ -900,7 +902,7 @@ int Search::_qSearch(Board &board, int alpha, int beta) {
     }
   }
 
-  MovePicker movePicker(&_orderingInfo, &board, ttMove.getMoveINT(), board.getActivePlayer(), MAX_PLY, 0, 0);
+  MovePicker movePicker(&_orderingInfo, &board, (qttNode ? 0 : ttMove.getMoveINT()), board.getActivePlayer(), MAX_PLY, 0, 0);
 
   while (movePicker.hasNext()) {
     Move move = movePicker.getNext();
