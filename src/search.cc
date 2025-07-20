@@ -780,7 +780,7 @@ int Search::_negaMax(Board &board, pV *up_pV, int depth, int alpha, int beta, bo
         // Beta cutoff
         if (score >= beta) {
           // Add this move as a new killer move and update history if move is quiet
-          int bonus = (depth > 2 || legalCount != 1) ? _getHistoryBonus(depth, nodeEval, alpha) : 0;
+          int bonus = (depth > 3 || qCount != 1) ? _getHistoryBonus(depth, nodeEval, alpha) : 0;
           _updateBeta(isQuiet, move, board.getActivePlayer(), pMove, ppMove, ply, bonus);
           // Award counter-move history additionally if we refuted special quite previous move
           if (isPmQuietCounter){
